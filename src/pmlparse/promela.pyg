@@ -353,7 +353,7 @@ expr ->
 	| varref:
 		return kids[0]
 	| const:
-		return kids[0]
+		return ConstExpr(kids[0])
 	| name idx P_AT name:
 		raise NotImplementedError(kids[2])
 	;
