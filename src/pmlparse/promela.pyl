@@ -1,0 +1,138 @@
+# ----------------------------------------------
+# promela.pyl
+#
+# No support for: c_code, c_decl, c_expr, c_state, c_track
+# Comments are supported via C preprocessor
+# ----------------------------------------------
+
+# P_ = punctuator
+# K_ = keyword
+# O_ = operator
+# T_ = token (anything else)
+
+code:
+
+
+definitions:
+	K_EXCL		"x[rs]"
+	K_PRINT		"print[fm]"
+	K_TRACE		"(no)?trace"
+	K_VIS		"(hidden|show)"
+	O_ADD		"(\+|-)"
+	O_BIT		"(&|\^|\|)"
+	O_EQ		"(==|!=)"
+	O_INCDEC	"(\+\+|--)"
+	O_MULT		"(\*|/|%)"
+	O_RECV		"\?\??"
+	O_RELEQ		"(<=|>=)"
+	O_SEND		"!!?"
+	O_SHIFT		"(<<|>>)"
+	T_BUILTIN	"(enabled|pc_value)"
+	T_CHANPOLL	"(empty|nempty|full|nfull)"
+	T_CONST		"(true|false|skip)"
+	T_ID		"[[:alpha:]_][[:alnum:]_$]*"
+	T_NUMBER	"[0-9]+"
+	T_STRING	"\".*\""
+	T_TYPE		"(bit|bool|byte|pid|short|int|unsigned)"
+
+
+INITIAL:
+	"\{":			return "P_LBRACE"
+	"\}":			return "P_RBRACE"
+	"\(":			return "P_LPAREN"
+	"\)":			return "P_RPAREN"
+	"\[":			return "P_LSQBRACE"
+	"\]":			return "P_RSQBRACE"
+	"<":			return "P_LAQUO"
+	">":			return "P_RAQUO"
+	"->":			return "P_SEQ"
+	";":			return "P_SEMICOL"
+	":":			return "P_COLON"
+	",":			return "P_COMMA"
+	"\.":			return "P_DOT"
+	"@":			return "P_AT"
+
+	"{O_INCDEC}":	return "O_INCDEC"
+	"{O_ADD}":		return "O_ADD"
+	"{O_MULT}":		return "O_MULT"
+	"{O_SHIFT}":	return "O_SHIFT"
+	"{O_RELEQ}":	return "O_RELEQ"
+	"{O_EQ}":		return "O_EQ"
+	"{O_RECV}":		return "O_RECV"
+	"{O_SEND}":		return "O_SEND"
+	"~":			return "O_TILDE"
+	"=":			return "O_ASSIGN"
+	"&&":			return "O_AND"
+	"\|\|":			return "O_OR"
+
+	"active":		return "K_ACTIVE"
+	"assert":		return "K_ASSERT"
+	"atomic":		return "K_ATOMIC"
+	"break":		return "K_BREAK"
+	"chan": 		return "K_CHAN"
+	"d_step":		return "K_DSTEP"
+	"do":			return "K_DO"
+	"else":			return "K_ELSE"
+	"eval":			return "K_EVAL"
+	"fi":			return "K_FI"
+	"goto":			return "K_GOTO"
+	"if":			return "K_IF"
+	"init":			return "K_INIT"
+	"local":		return "K_LOCAL"
+	"mtype":		return "K_MTYPE"
+	"never":		return "K_NEVER"
+	"od":			return "K_OD"
+	"of":			return "K_OF"
+	"priority":		return "K_PRIO"
+	"proctype":		return "K_PROC"
+	"provided":		return "K_PROVIDED"
+	"run":			return "K_RUN"
+	"typedef":		return "K_TYPEDEF"
+	"unless":		return "K_UNLESS"
+	"{K_EXCL}":		return "K_EXCL"
+	"{K_PRINT}":	return "K_PRINT"
+	"{K_TRACE}":	
+		if self.value == "trace":
+			self.value = 1
+		else:
+			self.value = 0
+		return "K_TRACE"
+	"{K_VIS}":
+		if self.value == "show":
+			self.value = 1
+		else:
+			self.value = 0
+		return "K_VIS"		
+	
+	"len":			return "T_LEN"
+	"{T_BUILTIN}":	return "T_BUILTIN"
+	"{T_CHANPOLL}":	return "T_CHANPOLL"
+	"{T_CONST}":
+		if self.value == "false":
+			self.value = 0
+		else:
+			self.value = 1
+		return "T_NUMBER"
+	"{T_TYPE}":		return "T_TYPE"
+	"{T_NUMBER}":
+		try:
+			self.value = int(self.value)
+		except ValueError:
+			raise Exception, ("Integer value '%d' too large" % self.value)
+		return "T_NUMBER"
+	"{T_ID}":		return "T_ID"
+	"{T_STRING}":	return "T_STRING"
+
+	"\t":
+		self.charno += self.SPACES_PER_TAB - 1
+		return
+	"[[:blank:]]":	return
+	"\r":			return
+	"\n":
+		self.lineno += 1
+		self.charno = 1
+		return
+	"^#[^\n]*":	return		# strip pragmas off
+	".":
+		raise Exception, ("Illegal character '%s'" % self.value)
+		return

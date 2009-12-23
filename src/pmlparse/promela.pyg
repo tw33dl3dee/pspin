@@ -1,0 +1,375 @@
+# ----------------------------------------------
+# promela.pyg
+# `timeout' and `np_' are varrefs here.
+# ----------------------------------------------
+
+code:
+	from expression import *
+	from variable import *
+
+	class ParseError(RuntimeError):
+		def __init__(self, str):
+			RuntimeError.__init__(self, str)
+
+	class NotImplementedError(ParseError):
+		def __init__(self, feature):
+			ParseError.__init__(self, "Feature `%s' not implemented" % feature)
+
+
+%left P_DOT;
+%left O_MULT;
+%left O_ADD;
+%left O_SHIFT;
+%left O_EQ O_RELEQ P_LAQUO P_RAQUO;
+%left O_BIT;
+%left O_AND;
+%left O_OR;
+
+
+spec ->
+	module+:
+		return codegen
+	;
+
+module ->
+	proctype
+	| init
+	| never
+	| trace
+	| utype
+	| mtype
+	| decl_list
+	;
+
+proctype ->
+	proc_hdr P_LPAREN decl_list? P_RPAREN prio? enabler? P_LBRACE sequence P_RBRACE:
+		if kids[2]:
+			codegen.cur_proc.set_args(kids[2])
+		codegen.cur_proc.set_body(kids[7])
+		codegen.end_proc()
+	;
+
+proc_hdr ->
+	active? K_PROC name:
+		codegen.start_proc(kids[0] or 0, kids[2])
+	;
+
+init ->
+	init_hdr prio? P_LBRACE sequence P_RBRACE:
+		codegen.cur_proc.set_args(kids[2])
+		codegen.cur_proc.set_body(kids[7])
+		codegen.end_proc()		
+	;
+
+init_hdr ->
+	K_INIT:
+		codegen.start_proc(1, 'init')
+	;
+
+never ->
+	K_NEVER P_LBRACE sequence P_RBRACE:
+		raise NotImplementedError(kids[0])
+	;
+
+trace ->
+	K_TRACE P_LBRACE sequence P_RBRACE:
+		raise NotImplementedError(kids[0])
+	;
+
+utype ->
+	K_TYPEDEF name P_LBRACE decl_list P_RBRACE:
+		raise NotImplementedError(kids[0])
+	;
+
+mtype ->
+	K_MTYPE O_ASSIGN? P_LBRACE name_list P_RBRACE:
+		raise NotImplementedError(kids[0])
+	;
+
+name_list ->
+	name:
+		return kids
+	| name_list P_COMMA name:
+		return kids[0] + [kids[2]]
+	;
+
+decl_list ->
+	decl:
+		return kids[0]
+	| decl_list P_SEMICOL decl:
+		return kids[0] + kids[2]
+	;
+
+decl ->
+	visible? typename ivar_list:
+		return [codegen.add_var(v, kids[1]) for v in kids[2]]
+	;
+
+ivar_list ->
+	ivar:
+		return kids
+	| ivar_list P_COMMA ivar:
+		return kids[0] + [kids[2]]
+	;
+
+typename ->
+	T_TYPE:
+		return Type(kids[0])
+	| K_MTYPE:
+		raise NotImplementedError(kids[0])
+	| K_CHAN:
+		raise NotImplementedError(kids[0])
+	| uname:
+		raise NotImplementedError(kids[0])	
+	;
+
+active ->
+	K_ACTIVE P_LSQBRACE const P_RSQBRACE:
+		return kids[2]
+	| K_ACTIVE:
+		return 1
+	;
+
+prio ->
+	K_PRIO const:
+		raise NotImplementedError(kids[0])
+	;
+
+enabler ->
+	K_PROVIDED P_LPAREN expr P_RPAREN:
+		raise NotImplementedError(kids[0])
+	;
+
+visible ->
+	K_VIS:
+		raise NotImplementedError(kids[0])
+	;
+
+sequence ->
+# empty
+	| seq sep?:
+		return ('sequence', kids[0])
+	;
+
+seq ->
+	step:
+		return kids
+	| seq sep step:
+	  	return kids[0] + [kids[2]]
+	;
+
+sep ->
+	P_SEMICOL
+	| P_SEQ
+	;
+
+step ->
+	stmt :
+		return ('step', kids[0])
+	| stmt K_UNLESS stmt:
+		raise NotImplementedError(kids[0])
+	| decl_list
+	| K_EXCL varref_list:
+		raise NotImplementedError(kids[0])
+	;
+
+varref_list ->
+	varref:
+		return kids
+	| varref_list P_COMMA varref:
+		return kids[0] + [kids[2]]
+	;
+
+ivar ->
+	name P_LSQBRACE const P_RSQBRACE ivar_init?:
+		return Variable(kids[0], None, kids[2], kids[4] or None)
+#	| name P_COLON const ivar_init?
+	| name ivar_init?:
+		return Variable(kids[0], None, None, kids[1] or None)
+	;
+
+ivar_init ->
+	O_ASSIGN expr:
+		return kids[1]
+	| O_ASSIGN ch_init
+	;
+
+ch_init ->
+	P_LSQBRACE const P_RSQBRACE K_OF P_LBRACE typename_list P_RBRACE:
+		raise NotImplementedError(kids[0])
+	;
+
+typename_list ->
+	typename:
+		return kids
+	| typename_list P_COMMA typename:
+		return kids[0] + [kids[2]]
+	;
+
+varref ->
+	name:
+		return SimpleRef(codegen.lookup_var(kids[0]))
+	| name idx:
+		return IdxRef(codegen.lookup_var(kids[0]), kids[1])
+	| varref P_DOT name:
+		return FieldRef(kids[0], kids[2])
+	;
+
+idx ->
+	P_LSQBRACE expr P_RSQBRACE:
+		return kids[1]
+	;
+
+send ->
+	varref O_SEND send_args:
+		raise NotImplementedError(kids[0])
+	;
+
+recv ->
+	varref O_RECV recv_args:
+		raise NotImplementedError(kids[0])
+	| varref O_RECV P_LAQUO recv_args2:
+		raise NotImplementedError(kids[0])
+	;
+
+recv_args2 ->
+	recv_args P_RAQUO:
+		return kids[0]
+	;
+
+poll ->
+	varref O_RECV P_LSQBRACE recv_args P_RSQBRACE
+	;
+
+send_args ->
+	arg_list:
+		return kids[0]
+	| expr P_LPAREN arg_list P_RPAREN:
+		return [kids[0]] + kids[2]
+	;
+
+recv_args ->
+	recv_list:
+		return kids[0]
+	| recv_arg P_LPAREN recv_list P_RPAREN:
+		return [kids[0]] + kids[2]
+	;
+
+recv_list ->
+	recv_arg:
+		return kids
+	| recv_list P_COMMA recv_arg:
+		return kids[0] + [kids[2]]
+	;
+
+recv_arg ->
+	varref
+	| K_EVAL P_LPAREN varref P_RPAREN
+	| O_ADD? const
+	;
+
+assign ->
+	varref O_ASSIGN expr
+	| varref O_INCDEC
+	;
+
+stmt ->
+	K_IF options K_FI:
+		return ('stmt', kids[0], kids[1])
+	| K_DO options K_OD:
+		return ('stmt', kids[0], kids[1])
+	| K_ATOMIC P_LBRACE sequence P_RBRACE:
+		raise NotImplementedError(kids[0])
+	| D_STEP P_LBRACE sequence P_RBRACE:
+		raise NotImplementedError(kids[0])
+	| P_LBRACE sequence P_RBRACE:
+		return ('stmt', kids[1])
+	| send
+	| recv
+	| assign
+	| K_ELSE
+	| K_BREAK
+	| K_GOTO name
+	| name P_COLON stmt
+	| K_PRINT P_LPAREN T_STRING print_list? P_RPAREN:
+		raise NotImplementedError(kids[0])
+	| K_ASSERT P_LPAREN expr P_RPAREN
+	| expr
+	;
+
+print_list ->
+	P_COMMA arg_list:
+		return kids[1]
+	;
+
+options ->
+	P_COLON P_COLON sequence:
+		return [kids[2]]
+	| options P_COLON P_COLON sequence:
+		return kids[0] + [kids[3]]
+	;
+
+expr ->
+	K_RUN name P_LPAREN arg_list? P_RPAREN prio?:
+		raise NotImplementedError(kids[0])
+	| expr O_AND expr:
+		return BinaryExpr(kids[0], kids[1], kids[2])
+	| expr O_OR expr:
+		return BinaryExpr(kids[0], kids[1], kids[2])
+	| expr O_ADD expr:
+		return BinaryExpr(kids[0], kids[1], kids[2])
+	| expr O_MULT expr:
+		return BinaryExpr(kids[0], kids[1], kids[2])
+	| expr O_BIT expr:
+		return BinaryExpr(kids[0], kids[1], kids[2])
+	| expr P_LAQUO expr:
+		return BinaryExpr(kids[0], kids[1], kids[2])
+	| expr P_RAQUO expr:
+		return BinaryExpr(kids[0], kids[1], kids[2])
+	| expr O_RELEQ expr:
+		return BinaryExpr(kids[0], kids[1], kids[2])
+	| expr O_EQ expr:
+		return BinaryExpr(kids[0], kids[1], kids[2])
+	| expr O_SHIFT expr:
+		return BinaryExpr(kids[0], kids[1], kids[2])
+	| O_TILDE expr:
+		return UnaryExpr(kids[0], kids[1])
+	| O_ADD expr:
+		return UnaryExpr(kids[0], kids[1])
+	| O_SEND expr:
+		return UnaryExpr(kids[0], kids[1])
+	| P_LPAREN expr P_RPAREN:
+		return kids[1]
+	| T_BUILTIN P_LPAREN expr P_RPAREN:
+		raise NotImplementedError(kids[0])
+	| T_CHANPOLL P_LPAREN varref P_RPAREN:
+		return ChanOpExpr(kids[0], kids[2])
+	| P_LPAREN expr P_SEQ expr P_COLON expr P_RPAREN:
+		return TernaryExpr(kids[1], kids[2], kids[3], kids[4], kids[5])
+	| T_LEN P_LPAREN varref P_RPAREN:
+		return ChanOpExpr(kids[0], kids[2])
+	| poll:
+		return kids[0]
+	| varref:
+		return kids[0]
+	| const:
+		return kids[0]
+	| name idx P_AT name:
+		raise NotImplementedError(kids[2])
+	;
+
+uname ->
+	name:
+		return kids[0]
+	;
+
+name ->
+	T_ID:
+		return kids[0]
+	;
+
+const ->
+	T_NUMBER:
+		return kids[0]
+	;
+

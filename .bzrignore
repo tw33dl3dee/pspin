@@ -6,3 +6,15 @@
 ./m2.pdf
 ./mag.doc
 ./magister.zip
+./test/spin/pan.*
+./test/spin/*.trail
+./test/spin/lynch
+./test/spin/oddeven
+./test/spin/oddevent.pml
+./test/spin/peterson3
+./test/spin/rip1
+./test/spin/rip2
+./test/spin/tsp
+*.pyc
+*_gramtab.*
+*_lextab.*
