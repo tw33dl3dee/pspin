@@ -47,8 +47,7 @@ class Process(object):
 
     def __repr__(self):
         return "`%s' (active: %d)\n<\targs: %s\ndecl:\n%s\n\tlabels: %s\n\tcode: %s>" \
-            % (self.name, self._active, self._args, self.decl(), self._labels, \
-                   pformat(self._stmts))
+            % (self.name, self._active, self._args, self.decl(), self._labels, pformat(self._stmts))
 
     def lookup_var(self, name):
         """Lookup variable in process symbol table

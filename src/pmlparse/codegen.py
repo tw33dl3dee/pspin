@@ -2,6 +2,7 @@
 #
 
 from process import Process
+from variable import *
 
 
 class Codegen(object):
@@ -11,9 +12,11 @@ class Codegen(object):
         self._vars = dict()
         self._procs = []
         self.cur_proc = None
+        self.add_var(Variable('_nproc', Type('byte'), len(self._procs)))
+        self.add_var(Variable('_svsize', Type('short')))
 
     def __repr__(self):
-        return "Vars: %s\nProcs: %s\n" % ([v.decl() for v in self._vars.values()], self._procs)
+        return "State: \n%s\nProcs: %s\n" % (self.state_decl(), self._procs)
         
     def start_proc(self, active, name):
         """Starts new proctype definition
@@ -66,4 +69,8 @@ class Codegen(object):
         else:
             raise RuntimeError, "Undefined variable: `%s'" % name
 
-
+    def state_decl(self):
+        """Return C-code that declares global state structure
+        """
+        state_vars = self._vars.values()
+        return "struct State {\n\t%s;\n}" % ";\n\t".join([v.decl() for v in state_vars])
