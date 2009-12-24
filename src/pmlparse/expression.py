@@ -14,7 +14,7 @@ class ConstExpr(Expr):
         """
         
         Arguments:
-        - `value`: Expression value (int)
+        - `value`: expression value (int)
         """
         Expr.__init__(self)
         self._value = value
@@ -55,7 +55,7 @@ class IdxRef(VarRef):
         
         Arguments:
         - `var`: Variable object
-        - `idx`: Index (int)
+        - `idx`: index (int)
         """
         Expr.__init__(self)
         self._var = var
@@ -74,7 +74,7 @@ class FieldRef(VarRef):
         
         Arguments:
         - `varname`: VarRef object
-        - `field`:Field name
+        - `field`: field name
         """
         Expr.__init__(self)
         self._varref = varref
@@ -92,9 +92,9 @@ class RunExpr(Expr):
         """
         
         Arguments:
-        - `proctype`: Process name
-        - `args`: Arguments (list of Expr objects)
-        - `prio`: Priority (int)
+        - `proctype`: process name
+        - `args`: arguments (list of Expr objects)
+        - `prio`: priority (int)
         """
         Expr.__init__(self)
         self._proctype = proctype
@@ -115,11 +115,11 @@ class TernaryExpr(Expr):
         """
         
         Arguments:
-        - `left`: Left Expr object
-        - `op1`: First part of op (str)
-        - `mid`: Mid Expr object
-        - `op2`: Second part of op (str)
-        - `right`: Right Expr object
+        - `left`: left Expr object
+        - `op1`: first part of op (str)
+        - `mid`: mid Expr object
+        - `op2`: second part of op (str)
+        - `right`: right Expr object
         """
         Expr.__init__(self)
         self._left = left
@@ -142,9 +142,9 @@ class BinaryExpr(Expr):
         """
         
         Arguments:
-        - `left`: Left Expr object
-        - `op`: Operator (str)
-        - `right`: Right Expr object
+        - `left`: left Expr object
+        - `op`: operator (str)
+        - `right`: right Expr object
         """
         Expr.__init__(self)
         self._left = left
@@ -163,8 +163,8 @@ class UnaryExpr(Expr):
         """
         
         Arguments:
-        - `op`: Unary operator
-        - `right`: Operand Expr object
+        - `op`: unary operator
+        - `right`: operand Expr object
         """
         Expr.__init__(self)
         self._op = op
@@ -182,8 +182,8 @@ class ChanOpExpr(Expr):
         """
         
         Arguments:
-        - `op`: Operator name (str)
-        - `chan`: Channel (VarRef object)
+        - `op`: operator name (str)
+        - `chan`: channel (VarRef object)
         """
         Expr.__init__(self)
         self._op = op

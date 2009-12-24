@@ -1,7 +1,7 @@
 byte turn[3], flag[3]
 byte ncrit
 
-active [3] proctype User(int unused1, unused2; byte unused3)
+active [3] proctype User(int unused1, unused2; bit unused3)
 {
   byte j, k;
 

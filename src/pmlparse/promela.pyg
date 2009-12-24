@@ -6,6 +6,7 @@
 code:
 	from expression import *
 	from variable import *
+	from statement import *
 
 	class ParseError(RuntimeError):
 		def __init__(self, str):
@@ -148,7 +149,7 @@ visible ->
 sequence ->
 # empty
 	| seq sep?:
-		return ('sequence', kids[0])
+		return kids[0]
 	;
 
 seq ->
@@ -165,7 +166,7 @@ sep ->
 
 step ->
 	stmt :
-		return ('step', kids[0])
+		return kids[0]
 	| stmt K_UNLESS stmt:
 		raise NotImplementedError(kids[0])
 	| decl_list
@@ -269,32 +270,44 @@ recv_arg ->
 	;
 
 assign ->
-	varref O_ASSIGN expr
-	| varref O_INCDEC
+	varref O_ASSIGN expr:
+		return AssignStmt(kids[0], kids[2])
+	| varref O_INCDEC:
+		return IncDecStmt(*kids)
 	;
 
 stmt ->
 	K_IF options K_FI:
-		return ('stmt', kids[0], kids[1])
+		return IfStmt(kids[1])
 	| K_DO options K_OD:
-		return ('stmt', kids[0], kids[1])
+		return DoStmt(kids[1])
 	| K_ATOMIC P_LBRACE sequence P_RBRACE:
 		raise NotImplementedError(kids[0])
 	| D_STEP P_LBRACE sequence P_RBRACE:
 		raise NotImplementedError(kids[0])
 	| P_LBRACE sequence P_RBRACE:
-		return ('stmt', kids[1])
+		return kids[1]
 	| send
 	| recv
-	| assign
-	| K_ELSE
-	| K_BREAK
-	| K_GOTO name
-	| name P_COLON stmt
+	| assign:
+		return kids[0]
+	| K_ELSE:
+		return ElseStmt()
+	| K_BREAK:
+		return BreakStmt()
+	| K_GOTO name:
+		return GotoStmt(codegen.cur_proc.lookup_label(kids[1]))
+	| name P_COLON stmt:
+		label = codegen.cur_proc.lookup_label(kids[0])
+		kids[2].add_label(label)
+		codegen.cur_proc.add_label(label)
+		return kids[2]
 	| K_PRINT P_LPAREN T_STRING print_list? P_RPAREN:
 		raise NotImplementedError(kids[0])
-	| K_ASSERT P_LPAREN expr P_RPAREN
-	| expr
+	| K_ASSERT P_LPAREN expr P_RPAREN:
+		return AssertStmt(kids[2])
+	| expr:
+		return ExprStmt(kids[0])
 	;
 
 print_list ->
@@ -313,31 +326,31 @@ expr ->
 	K_RUN name P_LPAREN arg_list? P_RPAREN prio?:
 		raise NotImplementedError(kids[0])
 	| expr O_AND expr:
-		return BinaryExpr(kids[0], kids[1], kids[2])
+		return BinaryExpr(*kids)
 	| expr O_OR expr:
-		return BinaryExpr(kids[0], kids[1], kids[2])
+		return BinaryExpr(*kids)
 	| expr O_ADD expr:
-		return BinaryExpr(kids[0], kids[1], kids[2])
+		return BinaryExpr(*kids)
 	| expr O_MULT expr:
-		return BinaryExpr(kids[0], kids[1], kids[2])
+		return BinaryExpr(*kids)
 	| expr O_BIT expr:
-		return BinaryExpr(kids[0], kids[1], kids[2])
+		return BinaryExpr(*kids)
 	| expr P_LAQUO expr:
-		return BinaryExpr(kids[0], kids[1], kids[2])
+		return BinaryExpr(*kids)
 	| expr P_RAQUO expr:
-		return BinaryExpr(kids[0], kids[1], kids[2])
+		return BinaryExpr(*kids)
 	| expr O_RELEQ expr:
-		return BinaryExpr(kids[0], kids[1], kids[2])
+		return BinaryExpr(*kids)
 	| expr O_EQ expr:
-		return BinaryExpr(kids[0], kids[1], kids[2])
+		return BinaryExpr(*kids)
 	| expr O_SHIFT expr:
-		return BinaryExpr(kids[0], kids[1], kids[2])
+		return BinaryExpr(*kids)
 	| O_TILDE expr:
-		return UnaryExpr(kids[0], kids[1])
+		return UnaryExpr(*kids)
 	| O_ADD expr:
-		return UnaryExpr(kids[0], kids[1])
+		return UnaryExpr(*kids)
 	| O_SEND expr:
-		return UnaryExpr(kids[0], kids[1])
+		return UnaryExpr(*kids)
 	| P_LPAREN expr P_RPAREN:
 		return kids[1]
 	| T_BUILTIN P_LPAREN expr P_RPAREN:
@@ -345,7 +358,7 @@ expr ->
 	| T_CHANPOLL P_LPAREN varref P_RPAREN:
 		return ChanOpExpr(kids[0], kids[2])
 	| P_LPAREN expr P_SEQ expr P_COLON expr P_RPAREN:
-		return TernaryExpr(kids[1], kids[2], kids[3], kids[4], kids[5])
+		return TernaryExpr(*kids[1:6])
 	| T_LEN P_LPAREN varref P_RPAREN:
 		return ChanOpExpr(kids[0], kids[2])
 	| poll:
