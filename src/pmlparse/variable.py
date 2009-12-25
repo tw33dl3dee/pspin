@@ -19,7 +19,7 @@ class Type(object):
         self._name = name
 
     def __repr__(self):
-        return self.name
+        return self._name
 
     def c_type(self):
         """C-type corresponding to this type (str)
@@ -38,17 +38,17 @@ class Variable(object):
     """Variable object
     """
     
-    def __init__(self, name, type, arrsize = None, initval = None):
+    def __init__(self, name, vartype, arrsize = None, initval = None):
         """
 
         Arguments:
         - `name`: variable name
-        - `type`: Type object
+        - `vartype`: Type object
         - `arrsize`: size of array (None if variable is not an array)
         - `initval`: initial value (or None)
         """
         self.name = name
-        self.type = type
+        self.type = vartype
         self.arrsize = arrsize
         self.initval = initval
         self.parent = None

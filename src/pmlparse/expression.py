@@ -5,6 +5,10 @@ class Expr(object):
     def __repr__(self):
         return self.code()
 
+    def code(self):
+        # This will trigger an error
+        return "(void)"
+
 
 class ConstExpr(Expr):
     """Constant expression
@@ -39,7 +43,7 @@ class SimpleRef(VarRef):
         Arguments:
         - `var`: Variable object
         """
-        Expr.__init__(self)
+        VarRef.__init__(self)
         self._var = var
 
     def code(self):
@@ -57,7 +61,7 @@ class IdxRef(VarRef):
         - `var`: Variable object
         - `idx`: index (int)
         """
-        Expr.__init__(self)
+        VarRef.__init__(self)
         self._var = var
         self._idx = idx
 
@@ -76,12 +80,12 @@ class FieldRef(VarRef):
         - `varname`: VarRef object
         - `field`: field name
         """
-        Expr.__init__(self)
+        VarRef.__init__(self)
         self._varref = varref
         self._field = field
         
     def ref(self):
-        return "(%s.%s)" % (self._varref.code(), self._idx)
+        return "(%s.%s)" % (self._varref.code(), self._field)
 
 
 class RunExpr(Expr):
@@ -102,8 +106,6 @@ class RunExpr(Expr):
         self._prio = prio
 
     def code(self):
-        """
-        """
         return NotImplemented
 
 
@@ -129,8 +131,6 @@ class TernaryExpr(Expr):
         self._right = right
 
     def code(self):
-        """
-        """
         return "(%s %s %s %s %s)" % (self._left.code(), self._op1, self._mid.code(), self._op2, self._right.code())
 
 
@@ -190,6 +190,4 @@ class ChanOpExpr(Expr):
         self._chan = chan
     
     def code(self):
-        """
-        """
         return "chan_%s(%s)" % (self._op, self._chan.code())

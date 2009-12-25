@@ -174,6 +174,7 @@ class IfStmt(Stmt):
         Arguments:
         - `options`: list of lists of Stmt objects; each list is a branch
         """
+        Stmt.__init__(self)
         self._options = options
 
     def __repr__(self):

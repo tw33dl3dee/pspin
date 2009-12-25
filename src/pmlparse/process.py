@@ -42,6 +42,7 @@ class Process(object):
         self._vars = dict()
         self._args = []
         self._labels = []
+        self._stmts = []
         self.add_var(Variable("_pid", Type('pid')))
         self.add_var(Variable("_ip", Type('byte')))
 

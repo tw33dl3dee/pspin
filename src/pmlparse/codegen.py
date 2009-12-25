@@ -34,17 +34,17 @@ class Codegen(object):
         """
         self.cur_proc = None
 
-    def add_var(self, var, type = None):
+    def add_var(self, var, vartype = None):
         """Adds variable to current scope
 
         Variable is added either to global symbol table or current proctype, if one exists.
 
         Arguments:
         - `var`: Variable object
-        - `type`: Type object
+        - `vartype`: Type object
         """
-        if type is not None:
-            var.type = type
+        if vartype is not None:
+            var.type = vartype
         if self.cur_proc is not None:
             return self.cur_proc.add_var(var)
         elif var.name in self._vars:
