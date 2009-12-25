@@ -50,6 +50,7 @@ class Codegen(object):
             raise RuntimeError, "Redefinition: `%s'" % var.name
         else:
             self._vars[var.name] = var
+            var.parent = self
             return var
 
     def lookup_var(self, name):
@@ -73,6 +74,13 @@ class Codegen(object):
         """
         return "struct State {\n\t%s;\n}" % ";\n\t".join([v.decl() for v in self._vars.values()])
 
+    def state_ref(self):
+        """Returns C-code (str) to reference global state structure
+        """
+        return "(struct State *)state"
+
+    ref = state_ref
+    
     def procsizes_decl(self):
         """Returns C-code which declares struct with sizes of proctypes' states
         """

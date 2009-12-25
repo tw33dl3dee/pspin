@@ -127,9 +127,9 @@ class Process(object):
         return "struct Proc%s" % self.name
     
     def ref(self):
-        """Return C-code (str) to reference current process instance of this type
+        """Returns C-code (str) to reference current process instance of this type
         """
-        return "(%s*)current" % self.reftype()
+        return "(%s *)current" % self.reftype()
 
     def add_stmt(self, stmt):
         """Adds new statement (not necessarily from topmost block) to process
