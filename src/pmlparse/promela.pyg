@@ -29,6 +29,7 @@ code:
 
 spec ->
 	module+:
+		codegen.finish()
 		return codegen
 	;
 
@@ -148,15 +149,10 @@ visible ->
 
 sequence ->
 # empty
-	| seq sep?:
-		return kids[0]
-	;
-
-seq ->
-	step:
-		return kids
-	| seq sep step:
-	  	return kids[0] + [kids[2]]
+	| step:
+		return [kids[0]]
+	| step sep sequence:
+	  	return [kids[0]] + kids[2]
 	;
 
 sep ->
@@ -166,7 +162,7 @@ sep ->
 
 step ->
 	stmt :
-		return kids[0]
+		return codegen.cur_proc.add_stmt(kids[0])
 	| stmt K_UNLESS stmt:
 		raise NotImplementedError(kids[0])
 	| decl_list
@@ -300,7 +296,6 @@ stmt ->
 	| name P_COLON stmt:
 		label = codegen.cur_proc.lookup_label(kids[0])
 		kids[2].add_label(label)
-		codegen.cur_proc.add_label(label)
 		return kids[2]
 	| K_PRINT P_LPAREN T_STRING print_list? P_RPAREN:
 		raise NotImplementedError(kids[0])

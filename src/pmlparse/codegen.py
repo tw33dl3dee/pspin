@@ -12,11 +12,9 @@ class Codegen(object):
         self._vars = dict()
         self._procs = []
         self.cur_proc = None
-        self.add_var(Variable('_nproc', Type('byte'), len(self._procs)))
-        self.add_var(Variable('_svsize', Type('short')))
 
     def __repr__(self):
-        return "State: \n%s\nProcs: %s\n" % (self.state_decl(), self._procs)
+        return "State: \n%s\nProcsizes: %s\n\nProcs: %s\n" % (self.state_decl(), self.procsizes_decl(), self._procs)
         
     def start_proc(self, active, name):
         """Starts new proctype definition
@@ -32,6 +30,7 @@ class Codegen(object):
     def end_proc(self):
         """Ends current proctype definition
         """
+        self.cur_proc.finish()
         self.cur_proc = None
 
     def add_var(self, var, vartype = None):
@@ -72,5 +71,15 @@ class Codegen(object):
     def state_decl(self):
         """Return C-code that declares global state structure
         """
-        state_vars = self._vars.values()
-        return "struct State {\n\t%s;\n}" % ";\n\t".join([v.decl() for v in state_vars])
+        return "struct State {\n\t%s;\n}" % ";\n\t".join([v.decl() for v in self._vars.values()])
+
+    def procsizes_decl(self):
+        """Returns C-code which declares struct with sizes of proctypes' states
+        """
+        return "size_t procsizes[] = { %s }" % ", ".join(["sizeof(%s)" % p.reftype() for p in self._procs])
+
+    def finish(self):
+        """Settles Codegen object, must be called after all proctypes and declarations
+        """
+        self.add_var(Variable('_svsize', Type('short')))
+        self.add_var(Variable('_nproc', Type('byte'), len(self._procs)))

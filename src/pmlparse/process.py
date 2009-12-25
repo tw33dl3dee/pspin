@@ -10,20 +10,21 @@ class Label(object):
     """Process label object
     """
     
-    def __init__(self, name, parent):
+    def __init__(self, name):
         """
         
         Arguments:
         - `name`: label name
-        - `parent`: Process object
         """
         self._name = name
-        self._parent = parent
-        # TODO: determine dynammically?..
-        self.ip = "%s_IP" % str(self)
+        self.parent = None
 
     def __repr__(self):
-        return "%s_%s"% (self._parent.name, self._name)
+        return self._name
+
+    @property
+    def ip(self):
+        return self.parent.ip
 
 
 class Process(object):
@@ -41,10 +42,10 @@ class Process(object):
         self.name = name
         self._vars = dict()
         self._args = []
-        self._labels = []
+        self._labels = dict()
         self._stmts = []
+        self._state_count = 0
         self.add_var(Variable("_pid", Type('pid')))
-        self.add_var(Variable("_ip", Type('byte')))
 
     def __repr__(self):
         return "`%s' (active: %d)\n<\targs: %s\ndecl:\n%s\n\tlabels: %s\n\tcode: %s>" \
@@ -89,29 +90,60 @@ class Process(object):
         - `stmts`:
         """
         self._stmts = stmts
+        self.check_body()
 
-    def add_label(self, label):
+    def check_body(self):
+        """Performs sanity checks (must be called after process is completely defined)
+        """
+        for label in self._labels.values():
+            if label.parent is None:
+                raise RuntimeError("Label used but not defined: %s" % label)
+
+    def add_label(self, name):
         """Add label to process
         
         Arguments:
-        - `label`: Label object
+        - `label`: label name (str)
         """
-        self._labels.append(label)
+        self._labels[name] = Label(name)
+        return self._labels[name]
 
     def lookup_label(self, name):
         """Return Label object belonging to this process
         
         Arguments:
-        - `name`: label name
+        - `name`: label name (str)
         """
-        return Label(name, self)
+        return self._labels.get(name) or self.add_label(name)
 
     def decl(self):
         """Returns C-code (str) that declares structure with internal data for this proctype
         """
         return "struct Proc%s {\n\t%s;\n}" % (self.name, ";\n\t".join([v.decl() for v in self._vars.values()]))
 
+    def reftype(self):
+        """Return C-type name for proctype
+        """
+        return "struct Proc%s" % self.name
+    
     def ref(self):
         """Return C-code (str) to reference current process instance of this type
         """
-        return "(Proc%s)current" % self.name
+        return "(%s*)current" % self.reftype()
+
+    def add_stmt(self, stmt):
+        """Adds new statement (not necessarily from topmost block) to process
+
+        Sets `ip` for `stmt`
+        
+        Arguments:
+        - `stmt`: Stmt object
+        """
+        self._state_count += 1
+        stmt.ip = self._state_count
+        return stmt
+
+    def finish(self):
+        """Settles Process object, must be called after all statements and declarations
+        """
+        self.add_var(Variable("_ip", Type('byte')))

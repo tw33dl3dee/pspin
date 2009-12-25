@@ -12,9 +12,10 @@ class Stmt(object):
 
     def __init__(self):
         self._labels = []
+        self.ip = None
     
     def __repr__(self):
-        return "STMT[%s]: %s" % (self.executable(), self.execute())
+        return "STMT@%d[%s]: %s" % (self.ip, self.executable(), self.execute())
 
     def executable(self):
         """Generates C code which evaluates to 1 if statement is executable
@@ -35,6 +36,7 @@ class Stmt(object):
         - `label`: Label object
         """
         self._labels.append(label)
+        label.parent = self
 
 
 class AssignStmt(Stmt):
