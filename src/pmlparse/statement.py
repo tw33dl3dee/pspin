@@ -4,6 +4,7 @@
 from variable import *
 from expression import SimpleRef
 from pprint import pformat
+from utils import flatten
 
 
 class Stmt(object):
@@ -70,6 +71,14 @@ class Stmt(object):
         Is used in if/do to fixup links of preceding statements
         """
         self._prev = stmt
+
+    def find_break_stmts(self):
+        """Finds all BreakStmt instances in current scope (statement and sub-statements)
+
+        For most statements, does nothing. TO be overloaded in block statements.
+        Returns (possibly deep) list of BreakStmt objects
+        """
+        return []
 
 
 class CompoundStmt(Stmt, list):
@@ -199,11 +208,11 @@ class ElseStmt(Stmt):
 class BreakStmt(Stmt):
     """Break statement
 
-    Always executable
+    Always executable, does nothing
     """
 
-    def execute(self):
-        return "BREAK";
+    def find_break_stmts(self):
+        return [self]
 
 
 class AssertStmt(Stmt):
@@ -263,6 +272,9 @@ class IfStmt(Stmt):
         self._prev.set_next(self)
         stmt.set_next(self)
 
+    def find_break_stmts(self):
+        return [s.find_break_stmts() for branch in self._options for s in branch]
+
     def executable(self):
         if self._has_else:
             # if/do having `else' branch is always executable
@@ -270,7 +282,7 @@ class IfStmt(Stmt):
         # We still need to filter out ElseStmt as we are called before `has_else` is set to True
         # to generate ElseStmt condition code
         return "(%s)" % " || ".join([branch[0].executable() for branch in self._options if type(branch[0]) is not ElseStmt])
-        
+
 
 class DoStmt(IfStmt):
     """Do statement
@@ -285,6 +297,16 @@ class DoStmt(IfStmt):
         - `options`: list of lists of Stmt objects; each list is a branch
         """
         IfStmt.__init__(self, options)
+
+    def set_next(self, stmt):
+        super(DoStmt, self).set_next(self)
+        brk_stmts = flatten([s.find_break_stmts() for branch in self._options for s in branch])
+        for brk in brk_stmts:
+            brk.set_next(stmt)
+
+    def find_break_stmts(self):
+        # `break' should not be sought in inner do-blocks
+        return []
 
     def __repr__(self):
         return "(@%s -> %s)[%s]: DO:\n%s" % (self.ip, [s.ip for s in self._next], self.executable(), pformat(self._options))
