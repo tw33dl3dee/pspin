@@ -3,7 +3,7 @@
 
 from variable import *
 from pprint import pformat
-from statement import Stmt
+from statement import Stmt, NoopStmt
 
 
 class Label(object):
@@ -17,14 +17,10 @@ class Label(object):
         - `name`: label name
         """
         self._name = name
-        self.parent = None
+        self.parent_stmt = None
 
     def __repr__(self):
         return self._name
-
-    @property
-    def ip(self):
-        return self.parent.ip
 
 
 class Process(object):
@@ -47,10 +43,11 @@ class Process(object):
         self._state_count = 0
         self._last_stmt = None
         self.add_var(Variable("_pid", Type('pid')))
+        self.add_stmt(NoopStmt())
 
     def __repr__(self):
-        return "`%s' (active: %d)\n<\targs: %s\ndecl:\n%s\n\tlabels: %s\n\tcode: %s>" \
-            % (self.name, self._active, self._args, self.decl(), self._labels, pformat(self._stmts))
+        return "`%s' (active: %d)\n<\targs: %s\ndecl:\n%s\n\tlabels: %s\n\tcode: \n%s>" \
+            % (self.name, self._active, self._args, self.decl(), self._labels, "\n".join([str(s) for s in self._stmts]))
 
     def lookup_var(self, name):
         """Lookup variable in process symbol table
@@ -84,20 +81,20 @@ class Process(object):
         """
         self._args = [var.name for var in varlist]
 
-    def set_body(self, stmts):
-        """Defines topmost process block (by setting it's statements)
+    # def set_body(self, stmts):
+    #     """Defines topmost process block (by setting it's statements)
         
-        Arguments:
-        - `stmts`: list of Stmt objects
-        """
-        self._stmts = stmts
-        self.check_body()
+    #     Arguments:
+    #     - `stmts`: list of Stmt objects
+    #     """
+    #     self._stmts = stmts
+    #     self.check_body()
 
-    def check_body(self):
+    def sanity_check(self):
         """Performs sanity checks (must be called after process is completely defined)
         """
         for label in self._labels.values():
-            if label.parent is None:
+            if label.parent_stmt is None:
                 raise RuntimeError("Label used but not defined: %s" % label)
 
     def add_label(self, name):
@@ -140,15 +137,21 @@ class Process(object):
         Arguments:
         - `stmt`: Stmt object
         """
+        self._stmts.append(stmt)
         self._state_count += 1
         stmt.ip = self._state_count
+        stmt.parent_proc = self
         if self._last_stmt:
             self._last_stmt.set_next(stmt)
             stmt.set_prev(self._last_stmt)
         self._last_stmt = stmt
+        print "Added statement %s" % type(stmt)
         return stmt
 
     def finish(self):
         """Settles Process object, must be called after all statements and declarations
         """
         self.add_var(Variable("_ip", Type('byte')))
+        self.sanity_check()
+        for stmt in self._stmts:
+            stmt.settle()

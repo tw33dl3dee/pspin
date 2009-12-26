@@ -5,9 +5,7 @@ active [3] proctype User(int unused1, unused2; bit unused3)
 {
   byte j, k;
 
-  {
-	goto again;
-  };
+  goto again;
 
 again:
   k = 0;

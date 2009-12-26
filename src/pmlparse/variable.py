@@ -51,7 +51,7 @@ class Variable(object):
         self.type = vartype
         self.arrsize = arrsize
         self.initval = initval
-        self.parent = None
+        self.parent = None  # parent ref()able object object
 
     def __repr__(self):
         return self.name

@@ -47,7 +47,6 @@ proctype ->
 	proc_hdr P_LPAREN decl_list? P_RPAREN prio? enabler? P_LBRACE sequence P_RBRACE:
 		if kids[2]:
 			codegen.cur_proc.set_args(kids[2])
-		codegen.cur_proc.set_body(kids[7])
 		codegen.end_proc()
 	;
 
@@ -162,10 +161,7 @@ sep ->
 
 step ->
 	stmt:
-		if type(kids[0]) is list:
-			return [codegen.cur_proc.add_stmt(s) for s in kids[0]]
-		else:
-			return codegen.cur_proc.add_stmt(kids[0])
+		return codegen.cur_proc.add_stmt(kids[0])
 	| stmt K_UNLESS stmt:
 		raise NotImplementedError(kids[0])
 	| decl_list
@@ -285,7 +281,7 @@ stmt ->
 	| D_STEP P_LBRACE sequence P_RBRACE:
 		raise NotImplementedError(kids[0])
 	| P_LBRACE sequence P_RBRACE:
-		return kids[1]
+		raise NotImplementedError('nested blocks')
 	| send
 	| recv
 	| assign:

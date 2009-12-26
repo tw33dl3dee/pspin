@@ -16,6 +16,7 @@ class Stmt(object):
         self.ip = None
         self._next = []
         self._prev = None
+        self.parent_proc = None
     
     def __repr__(self):
         return "STMT(@%s -> %s)[%s]: %s" % (self.ip, [s.ip for s in self._next], self.executable(), self.execute())
@@ -39,7 +40,7 @@ class Stmt(object):
         - `label`: Label object
         """
         self._labels.append(label)
-        label.parent = self
+        label.parent_stmt = self
 
     def set_next(self, stmt):
         """Sets next statement for current statement
@@ -79,6 +80,19 @@ class Stmt(object):
         Returns (possibly deep) list of BreakStmt objects
         """
         return []
+
+    def settle(self):
+        """Settles Stmt object, must be called after all statements in proctype have been parsed
+
+        Actually this is usable for statements that depend on other statements only
+        """
+        pass
+
+
+class NoopStmt(Stmt):
+    """Does nothing. Differs from base Stmt only in name
+    """
+    pass
 
 
 class CompoundStmt(Stmt, list):
@@ -150,6 +164,8 @@ class IncDecStmt(Stmt):
 
 class GotoStmt(Stmt):
     """Goto statement
+
+    Always executable, does nothing. Is't next statement in label it's pointing to
     """
     
     def __init__(self, label):
@@ -161,8 +177,8 @@ class GotoStmt(Stmt):
         Stmt.__init__(self)
         self._label = label
 
-    def execute(self):
-        return "IP = %s" % str(self._label.ip)
+    def settle(self):
+        self.set_next(self._label.parent_stmt)
 
 
 class ExprStmt(Stmt):
@@ -260,9 +276,6 @@ class IfStmt(Stmt):
                 branch[0].cond = "(!%s)" % (self.executable())
                 self._has_else = True
 
-    def __repr__(self):
-        return "(@%s -> %s)[%s]: IF: %s" % (self.ip, [s.ip for s in self._next], self.executable(), pformat(self._options))
-
     def set_next(self, stmt):
         for branch in self._options:
             branch[-1].set_next(stmt)
@@ -307,6 +320,3 @@ class DoStmt(IfStmt):
     def find_break_stmts(self):
         # `break' should not be sought in inner do-blocks
         return []
-
-    def __repr__(self):
-        return "(@%s -> %s)[%s]: DO:\n%s" % (self.ip, [s.ip for s in self._next], self.executable(), pformat(self._options))
