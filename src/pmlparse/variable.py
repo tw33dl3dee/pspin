@@ -65,7 +65,7 @@ class Variable(object):
         return "%s %s %s" % (self.type.c_type(), self.name, lenspec or bitspec)
 
     def ref(self):
-        """Generates C-code for variable reference in expressions
+        """Generates C-expression that references variable
         """
         if self.parent:
             return "((%s)->%s)" % (self.parent.ref(), self.name)

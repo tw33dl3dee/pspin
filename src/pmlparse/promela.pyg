@@ -161,8 +161,11 @@ sep ->
 	;
 
 step ->
-	stmt :
-		return codegen.cur_proc.add_stmt(kids[0])
+	stmt:
+		if type(kids[0]) is list:
+			return [codegen.cur_proc.add_stmt(s) for s in kids[0]]
+		else:
+			return codegen.cur_proc.add_stmt(kids[0])
 	| stmt K_UNLESS stmt:
 		raise NotImplementedError(kids[0])
 	| decl_list

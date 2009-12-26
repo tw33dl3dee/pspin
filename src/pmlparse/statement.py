@@ -13,12 +13,14 @@ class Stmt(object):
     def __init__(self):
         self._labels = []
         self.ip = None
+        self._next = []
+        self._prev = None
     
     def __repr__(self):
-        return "STMT@%d[%s]: %s" % (self.ip, self.executable(), self.execute())
+        return "STMT(@%s -> %s)[%s]: %s" % (self.ip, [s.ip for s in self._next], self.executable(), self.execute())
 
     def executable(self):
-        """Generates C code which evaluates to 1 if statement is executable
+        """Generates C expression which evaluates to 1 if statement is executable
         """
         return "1"
 
@@ -37,6 +39,62 @@ class Stmt(object):
         """
         self._labels.append(label)
         label.parent = self
+
+    def set_next(self, stmt):
+        """Sets next statement for current statement
+        
+        Arguments:
+        - `stmt`: Stmt object
+        """
+        self._next = [stmt]
+
+    @property
+    def next(self):
+        """List of next statements (reachable immeaditaly after current is executed)
+
+        All statements in list are atomic statements (no if/do blocks)
+        """
+        return self._next
+
+    @property
+    def prev(self):
+        """Prev statement (from which this statement is reachable)
+
+        Could be a compound statement (if/do)
+        """
+        return self._prev
+
+    def set_prev(self, stmt):
+        """Sets next statement for current statement
+
+        Is used in if/do to fixup links of preceding statements
+        """
+        self._prev = stmt
+
+
+class CompoundStmt(Stmt, list):
+    """Compound statement.
+
+    This statement is never used on it's own, only for if/do statements
+    for transition generation and executability checks.
+    Is executable if first statement is executable
+    """
+    
+    def __init__(self, stmts):
+        """
+        
+        Arguments:
+        - `stmts`: list of Stmt objects
+        """
+        Stmt.__init__(self)
+        list.__init__(stmts)
+
+    def executable(self):
+        # Empty block is always executable
+        return len(self) and self[0].executable() or "1"
+
+    def execute(self):
+        raise NotImplementedError
 
 
 class AssignStmt(Stmt):
@@ -121,25 +179,29 @@ class ExprStmt(Stmt):
         return self._expr.code()
 
 
-class ElseStmt(ExprStmt):
+class ElseStmt(Stmt):
     """Else statement
 
-    This is actually an expression that is 1 when all other branches
-    are non-executable
+    This is an expression that is 1 when all other branches are non-executable
+    Actual expression (`cond`) is set by parent if/do statement
     """
-
-    else_var = Variable("ELSE", Type('bool'))
     
     def __init__(self):
-        ExprStmt.__init__(self, SimpleRef(self.else_var))
-        
+        Stmt.__init__(self)
+        self.cond = None
+
+    def executable(self):
+        if self.cond is None:
+            raise RuntimeError, "`else' not in guard"
+        return self.cond
+
 
 class BreakStmt(Stmt):
     """Break statement
 
     Always executable
     """
-    
+
     def execute(self):
         return "BREAK";
 
@@ -166,7 +228,8 @@ class AssertStmt(Stmt):
 class IfStmt(Stmt):
     """If statement
 
-    In current naive implementation, it's always executable and acts like no-op.
+    Executable when at least one of it's branches is executable.
+    Executes as no-op.
     It's main purpose is generating multiple transition branches
     """
     
@@ -178,10 +241,36 @@ class IfStmt(Stmt):
         """
         Stmt.__init__(self)
         self._options = options
+        self._next = [branch[0] for branch in options]
+        self._has_else = False
+        for branch in options:
+            if type(branch[0]) is ElseStmt:
+                if self._has_else:
+                    raise RuntimeError, "Multiple `else' branches"
+                # This MUST be called before `has_else` is set to True, otherwise `cond` will always be "!1"
+                branch[0].cond = "(!%s)" % (self.executable())
+                self._has_else = True
 
     def __repr__(self):
-        return "IF: %s" % pformat(self._options)
+        return "(@%s -> %s)[%s]: IF: %s" % (self.ip, [s.ip for s in self._next], self.executable(), pformat(self._options))
 
+    def set_next(self, stmt):
+        for branch in self._options:
+            branch[-1].set_next(stmt)
+
+    def set_prev(self, stmt):
+        self._prev = self._options[0][0].prev
+        self._prev.set_next(self)
+        stmt.set_next(self)
+
+    def executable(self):
+        if self._has_else:
+            # if/do having `else' branch is always executable
+            return "1"
+        # We still need to filter out ElseStmt as we are called before `has_else` is set to True
+        # to generate ElseStmt condition code
+        return "(%s)" % " || ".join([branch[0].executable() for branch in self._options if type(branch[0]) is not ElseStmt])
+        
 
 class DoStmt(IfStmt):
     """Do statement
@@ -198,4 +287,4 @@ class DoStmt(IfStmt):
         IfStmt.__init__(self, options)
 
     def __repr__(self):
-        return "DO: %s" % pformat(self._options)
+        return "(@%s -> %s)[%s]: DO:\n%s" % (self.ip, [s.ip for s in self._next], self.executable(), pformat(self._options))

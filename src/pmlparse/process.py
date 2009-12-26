@@ -45,6 +45,7 @@ class Process(object):
         self._labels = dict()
         self._stmts = []
         self._state_count = 0
+        self._last_stmt = None
         self.add_var(Variable("_pid", Type('pid')))
 
     def __repr__(self):
@@ -84,10 +85,10 @@ class Process(object):
         self._args = [var.name for var in varlist]
 
     def set_body(self, stmts):
-        """
+        """Defines topmost process block (by setting it's statements)
         
         Arguments:
-        - `stmts`:
+        - `stmts`: list of Stmt objects
         """
         self._stmts = stmts
         self.check_body()
@@ -141,6 +142,10 @@ class Process(object):
         """
         self._state_count += 1
         stmt.ip = self._state_count
+        if self._last_stmt:
+            self._last_stmt.set_next(stmt)
+            stmt.set_prev(self._last_stmt)
+        self._last_stmt = stmt
         return stmt
 
     def finish(self):

@@ -6,8 +6,9 @@ class Expr(object):
         return self.code()
 
     def code(self):
-        # This will trigger an error
-        return "(void)"
+        """Returns C expression which evaluates current expression value
+        """
+        raise NotImplemented
 
 
 class ConstExpr(Expr):
