@@ -1,6 +1,7 @@
 #
 #
 
+from __future__ import with_statement
 from process import Process
 from variable import *
 from string import Template
@@ -14,8 +15,29 @@ class Codegen(object):
         self._procs = []
         self.cur_proc = None
 
-    def __repr__(self):
-        return "State: \n%s\nProcsizes: %s\n\nProcs:\n%s\nTrans:\n%s\n" % (self.state_decl(), self.procsizes_decl(), self._procs, self.transitions_init())
+    def write_file(self, fname):
+        """Writes out generated code to file
+        
+        Arguments:
+        - `fname`: file name to write to
+        """
+        with file(fname, "w") as f:
+            self.write_block(f, 'STATE_DECL', self.state_decl())
+            self.write_block(f, 'PROC_DECL', self.proc_decl())
+            self.write_block(f, 'TRANSITIONS_INIT', self.transitions_init())
+            self.write_block(f, 'TRANSITIONS', self.transitions())
+
+    def write_block(self, f, guard, code):
+        """Writes block of code inside #ifdef/#endif guard
+        
+        Arguments:
+        - `f`: file object
+        - `guard`: macro checked with #ifdef
+        - `code`: code (str)
+        """
+        f.write("\n#ifdef %s\n\n" % guard)
+        f.write(code.replace("\t", " "*4))
+        f.write(";\n\n#endif // %s\n" % guard)
         
     def start_proc(self, active, name):
         """Starts new proctype definition
@@ -73,7 +95,11 @@ class Codegen(object):
     def state_decl(self):
         """Return C-code that declares global state structure
         """
-        return "struct State {\n\t%s;\n}" % ";\n\t".join([v.decl() for v in self._vars.values()])
+        state_tpl = """struct State {
+    $fields;
+}"""
+        fields = [v.decl() for v in self._vars.values()]
+        return Template(state_tpl).substitute(fields = ";\n\t".join(fields))
 
     def state_ref(self):
         """Returns C-code (str) to reference global state structure
@@ -82,10 +108,17 @@ class Codegen(object):
 
     ref = state_ref
     
-    def procsizes_decl(self):
-        """Returns C-code which declares struct with sizes of proctypes' states
+    def proc_decl(self):
+        """Returns C-code which declares proctypes structures and their sizes
         """
-        return "size_t procsizes[] = { %s }" % ", ".join(["sizeof(%s)" % p.reftype() for p in self._procs])
+        procsizes_tpl = """
+#define NPROCTYPE $nproctype
+#define PROCSIZE(proctype) procsizes[proctype]
+size_t procsizes[] = { $procsizes }"""
+        procsizes = ", ".join(["sizeof(%s)" % p.reftype() for p in self._procs])
+        lines = [p.decl() for p in self._procs]
+        lines.append(Template(procsizes_tpl).substitute(nproctype=len(self._procs), procsizes=procsizes))
+        return ";\n".join(lines)
 
     def transitions_init(self):
         """Returns C-code (str) that initializes transitions for all proctypes
@@ -93,6 +126,19 @@ class Codegen(object):
         trans_init_tpl = "transitions = calloc(sizeof(int ***), $proc_count)"
         lines = [Template(trans_init_tpl).substitute(proc_count=len(self._procs))]
         lines += [proc.transitions_init("transitions[%d]" % i) for (proc, i) in zip(self._procs, range(len(self._procs)))]
+        return ";\n".join(lines)
+
+    def transitions(self):
+        """Returns C-code (str) that performs transition for given (proctype, ip)
+        """
+        lines = ["switch (proctype) {"]
+        case_tpl = """\tcase $proctype: {
+    $switch;
+    }
+    break"""
+        for (p, i) in zip(self._procs, range(len(self._procs))):
+             lines.append(Template(case_tpl).substitute(proctype=i, switch=p.transitions()))
+        lines += ["default:\n\tassert(0)", "}"]
         return ";\n".join(lines)
 
     def finish(self):

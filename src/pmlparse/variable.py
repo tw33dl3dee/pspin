@@ -18,7 +18,7 @@ class Type(object):
             raise RuntimeError, "Unknown type `%s'" % name
         self._name = name
 
-    def __repr__(self):
+    def __str__(self):
         return self._name
 
     def c_type(self):
@@ -53,7 +53,7 @@ class Variable(object):
         self.initval = initval
         self.parent = None  # parent ref()able object object
 
-    def __repr__(self):
+    def __str__(self):
         return self.name
 
     def decl(self):

@@ -2,7 +2,9 @@
 #
 
 class Expr(object):
-    def __repr__(self):
+    def __str__(self):
+        """Returns human-readable expression representation
+        """
         return self.code()
 
     def code(self):
@@ -47,6 +49,9 @@ class SimpleRef(VarRef):
         VarRef.__init__(self)
         self._var = var
 
+    def __str__(self):
+        return str(self._var)
+
     def code(self):
         return self._var.ref()
 
@@ -66,6 +71,9 @@ class IdxRef(VarRef):
         self._var = var
         self._idx = idx
 
+    def __str__(self):
+        return "%s[%s]" % (self._var, self._idx)
+
     def code(self):
         return "(%s[%s])" % (self._var.ref(), self._idx)
 
@@ -84,7 +92,10 @@ class FieldRef(VarRef):
         VarRef.__init__(self)
         self._varref = varref
         self._field = field
-        
+
+    def __str__(self):
+        return "%s.%s" % (self._varref, self._field)
+
     def ref(self):
         return "(%s.%s)" % (self._varref.code(), self._field)
 
@@ -131,6 +142,9 @@ class TernaryExpr(Expr):
         self._op2 = op2
         self._right = right
 
+    def __str__(self):
+        return "(%s %s %s %s %s)" % (self._left, self._op1, self._mid, self._op2, self._right)
+
     def code(self):
         return "(%s %s %s %s %s)" % (self._left.code(), self._op1, self._mid.code(), self._op2, self._right.code())
 
@@ -152,6 +166,9 @@ class BinaryExpr(Expr):
         self._op = op
         self._right = right
 
+    def __str__(self):
+        return "(%s %s %s)" % (self._left, self._op, self._right)
+
     def code(self):
         return "(%s %s %s)" % (self._left.code(), self._op, self._right.code())
 
@@ -171,8 +188,11 @@ class UnaryExpr(Expr):
         self._op = op
         self._right = right
 
+    def __str__(self):
+        return "(%s%s)" % (self._op, self._right)
+
     def code(self):
-        return "(%s %s)" % (self._op, self._right.code())
+        return "(%s%s)" % (self._op, self._right.code())
 
 
 class ChanOpExpr(Expr):
@@ -189,6 +209,9 @@ class ChanOpExpr(Expr):
         Expr.__init__(self)
         self._op = op
         self._chan = chan
+
+    def __str__(self):
+        return "chan_%s(%s)" % (self._op, self._chan)
     
     def code(self):
         return "chan_%s(%s)" % (self._op, self._chan.code())

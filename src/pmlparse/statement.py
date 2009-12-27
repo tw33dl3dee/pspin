@@ -3,7 +3,6 @@
 
 from variable import *
 from expression import SimpleRef
-from pprint import pformat
 from utils import flatten
 
 
@@ -18,8 +17,11 @@ class Stmt(object):
         self._prev = None
         self.parent_proc = None
     
-    def __repr__(self):
-        return "STMT(@%s -> %s)[%s]: %s" % (self.ip, [s.ip for s in self._next], self.executable(), self.execute())
+    def __str__(self):
+        return "[%d] %s" % (self.ip, self.debug_repr())
+
+    def debug_repr(self):
+        return self.execute()
 
     def executable(self):
         """Generates C expression which evaluates to 1 if statement is executable
@@ -92,7 +94,17 @@ class Stmt(object):
 class NoopStmt(Stmt):
     """Does nothing. Differs from base Stmt only in name
     """
-    pass
+    def __init__(self, name):
+        """
+        
+        Arguments:
+        - `name`: state name (str), used for debug printing
+        """
+        super(NoopStmt, self).__init__()
+        self._name = name
+
+    def debug_repr(self):
+        return self._name
 
 
 class CompoundStmt(Stmt, list):
@@ -140,6 +152,9 @@ class AssignStmt(Stmt):
     def execute(self):
         return "%s = %s" % (self._varref.code(), self._expr.code())
 
+    def debug_repr(self):
+        return "%s = %s" % (self._varref, self._expr)
+
 
 class IncDecStmt(Stmt):
     """Increment/decrement statement
@@ -161,6 +176,9 @@ class IncDecStmt(Stmt):
     def execute(self):
         return "%s%s" % (self._op, self._varref.code())
 
+    def debug_repr(self):
+        return "%s%s" % (self._op, self._varref)
+
 
 class GotoStmt(Stmt):
     """Goto statement
@@ -176,6 +194,9 @@ class GotoStmt(Stmt):
         """
         Stmt.__init__(self)
         self._label = label
+
+    def debug_repr(self):
+        return "goto %s" % self._label
 
     def settle(self):
         self.set_next(self._label.parent_stmt)
@@ -203,6 +224,9 @@ class ExprStmt(Stmt):
     def executable(self):
         return self._expr.code()
 
+    def debug_repr(self):
+        return str(self._expr)
+
 
 class ElseStmt(Stmt):
     """Else statement
@@ -220,6 +244,9 @@ class ElseStmt(Stmt):
             raise RuntimeError, "`else' not in guard"
         return self.cond
 
+    def debug_repr(self):
+        return "else"
+
 
 class BreakStmt(Stmt):
     """Break statement
@@ -229,6 +256,9 @@ class BreakStmt(Stmt):
 
     def find_break_stmts(self):
         return [self]
+
+    def debug_repr(self):
+        return "break"
 
 
 class AssertStmt(Stmt):
@@ -248,6 +278,9 @@ class AssertStmt(Stmt):
 
     def execute(self):
         return "ASSERT(%s)" % self._expr.code()
+
+    def debug_repr(self):
+        return "assert(%s)" % self._expr
 
 
 class IfStmt(Stmt):
@@ -296,6 +329,9 @@ class IfStmt(Stmt):
         # to generate ElseStmt condition code
         return "(%s)" % " || ".join([branch[0].executable() for branch in self._options if type(branch[0]) is not ElseStmt])
 
+    def debug_repr(self):
+        return "if"
+
 
 class DoStmt(IfStmt):
     """Do statement
@@ -320,3 +356,6 @@ class DoStmt(IfStmt):
     def find_break_stmts(self):
         # `break' should not be sought in inner do-blocks
         return []
+
+    def debug_repr(self):
+        return "do"

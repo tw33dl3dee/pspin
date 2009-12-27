@@ -19,3 +19,5 @@
 *_gramtab.*
 *_lextab.*
 .*
+TAGS
+./src/pmlparse/*.c

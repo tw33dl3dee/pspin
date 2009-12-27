@@ -43,4 +43,4 @@ else:
         print_errpos(fname, e.lineno(l), e.charno(l), l.SPACES_PER_TAB)
         sys.exit(2)
     else:
-        pprint(code)
+        code.write_file(sys.argv[2])

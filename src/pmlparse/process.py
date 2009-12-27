@@ -2,7 +2,6 @@
 #
 
 from variable import *
-from pprint import pformat
 from statement import Stmt, NoopStmt
 from string import Template
 
@@ -20,7 +19,7 @@ class Label(object):
         self._name = name
         self.parent_stmt = None
 
-    def __repr__(self):
+    def __str__(self):
         return self._name
 
 
@@ -44,11 +43,11 @@ class Process(object):
         self._state_count = 0
         self._last_stmt = None
         self.add_var(Variable("_pid", Type('pid')))
-        self.add_stmt(NoopStmt())
+        self.add_stmt(NoopStmt("-start-"))
 
-    def __repr__(self):
-        return "`%s' (active: %d)\n<\targs: %s\ndecl:\n%s\n\tlabels: %s\n\tcode: \n%s>" \
-            % (self.name, self._active, self._args, self.decl(), self._labels, "\n".join([str(s) for s in self._stmts]))
+    def __str__(self):
+        return "`%s' (active: %d)\n<\targs: %s\ndecl:\n%s\n\tcode: \n%s\n" \
+            % (self.name, self._active, self._args, self.decl(), "\n".join([str(s) for s in self._stmts]))
 
     def lookup_var(self, name):
         """Lookup variable in process symbol table
@@ -118,7 +117,11 @@ class Process(object):
     def decl(self):
         """Returns C-code (str) that declares structure with internal data for this proctype
         """
-        return "struct Proc%s {\n\t%s;\n}" % (self.name, ";\n\t".join([v.decl() for v in self._vars.values()]))
+        decl_tpl = """struct Proc$name {
+    $fields;
+}"""
+        fields = [v.decl() for v in self._vars.values()]
+        return Template(decl_tpl).substitute(name=self.name, fields = ";\n\t".join(fields))
 
     def reftype(self):
         """Return C-type name for proctype
@@ -147,6 +150,23 @@ class Process(object):
             lines.append(Template(trans_add_tpl).substitute(trans=varname, ip_from=stmt.ip, ip_to=0, i=len(stmt.next)))
         return ";\n".join(lines)
 
+    def transitions(self): 
+        """Returns C-code (str) that performs transition for current proctype and given ip
+        """
+        switch_tpl = "\tswitch ($ipvar) {"
+        case_tpl = """\t\tcase $ip:
+            if ($executable) {
+                COPY_STATE;
+                $execute;
+                goto passed;
+            }
+            goto blocked"""
+        lines = [Template(switch_tpl).substitute(ipvar=self.lookup_var("_ip").ref())]
+        for stmt in self._stmts:
+            lines.append(Template(case_tpl).substitute(ip=stmt.ip, executable=stmt.executable(), execute=stmt.execute()))
+        lines += ["\t\tdefault:\n\t\t\tassert(0)", "\t\t}"]
+        return ";\n".join(lines)
+
     def add_stmt(self, stmt):
         """Adds new statement (not necessarily from topmost block) to process
 
@@ -163,12 +183,12 @@ class Process(object):
             self._last_stmt.set_next(stmt)
             stmt.set_prev(self._last_stmt)
         self._last_stmt = stmt
-        print "Added statement %s" % type(stmt)
         return stmt
 
     def finish(self):
         """Settles Process object, must be called after all statements and declarations
         """
+        self.add_stmt(NoopStmt("-end-"))
         self.add_var(Variable("_ip", Type('byte')))
         self.sanity_check()
         for stmt in self._stmts:
