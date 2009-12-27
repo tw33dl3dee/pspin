@@ -4,6 +4,7 @@
 from variable import *
 from pprint import pformat
 from statement import Stmt, NoopStmt
+from string import Template
 
 
 class Label(object):
@@ -129,6 +130,23 @@ class Process(object):
         """
         return "(%s *)current" % self.reftype()
 
+    def transitions_init(self, varname):
+        """Returns C-code (str) that initializes transitions for this proctype
+
+        Arguments:
+        - `varname`: name of C-array that stores transitions (str)
+        """
+        trans_init_tpl = "$trans = calloc(sizeof(int **), $state_count)"
+        trans_init_from_tpl = "$trans[$ip_from] = calloc(sizeof(int *), $to_count)"
+        trans_add_tpl = "$trans[$ip_from][$i] = $ip_to"
+        lines = [Template(trans_init_tpl).substitute(trans=varname, state_count=self._state_count)]
+        for stmt in self._stmts:
+            lines.append(Template(trans_init_from_tpl).substitute(trans=varname, ip_from=stmt.ip, to_count=(len(stmt.next) + 1)))
+            for (next, i) in zip(stmt.next, range(len(stmt.next))):
+                lines.append(Template(trans_add_tpl).substitute(trans=varname, ip_from=stmt.ip, ip_to=next.ip, i=i))
+            lines.append(Template(trans_add_tpl).substitute(trans=varname, ip_from=stmt.ip, ip_to=0, i=len(stmt.next)))
+        return ";\n".join(lines)
+
     def add_stmt(self, stmt):
         """Adds new statement (not necessarily from topmost block) to process
 
@@ -139,7 +157,7 @@ class Process(object):
         """
         self._stmts.append(stmt)
         self._state_count += 1
-        stmt.ip = self._state_count
+        stmt.ip = self._state_count - 1
         stmt.parent_proc = self
         if self._last_stmt:
             self._last_stmt.set_next(stmt)

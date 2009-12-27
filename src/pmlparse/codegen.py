@@ -3,6 +3,7 @@
 
 from process import Process
 from variable import *
+from string import Template
 
 
 class Codegen(object):
@@ -14,7 +15,7 @@ class Codegen(object):
         self.cur_proc = None
 
     def __repr__(self):
-        return "State: \n%s\nProcsizes: %s\n\nProcs: %s\n" % (self.state_decl(), self.procsizes_decl(), self._procs)
+        return "State: \n%s\nProcsizes: %s\n\nProcs:\n%s\nTrans:\n%s\n" % (self.state_decl(), self.procsizes_decl(), self._procs, self.transitions_init())
         
     def start_proc(self, active, name):
         """Starts new proctype definition
@@ -85,6 +86,14 @@ class Codegen(object):
         """Returns C-code which declares struct with sizes of proctypes' states
         """
         return "size_t procsizes[] = { %s }" % ", ".join(["sizeof(%s)" % p.reftype() for p in self._procs])
+
+    def transitions_init(self):
+        """Returns C-code (str) that initializes transitions for all proctypes
+        """
+        trans_init_tpl = "transitions = calloc(sizeof(int ***), $proc_count)"
+        lines = [Template(trans_init_tpl).substitute(proc_count=len(self._procs))]
+        lines += [proc.transitions_init("transitions[%d]" % i) for (proc, i) in zip(self._procs, range(len(self._procs)))]
+        return ";\n".join(lines)
 
     def finish(self):
         """Settles Codegen object, must be called after all proctypes and declarations
