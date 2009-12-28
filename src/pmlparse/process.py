@@ -81,15 +81,6 @@ class Process(object):
         """
         self._args = [var.name for var in varlist]
 
-    # def set_body(self, stmts):
-    #     """Defines topmost process block (by setting it's statements)
-        
-    #     Arguments:
-    #     - `stmts`: list of Stmt objects
-    #     """
-    #     self._stmts = stmts
-    #     self.check_body()
-
     def sanity_check(self):
         """Performs sanity checks (must be called after process is completely defined)
         """
@@ -158,13 +149,24 @@ class Process(object):
             if ($executable) {
                 COPY_STATE;
                 $execute;
+                RECORD_STEP("$step_str");
                 goto passed;
             }
             goto blocked"""
         lines = [Template(switch_tpl).substitute(ipvar=self.lookup_var("_ip").ref())]
         for stmt in self._stmts:
-            lines.append(Template(case_tpl).substitute(ip=stmt.ip, executable=stmt.executable(), execute=stmt.execute()))
+            lines.append(Template(case_tpl).substitute(ip=stmt.ip, executable=stmt.executable(), \
+                                                       execute=stmt.execute(), step_str=str(stmt)))
         lines += ["\t\tdefault:\n\t\t\tassert(0)", "\t\t}"]
+        return ";\n".join(lines)
+
+    def state_dump(self):
+        """Returns C-code (str) that dumps current proctype's variables
+        """
+        print_var_tpl = '\t\tprintf("\\t-\\t$varname:\\t%d\\n", $varref)'
+        lines = []
+        for v in self._vars.values():
+            lines.append(Template(print_var_tpl).substitute(varname=str(v), varref=v.ref()))
         return ";\n".join(lines)
 
     def add_stmt(self, stmt):

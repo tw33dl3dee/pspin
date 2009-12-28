@@ -23,7 +23,9 @@ class Codegen(object):
         """
         with file(fname, "w") as f:
             self.write_block(f, 'STATE_DECL', self.state_decl())
+            self.write_block(f, 'STATE_DUMP', self.state_dump())
             self.write_block(f, 'PROC_DECL', self.proc_decl())
+            self.write_block(f, 'PROCSTATE_DUMP', self.procstate_dump())
             self.write_block(f, 'TRANSITIONS_INIT', self.transitions_init())
             self.write_block(f, 'TRANSITIONS', self.transitions())
 
@@ -132,12 +134,35 @@ size_t procsizes[] = { $procsizes }"""
         """Returns C-code (str) that performs transition for given (proctype, ip)
         """
         lines = ["switch (proctype) {"]
-        case_tpl = """\tcase $proctype: {
+        case_tpl = """case $proctype: {
     $switch;
     }
     break"""
         for (p, i) in zip(self._procs, range(len(self._procs))):
              lines.append(Template(case_tpl).substitute(proctype=i, switch=p.transitions()))
+        lines += ["default:\n\tassert(0)", "}"]
+        return ";\n".join(lines)
+
+    def state_dump(self):
+        """Returns C-code (str) that dumps current global state variables
+        """
+        print_var_tpl = 'printf("-\\t$varname:\\t%d\\n", $varref)'
+        lines = []
+        for v in self._vars.values():
+            lines.append(Template(print_var_tpl).substitute(varname=str(v), varref=v.ref()))
+        return ";\n".join(lines)
+
+    def procstate_dump(self):
+        """Returns C-code (str) thatb dumps state variables of given proctype
+        """
+        print_var_tpl = 'printf("-\\t$varname:\\t%d\\n", $varref)'
+        lines = ["switch (proctype) {"]
+        case_tpl = """case $proctype: {
+$dump;
+    }
+    break"""
+        for (p, i) in zip(self._procs, range(len(self._procs))):
+             lines.append(Template(case_tpl).substitute(proctype=i, dump=p.state_dump()))
         lines += ["default:\n\tassert(0)", "}"]
         return ";\n".join(lines)
 

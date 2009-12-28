@@ -18,9 +18,11 @@ class Stmt(object):
         self.parent_proc = None
     
     def __str__(self):
-        return "[%d] %s" % (self.ip, self.debug_repr())
+        return self.debug_repr()
 
     def debug_repr(self):
+        """Returns human-readable representation of statement
+        """
         return self.execute()
 
     def executable(self):
