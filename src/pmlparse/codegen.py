@@ -100,7 +100,8 @@ class Codegen(object):
         state_tpl = """struct State {
     $fields;
 }"""
-        fields = [v.decl() for v in self._vars.values()]
+        fields = [v.decl() for v in sorted(self._vars.values())]
+        fields.append("char _procs[0]")
         return Template(state_tpl).substitute(fields = ";\n\t".join(fields))
 
     def state_ref(self):
@@ -133,7 +134,7 @@ size_t procsizes[] = { $procsizes }"""
     def transitions(self):
         """Returns C-code (str) that performs transition for given (proctype, ip)
         """
-        lines = ["switch (proctype) {"]
+        lines = ["switch (current->_proctype) {"]
         case_tpl = """case $proctype: {
     $switch;
     }
@@ -155,8 +156,7 @@ size_t procsizes[] = { $procsizes }"""
     def procstate_dump(self):
         """Returns C-code (str) thatb dumps state variables of given proctype
         """
-        print_var_tpl = 'printf("-\\t$varname:\\t%d\\n", $varref)'
-        lines = ["switch (proctype) {"]
+        lines = ["switch (current->proctype) {"]
         case_tpl = """case $proctype: {
 $dump;
     }
@@ -170,4 +170,3 @@ $dump;
         """Settles Codegen object, must be called after all proctypes and declarations
         """
         self.add_var(Variable('_svsize', Type('short')))
-        self.add_var(Variable('_nproc', Type('byte'), len(self._procs)))

@@ -56,6 +56,9 @@ class Variable(object):
     def __str__(self):
         return self.name
 
+    def __cmp__(self, other):
+        return cmp(self.name, other.name)
+
     def decl(self):
         """Generates C-code for variable declaration
         """
@@ -72,3 +75,25 @@ class Variable(object):
         else:
             return "(%s)" % self.name
 
+
+class SpecialVariable(Variable):
+    """Special variable that is not stored in global/process state
+    """
+    
+    def __init__(self, name, c_name, vartype):
+        """
+        
+        Arguments:
+        - `name`: variable name as used in Promela
+        - `c_name`: variable name as used in C
+        - `vartype`: Type object
+        """
+        super(SpecialVariable, self).__init__(name, vartype)
+        self._c_name = c_name
+
+    def decl(self):
+        # Do not include in state declaration
+        return None
+
+    def ref(self):
+        return self._c_name

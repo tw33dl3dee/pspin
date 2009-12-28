@@ -8,6 +8,8 @@
  * 
  */
 
+#define CODEGEN_FILE "../pmlparse/peterson3.c"
+
 #include "state.h"
 
 /** 

@@ -65,7 +65,7 @@ class IdxRef(VarRef):
         
         Arguments:
         - `var`: Variable object
-        - `idx`: index (int)
+        - `idx`: index (Expression object)
         """
         VarRef.__init__(self)
         self._var = var
@@ -75,7 +75,7 @@ class IdxRef(VarRef):
         return "%s[%s]" % (self._var, self._idx)
 
     def code(self):
-        return "(%s[%s])" % (self._var.ref(), self._idx)
+        return "(%s[%s])" % (self._var.ref(), self._idx.code())
 
 
 class FieldRef(VarRef):

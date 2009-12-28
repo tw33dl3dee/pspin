@@ -11,6 +11,12 @@
 #ifndef _STATE_H_
 #define _STATE_H_
 
+struct Process {
+    unsigned char _ip ;
+    unsigned char _proctype ;
+	char data[0];
+};
+
 #define STATE_DECL
 #include CODEGEN_FILE
 #undef  STATE_DECL

@@ -42,7 +42,7 @@ class Process(object):
         self._stmts = []
         self._state_count = 0
         self._last_stmt = None
-        self.add_var(Variable("_pid", Type('pid')))
+        self.add_var(SpecialVariable("_pid", "pid", Type('pid')))
         self.add_stmt(NoopStmt("-start-"))
 
     def __str__(self):
@@ -111,7 +111,7 @@ class Process(object):
         decl_tpl = """struct Proc$name {
     $fields;
 }"""
-        fields = [v.decl() for v in self._vars.values()]
+        fields = [decl for v in sorted(self._vars.values()) for decl in [v.decl()] if decl]
         return Template(decl_tpl).substitute(name=self.name, fields = ";\n\t".join(fields))
 
     def reftype(self):
@@ -165,7 +165,7 @@ class Process(object):
         """
         print_var_tpl = '\t\tprintf("\\t-\\t$varname:\\t%d\\n", $varref)'
         lines = []
-        for v in self._vars.values():
+        for v in sorted(self._vars.values()):
             lines.append(Template(print_var_tpl).substitute(varname=str(v), varref=v.ref()))
         return ";\n".join(lines)
 
@@ -192,6 +192,7 @@ class Process(object):
         """
         self.add_stmt(NoopStmt("-end-"))
         self.add_var(Variable("_ip", Type('byte')))
+        self.add_var(Variable("_proctype", Type('byte')))
         self.sanity_check()
         for stmt in self._stmts:
             stmt.settle()
