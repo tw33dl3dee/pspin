@@ -136,7 +136,7 @@ class Process(object):
         lines = [Template(trans_init_tpl).substitute(trans=varname, state_count=self._state_count)]
         for stmt in self._stmts:
             lines.append(Template(trans_init_from_tpl).substitute(trans=varname, ip_from=stmt.ip, to_count=(len(stmt.next) + 1)))
-            for (next, i) in zip(stmt.next, range(len(stmt.next))):
+            for (i, next) in enumerate(stmt.next):
                 lines.append(Template(trans_add_tpl).substitute(trans=varname, ip_from=stmt.ip, ip_to=next.ip, i=i))
             lines.append(Template(trans_add_tpl).substitute(trans=varname, ip_from=stmt.ip, ip_to=0, i=len(stmt.next)))
         return ";\n".join(lines)

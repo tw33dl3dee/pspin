@@ -128,7 +128,7 @@ size_t procsizes[] = { $procsizes }"""
         """
         trans_init_tpl = "transitions = calloc(sizeof(int ***), $proc_count)"
         lines = [Template(trans_init_tpl).substitute(proc_count=len(self._procs))]
-        lines += [proc.transitions_init("transitions[%d]" % i) for (proc, i) in zip(self._procs, range(len(self._procs)))]
+        lines += [proc.transitions_init("transitions[%d]" % i) for (i, proc) in enumerate(self._procs)]
         return ";\n".join(lines)
 
     def transitions(self):
@@ -139,7 +139,7 @@ size_t procsizes[] = { $procsizes }"""
     $switch;
     }
     break"""
-        for (p, i) in zip(self._procs, range(len(self._procs))):
+        for (i, p) in enumerate(self._procs):
              lines.append(Template(case_tpl).substitute(proctype=i, switch=p.transitions()))
         lines += ["default:\n\tassert(0)", "}"]
         return ";\n".join(lines)
@@ -161,7 +161,7 @@ size_t procsizes[] = { $procsizes }"""
 $dump;
     }
     break"""
-        for (p, i) in zip(self._procs, range(len(self._procs))):
+        for (i, p) in enumerate(self._procs):
              lines.append(Template(case_tpl).substitute(proctype=i, dump=p.state_dump()))
         lines += ["default:\n\tassert(0)", "}"]
         return ";\n".join(lines)
