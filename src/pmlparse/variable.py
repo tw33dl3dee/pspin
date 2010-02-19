@@ -5,12 +5,13 @@ class Type(object):
     """Type object
     """
 
-    c_types = {'bit': 'unsigned', 'bool': 'unsigned', 'byte': 'unsigned char', 'short': 'short', 'int': 'int', 'pid':'char'}
+    c_types = {'bit': 'unsigned', 'bool': 'unsigned', 'byte': 'unsigned char',
+               'short': 'short', 'int': 'int', 'pid':'char'}
     c_sizes = {'bit': 1, 'bool': 1}
-    
+
     def __init__(self, name):
         """
-        
+
         Arguments:
         - `name`: type name (str)
         """
@@ -37,7 +38,7 @@ class Type(object):
 class Variable(object):
     """Variable object
     """
-    
+
     def __init__(self, name, vartype, arrsize = None, initval = None):
         """
 
@@ -79,10 +80,10 @@ class Variable(object):
 class SpecialVariable(Variable):
     """Special variable that is not stored in global/process state
     """
-    
+
     def __init__(self, name, c_name, vartype):
         """
-        
+
         Arguments:
         - `name`: variable name as used in Promela
         - `c_name`: variable name as used in C

@@ -16,7 +16,7 @@ class Stmt(object):
         self._next = []
         self._prev = None
         self.parent_proc = None
-    
+
     def __str__(self):
         return self.debug_repr()
 
@@ -39,7 +39,7 @@ class Stmt(object):
 
     def add_label(self, label):
         """Adds label to statement
-        
+
         Arguments:
         - `label`: Label object
         """
@@ -48,7 +48,7 @@ class Stmt(object):
 
     def set_next(self, stmt):
         """Sets next statement for current statement
-        
+
         Arguments:
         - `stmt`: Stmt object
         """
@@ -98,7 +98,7 @@ class NoopStmt(Stmt):
     """
     def __init__(self, name):
         """
-        
+
         Arguments:
         - `name`: state name (str), used for debug printing
         """
@@ -116,10 +116,10 @@ class CompoundStmt(Stmt, list):
     for transition generation and executability checks.
     Is executable if first statement is executable
     """
-    
+
     def __init__(self, stmts):
         """
-        
+
         Arguments:
         - `stmts`: list of Stmt objects
         """
@@ -139,10 +139,10 @@ class AssignStmt(Stmt):
 
     Always executable
     """
-    
+
     def __init__(self, varref, expr):
         """
-        
+
         Arguments:
         - `varref`: VarRef object to assign to
         - `expr`: Expression object
@@ -163,10 +163,10 @@ class IncDecStmt(Stmt):
 
     Always executable
     """
-    
+
     def __init__(self, varref, op):
         """
-        
+
         Arguments:
         - `varref`: VarRef object to increment/decrement
         - `op`: operator ('++' or '--')
@@ -187,10 +187,10 @@ class GotoStmt(Stmt):
 
     Always executable, does nothing. Is't next statement in label it's pointing to
     """
-    
+
     def __init__(self, label):
         """
-        
+
         Arguments:
         - `label`: Label object
         """
@@ -210,10 +210,10 @@ class ExprStmt(Stmt):
     Executable, when expression is != 0.
     Does nothing
     """
-    
+
     def __init__(self, expr):
         """
-        
+
         Arguments:
         - `expr`: Expression object
         """
@@ -236,7 +236,7 @@ class ElseStmt(Stmt):
     This is an expression that is 1 when all other branches are non-executable
     Actual expression (`cond`) is set by parent if/do statement
     """
-    
+
     def __init__(self):
         Stmt.__init__(self)
         self.cond = None
@@ -268,10 +268,10 @@ class AssertStmt(Stmt):
 
     Always executable
     """
-    
+
     def __init__(self, expr):
         """
-        
+
         Arguments:
         - `expr`: Expr object whose value is asserted to be != 0
         """
@@ -292,10 +292,10 @@ class IfStmt(Stmt):
     Executes as no-op.
     It's main purpose is generating multiple transition branches
     """
-    
+
     def __init__(self, options):
         """
-        
+
         Arguments:
         - `options`: list of lists of Stmt objects; each list is a branch
         """
@@ -329,7 +329,8 @@ class IfStmt(Stmt):
             return "1"
         # We still need to filter out ElseStmt as we are called before `has_else` is set to True
         # to generate ElseStmt condition code
-        return "(%s)" % " || ".join([branch[0].executable() for branch in self._options if type(branch[0]) is not ElseStmt])
+        return "(%s)" % " || ".join([branch[0].executable() for branch in self._options
+                                     if type(branch[0]) is not ElseStmt])
 
     def debug_repr(self):
         return "if"
@@ -340,10 +341,10 @@ class DoStmt(IfStmt):
 
     Acts similar to IfStmt
     """
-    
+
     def __init__(self, options):
         """
-        
+
         Arguments:
         - `options`: list of lists of Stmt objects; each list is a branch
         """

@@ -58,8 +58,8 @@ def setprodprec(prodprec, prodno, prec, assoc) :
 	v = [prec,assoc]
 	if prodprec[prodno] != None :
 		if prodprec[prodno] != v :
-			raise SpecError("Changing priority of [%s -> %s] from %s to %s" % \
-				(gt.gram[prodno][0], gt.gram[prodno][1], prodprec[prodno], v))
+			raise SpecError("Changing priority of [%s -> %s] from %s to %s" % 
+							(gt.gram[prodno][0], gt.gram[prodno][1], prodprec[prodno], v))
 	else :
 		prodprec[prodno] = v
 

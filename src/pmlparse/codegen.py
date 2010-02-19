@@ -17,7 +17,7 @@ class Codegen(object):
 
     def write_file(self, fname):
         """Writes out generated code to file
-        
+
         Arguments:
         - `fname`: file name to write to
         """
@@ -31,7 +31,7 @@ class Codegen(object):
 
     def write_block(self, f, guard, code):
         """Writes block of code inside #ifdef/#endif guard
-        
+
         Arguments:
         - `f`: file object
         - `guard`: macro checked with #ifdef
@@ -40,10 +40,10 @@ class Codegen(object):
         f.write("\n#ifdef %s\n\n" % guard)
         f.write(code.replace("\t", " "*4))
         f.write(";\n\n#endif // %s\n" % guard)
-        
+
     def start_proc(self, active, name):
         """Starts new proctype definition
-        
+
         Arguments:
         - `active`: active count or 0 if not active,
         - `name`: proctype name
@@ -51,7 +51,7 @@ class Codegen(object):
         self.cur_proc = Process(active, name)
         self._procs.append(self.cur_proc)
         return self.cur_proc
-        
+
     def end_proc(self):
         """Ends current proctype definition
         """
@@ -110,7 +110,7 @@ class Codegen(object):
         return "(struct State *)state"
 
     ref = state_ref
-    
+
     def proc_decl(self):
         """Returns C-code which declares proctypes structures and their sizes
         """

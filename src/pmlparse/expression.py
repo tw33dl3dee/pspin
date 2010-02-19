@@ -16,10 +16,10 @@ class Expr(object):
 class ConstExpr(Expr):
     """Constant expression
     """
-    
+
     def __init__(self, value):
         """
-        
+
         Arguments:
         - `value`: expression value (int)
         """
@@ -39,10 +39,10 @@ class VarRef(Expr):
 class SimpleRef(VarRef):
     """Direct reference to a variable
     """
-    
+
     def __init__(self, var):
         """
-        
+
         Arguments:
         - `var`: Variable object
         """
@@ -59,10 +59,10 @@ class SimpleRef(VarRef):
 class IdxRef(VarRef):
     """Indexed reference to a variable
     """
-    
+
     def __init__(self, var, idx):
         """
-        
+
         Arguments:
         - `var`: Variable object
         - `idx`: index (Expression object)
@@ -81,10 +81,10 @@ class IdxRef(VarRef):
 class FieldRef(VarRef):
     """Reference to a field of another variable reference
     """
-    
+
     def __init__(self, varref, field):
         """
-        
+
         Arguments:
         - `varname`: VarRef object
         - `field`: field name
@@ -103,10 +103,10 @@ class FieldRef(VarRef):
 class RunExpr(Expr):
     """Run process
     """
-    
+
     def __init__(self, proctype, args, prio):
         """
-        
+
         Arguments:
         - `proctype`: process name
         - `args`: arguments (list of Expr objects)
@@ -124,10 +124,10 @@ class RunExpr(Expr):
 class TernaryExpr(Expr):
     """Ternary expression (the only instance of which in PROMELA is ?:)
     """
-    
+
     def __init__(self, left, op1, mid, op2, right):
         """
-        
+
         Arguments:
         - `left`: left Expr object
         - `op1`: first part of op (str)
@@ -152,10 +152,10 @@ class TernaryExpr(Expr):
 class BinaryExpr(Expr):
     """Binary expression
     """
-    
+
     def __init__(self, left, op, right):
         """
-        
+
         Arguments:
         - `left`: left Expr object
         - `op`: operator (str)
@@ -176,10 +176,10 @@ class BinaryExpr(Expr):
 class UnaryExpr(Expr):
     """Unary expression
     """
-    
+
     def __init__(self, op, right):
         """
-        
+
         Arguments:
         - `op`: unary operator
         - `right`: operand Expr object
@@ -198,10 +198,10 @@ class UnaryExpr(Expr):
 class ChanOpExpr(Expr):
     """Channel operation (len, full, etc)
     """
-    
+
     def __init__(self, op, chan):
         """
-        
+
         Arguments:
         - `op`: operator name (str)
         - `chan`: channel (VarRef object)
@@ -212,6 +212,6 @@ class ChanOpExpr(Expr):
 
     def __str__(self):
         return "chan_%s(%s)" % (self._op, self._chan)
-    
+
     def code(self):
         return "chan_%s(%s)" % (self._op, self._chan.code())

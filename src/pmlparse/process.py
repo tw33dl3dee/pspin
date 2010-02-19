@@ -9,10 +9,10 @@ from string import Template
 class Label(object):
     """Process label object
     """
-    
+
     def __init__(self, name):
         """
-        
+
         Arguments:
         - `name`: label name
         """
@@ -26,10 +26,10 @@ class Label(object):
 class Process(object):
     """Process object
     """
-    
+
     def __init__(self, active, name):
         """
-        
+
         Arguments:
         - `active`: active count (0 means inactive)
         - `name`: name (str)
@@ -75,7 +75,7 @@ class Process(object):
 
     def set_args(self, varlist):
         """Add variables to list of process' arguments
-        
+
         Arguments:
         - `varlist`: list of Variable objects
         """
@@ -90,7 +90,7 @@ class Process(object):
 
     def add_label(self, name):
         """Add label to process
-        
+
         Arguments:
         - `label`: label name (str)
         """
@@ -99,7 +99,7 @@ class Process(object):
 
     def lookup_label(self, name):
         """Return Label object belonging to this process
-        
+
         Arguments:
         - `name`: label name (str)
         """
@@ -118,7 +118,7 @@ class Process(object):
         """Return C-type name for proctype
         """
         return "struct Proc%s" % self.name
-    
+
     def ref(self):
         """Returns C-code (str) to reference current process instance of this type
         """
@@ -135,13 +135,14 @@ class Process(object):
         trans_add_tpl = "$trans[$ip_from][$i] = $ip_to"
         lines = [Template(trans_init_tpl).substitute(trans=varname, state_count=self._state_count)]
         for stmt in self._stmts:
-            lines.append(Template(trans_init_from_tpl).substitute(trans=varname, ip_from=stmt.ip, to_count=(len(stmt.next) + 1)))
+            lines.append(Template(trans_init_from_tpl).substitute(trans=varname, ip_from=stmt.ip,
+                                                                  to_count=(len(stmt.next) + 1)))
             for (i, next) in enumerate(stmt.next):
                 lines.append(Template(trans_add_tpl).substitute(trans=varname, ip_from=stmt.ip, ip_to=next.ip, i=i))
             lines.append(Template(trans_add_tpl).substitute(trans=varname, ip_from=stmt.ip, ip_to=0, i=len(stmt.next)))
         return ";\n".join(lines)
 
-    def transitions(self): 
+    def transitions(self):
         """Returns C-code (str) that performs transition for current proctype and given ip
         """
         switch_tpl = "\tswitch ($ipvar) {"
@@ -155,7 +156,7 @@ class Process(object):
             goto blocked"""
         lines = [Template(switch_tpl).substitute(ipvar=self.lookup_var("_ip").ref())]
         for stmt in self._stmts:
-            lines.append(Template(case_tpl).substitute(ip=stmt.ip, executable=stmt.executable(), \
+            lines.append(Template(case_tpl).substitute(ip=stmt.ip, executable=stmt.executable(),
                                                        execute=stmt.execute(), step_str=str(stmt)))
         lines += ["\t\tdefault:\n\t\t\tassert(0)", "\t\t}"]
         return ";\n".join(lines)
@@ -173,7 +174,7 @@ class Process(object):
         """Adds new statement (not necessarily from topmost block) to process
 
         Sets `ip` for `stmt`
-        
+
         Arguments:
         - `stmt`: Stmt object
         """
