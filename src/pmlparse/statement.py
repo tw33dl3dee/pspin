@@ -279,7 +279,7 @@ class AssertStmt(Stmt):
         self._expr = expr
 
     def execute(self):
-        return "ASSERT(%s)" % self._expr.code()
+        return "ASSERT(%s, \"%s\")" % (self._expr.code(), self._expr)
 
     def debug_repr(self):
         return "assert(%s)" % self._expr
