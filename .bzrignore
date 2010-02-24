@@ -1,11 +1,4 @@
 ./tmp
-./1.doc
-./2.doc
-./3.doc
-./m1.pdf
-./m2.pdf
-./mag.doc
-./magister.zip
 ./test/spin/pan.*
 ./test/spin/*.trail
 ./test/spin/lynch
@@ -21,3 +14,5 @@
 .*
 TAGS
 ./src/pmlparse/*.c
+./src/pspin/pan.c
+./src/pspin/state
