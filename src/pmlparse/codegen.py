@@ -24,8 +24,10 @@ class Codegen(object):
         with file(fname, "w") as f:
             self.write_block(f, 'STATE_DECL', self.state_decl())
             self.write_block(f, 'STATE_DUMP', self.state_dump())
+            self.write_block(f, 'STATE_INIT', self.state_init())
             self.write_block(f, 'PROC_DECL', self.proc_decl())
             self.write_block(f, 'PROCSTATE_DUMP', self.procstate_dump())
+            self.write_block(f, 'PROCSTATE_INIT', self.procstate_init())
             self.write_block(f, 'TRANSITIONS_INIT', self.transitions_init())
             self.write_block(f, 'TRANSITIONS', self.transitions())
 
@@ -97,7 +99,9 @@ class Codegen(object):
     def state_decl(self):
         """Return C-code that declares global state structure
         """
-        state_tpl = """struct State {
+        state_tpl = """#define STATESIZE(state) ((state)->_svsize)
+
+struct State {
     $fields;
 }"""
         fields = [v.decl() for v in sorted(self._vars.values())]
@@ -114,13 +118,19 @@ class Codegen(object):
     def proc_decl(self):
         """Returns C-code which declares proctypes structures and their sizes
         """
+        # TODO: take these varnames from symtable, do not hardcode
         procsizes_tpl = """
 #define NPROCTYPE $nproctype
-#define PROCSIZE(proctype) procsizes[proctype]
-size_t procsizes[] = { $procsizes }"""
-        procsizes = ", ".join(["sizeof(%s)" % p.reftype() for p in self._procs])
+#define PROCIP(process) (process)->_ip
+#define PROCTYPE(process) (process)->_proctype
+#define PROCSIZE(process) procsizes[(process)->_proctype]
+static size_t procsizes[] = { $procsizes };
+static int procactive[] = { $procactive }"""
+        procsizes = ", ".join([p.sizeof() for p in self._procs])
+        procactive = ", ".join([str(p.active) for p in self._procs])
         lines = [p.decl() for p in self._procs]
-        lines.append(Template(procsizes_tpl).substitute(nproctype=len(self._procs), procsizes=procsizes))
+        lines.append(Template(procsizes_tpl).substitute(nproctype=len(self._procs),
+                                                        procsizes=procsizes, procactive=procactive))
         return ";\n".join(lines)
 
     def transitions_init(self):
@@ -147,22 +157,47 @@ size_t procsizes[] = { $procsizes }"""
     def state_dump(self):
         """Returns C-code (str) that dumps current global state variables
         """
-        print_var_tpl = 'printf("-\\t$varname:\\t%d\\n", $varref)'
+        print_var_tpl = 'printf("-\\t$varname:$format\\n", $varref)'
         lines = []
         for v in self._vars.values():
-            lines.append(Template(print_var_tpl).substitute(varname=str(v), varref=v.ref()))
+            lines.append(Template(print_var_tpl).substitute(format=v.printf_format(),
+                                                            varref=v.printf_ref(),
+                                                            varname=str(v)))
+        return ";\n".join(lines)
+
+    def state_init(self):
+        """Returns C-code (str) that initializes global state variables
+        """
+        lines = []
+        for v in sorted(self._vars.values()):
+            init = v.init()
+            if init is not None:
+                lines.append(init)
         return ";\n".join(lines)
 
     def procstate_dump(self):
-        """Returns C-code (str) thatb dumps state variables of given proctype
+        """Returns C-code (str) that dumps state variables of given proctype
         """
-        lines = ["switch (current->proctype) {"]
+        lines = ["switch (current->_proctype) {"]
         case_tpl = """case $proctype: {
 $dump;
     }
     break"""
         for (i, p) in enumerate(self._procs):
              lines.append(Template(case_tpl).substitute(proctype=i, dump=p.state_dump()))
+        lines += ["default:\n\tassert(0)", "}"]
+        return ";\n".join(lines)
+
+    def procstate_init(self):
+        """Returns C-code (str) that initializes state variables of given proctype
+        """
+        lines = ["switch (current->_proctype) {"]
+        case_tpl = """case $proctype: {
+$init;
+    }
+    break"""
+        for (i, p) in enumerate(self._procs):
+             lines.append(Template(case_tpl).substitute(proctype=i, init=p.state_init()))
         lines += ["default:\n\tassert(0)", "}"]
         return ";\n".join(lines)
 

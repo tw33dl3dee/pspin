@@ -34,7 +34,7 @@ class Process(object):
         - `active`: active count (0 means inactive)
         - `name`: name (str)
         """
-        self._active = active
+        self.active = active
         self.name = name
         self._vars = dict()
         self._args = []
@@ -47,7 +47,7 @@ class Process(object):
 
     def __str__(self):
         return "`%s' (active: %d)\n<\targs: %s\ndecl:\n%s\n\tcode: \n%s\n" \
-            % (self.name, self._active, self._args, self.decl(), "\n".join([str(s) for s in self._stmts]))
+            % (self.name, self.active, self._args, self.decl(), "\n".join([str(s) for s in self._stmts]))
 
     def lookup_var(self, name):
         """Lookup variable in process symbol table
@@ -148,26 +148,40 @@ class Process(object):
         switch_tpl = "\tswitch ($ipvar) {"
         case_tpl = """\t\tcase $ip:
             if ($executable) {
-                COPY_STATE;
-                $execute;
+                COPY_STATE();
                 RECORD_STEP("$step_str");
+                $execute;
                 goto passed;
             }
             goto blocked"""
-        lines = [Template(switch_tpl).substitute(ipvar=self.lookup_var("_ip").ref())]
+        lines = [Template(switch_tpl).substitute(ipvar="dest_ip")]
+                                                 # TODO: was self.lookup_var("_ip").ref())]
         for stmt in self._stmts:
             lines.append(Template(case_tpl).substitute(ip=stmt.ip, executable=stmt.executable(),
                                                        execute=stmt.execute(), step_str=str(stmt)))
         lines += ["\t\tdefault:\n\t\t\tassert(0)", "\t\t}"]
         return ";\n".join(lines)
 
+    def state_init(self):
+        """Returns C-code (str) to initialize new process structure for current proctype
+        """
+        init_var_tpl = '\t\t$init'
+        lines = []
+        for v in sorted(self._vars.values()):
+            init = v.init()
+            if init is not None:
+                lines.append(Template(init_var_tpl).substitute(init=init))
+        return ";\n".join(lines)
+
     def state_dump(self):
         """Returns C-code (str) that dumps current proctype's variables
         """
-        print_var_tpl = '\t\tprintf("\\t-\\t$varname:\\t%d\\n", $varref)'
+        print_var_tpl = '\t\tprintf("\\t-\\t$varname: $format\\n", $varref)'
         lines = []
         for v in sorted(self._vars.values()):
-            lines.append(Template(print_var_tpl).substitute(varname=str(v), varref=v.ref()))
+            lines.append(Template(print_var_tpl).substitute(format=v.printf_format(),
+                                                            varref=v.printf_ref(),
+                                                            varname=str(v)))
         return ";\n".join(lines)
 
     def add_stmt(self, stmt):
@@ -197,3 +211,8 @@ class Process(object):
         self.sanity_check()
         for stmt in self._stmts:
             stmt.settle()
+
+    def sizeof(self):
+        """Returns C-code (str) that evaluates to process data structure size
+        """
+        return "sizeof(%s)" % self.reftype()

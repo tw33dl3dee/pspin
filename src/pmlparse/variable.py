@@ -8,7 +8,10 @@ class Type(object):
     c_types = {'bit': 'unsigned', 'bool': 'unsigned', 'byte': 'unsigned char',
                'short': 'short', 'int': 'int', 'pid':'char'}
     c_sizes = {'bit': 1, 'bool': 1}
-
+    
+    printf_codes = {}  # no special cases here
+    printf_types = {}  # no special cases here
+    
     def __init__(self, name):
         """
 
@@ -33,6 +36,16 @@ class Type(object):
         Returns 0 if type has no fixed bit-size.
         """
         return self.c_sizes.get(self._name)
+
+    def printf_format(self):
+        """printf specifier to use for this type (str)
+        """
+        return self.printf_codes.get(self._name, '%d')
+
+    def printf_type(self):
+        """C-type to pass to printf (str)
+        """
+        return self.printf_types.get(self._name, 'int')
 
 
 class Variable(object):
@@ -68,6 +81,14 @@ class Variable(object):
         # TODO: fold bit arrays
         return "%s %s %s" % (self.type.c_type(), self.name, lenspec or bitspec)
 
+    def init(self):
+        """Generates  C-code to initialize variable
+        """
+        if self.initval is None:
+            return None
+        else:
+            return "%s = %s" % (self.ref(), self.initval)
+
     def ref(self):
         """Generates C-expression that references variable
         """
@@ -75,6 +96,22 @@ class Variable(object):
             return "((%s)->%s)" % (self.parent.ref(), self.name)
         else:
             return "(%s)" % self.name
+
+    def printf_format(self):
+        """Generates string to be used as printf-format specifier
+        """
+        skip = " "*(10 - len(self.name))
+        if self.arrsize:
+            return skip + "[%s]" % (", ".join([self.type.printf_format()]*self.arrsize))
+        else:
+            return skip + self.type.printf_format()
+
+    def printf_ref(self):
+        if self.arrsize:
+            return ",".join(["(%s)%s[%d]" % (self.type.printf_type(), self.ref(), i)
+                             for i in range(self.arrsize)])
+        else:
+            return "(%s)%s" % (self.type.printf_type(), self.ref())
 
 
 class SpecialVariable(Variable):
@@ -94,6 +131,10 @@ class SpecialVariable(Variable):
 
     def decl(self):
         # Do not include in state declaration
+        return None
+
+    def init(self):
+        # Do not initialize in state declaration
         return None
 
     def ref(self):
