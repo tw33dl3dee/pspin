@@ -27,7 +27,7 @@ static char state_hashtable[HASH_SIZE/8];
  */
 int state_hash_add(struct State *state)
 {
-	state_hash_t hash = HASH(state) % HASH_SIZE;
+	state_hash_t hash = STATE_HASH(state) % HASH_SIZE;
 	int old = BIT_TEST(state_hashtable, hash);
 	BIT_SET(state_hashtable, hash);
 	printf("State hash (%lu)", hash);

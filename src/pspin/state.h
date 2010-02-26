@@ -64,6 +64,13 @@ struct Process {
  */
 typedef int ***transitions_t;
 
+/**
+ *  Tracing facilities
+ */
+
 #define dprintf printf
+
+void trace_state_begin(struct State *state);
+void trace_state_new(struct State *state);
 		
 #endif /* _STATE_H_ */

@@ -228,6 +228,8 @@ void bfs(void)
 	while ((cur_state = BFS_TAKE()) != NULL) {
 		int pid = 0;
 
+		trace_state_begin(cur_state);
+
 		dprintf("Transitions from state:\n");
 		dump_state(cur_state);
 
@@ -245,6 +247,8 @@ void bfs(void)
 
 				assert(next_state != NULL);
 				queue_new_state(next_state);
+
+				trace_state_new(next_state);
 			}
 		}
 

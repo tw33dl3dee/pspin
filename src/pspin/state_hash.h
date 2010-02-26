@@ -17,19 +17,30 @@
 
 typedef unsigned long state_hash_t;
 
-#define HASH(state)									\
+#define HASH(data, len)								\
 	({												\
-		char *data = (char *)state;					\
 		int hash32 = 0;								\
-		for (int i = 0; i < STATESIZE(state); ++i)	\
-			hash32 = 3*hash32 + data[i];			\
+		for (int i = 0; i < (len); ++i)				\
+			hash32 = 3*hash32 + ((char *)data)[i];	\
 		(state_hash_t)hash32;						\
 	})
+
+#define STATE_HASH(state) HASH(state, STATESIZE(state))
 
 #define BIT_TEST(bits, number)  ((bits)[(number)/8] &   (1 << (number)%8))
 #define BIT_SET(bits, number)   ((bits)[(number)/8] |=  (1 << (number)%8))
 #define BIT_RESET(bits, number) ((bits)[(number)/8] &= ~(1 << (number)%8))
 
 extern int state_hash_add(struct State *state);
+
+#if defined(STATE_PARTITION_HASH)
+#	define STATE_NODE_IDX(state, node_count) (STATE_HASH(state)%(node_count))
+#elif defined(STATE_PARTITION_FIRST_PROC)
+#	define STATE_NODE_IDX(state, node_count)		\
+	({												\
+		struct Process *proc = FIRST_PROC(state);	\
+		HASH(proc, PROCSIZE(proc))%(node_count);	\
+	})
+#endif
 
 #endif /* _HASH_H_ */
