@@ -99,7 +99,9 @@ class Codegen(object):
     def state_decl(self):
         """Return C-code that declares global state structure
         """
-        state_tpl = """#define STATESIZE(state) ((state)->_svsize)
+        state_tpl = """
+#define STATESIZE(state) ((state)->_svsize)
+#define STATEATOMIC(state) ((state)->_atomic)
 
 struct State {
     $fields;
@@ -124,6 +126,7 @@ struct State {
 #define PROCIP(process) (process)->_ip
 #define PROCTYPE(process) (process)->_proctype
 #define PROCSIZE(process) procsizes[(process)->_proctype]
+
 static size_t procsizes[] = { $procsizes };
 static int procactive[] = { $procactive }"""
         procsizes = ", ".join([p.sizeof() for p in self._procs])
@@ -205,3 +208,4 @@ $init;
         """Settles Codegen object, must be called after all proctypes and declarations
         """
         self.add_var(Variable('_svsize', Type('short')))
+        self.add_var(Variable('_atomic', Type('pid'), initval=-1))

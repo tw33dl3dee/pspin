@@ -7,6 +7,7 @@ code:
 	from expression import *
 	from variable import *
 	from statement import *
+	from utils import listify
 
 	class ParseError(RuntimeError):
 		def __init__(self, str):
@@ -149,9 +150,9 @@ visible ->
 sequence ->
 # empty
 	| step:
-		return [kids[0]]
+		return kids[0]
 	| step sep sequence:
-	  	return [kids[0]] + kids[2]
+	  	return kids[0] + kids[2]
 	;
 
 sep ->
@@ -161,7 +162,7 @@ sep ->
 
 step ->
 	stmt:
-		return codegen.cur_proc.add_stmt(kids[0])
+		return [codegen.cur_proc.add_stmt(k) for k in listify(kids[0])]
 	| stmt K_UNLESS stmt:
 		raise NotImplementedError(kids[0])
 	| decl_list
@@ -277,7 +278,7 @@ stmt ->
 	| K_DO options K_OD:
 		return DoStmt(kids[1])
 	| K_ATOMIC P_LBRACE sequence P_RBRACE:
-		raise NotImplementedError(kids[0])
+		return [AtomicStmt(kids[2]), AtomicEndStmt()]
 	| D_STEP P_LBRACE sequence P_RBRACE:
 		raise NotImplementedError(kids[0])
 	| P_LBRACE sequence P_RBRACE:
@@ -294,7 +295,7 @@ stmt ->
 		return GotoStmt(codegen.cur_proc.lookup_label(kids[1]))
 	| name P_COLON stmt:
 		label = codegen.cur_proc.lookup_label(kids[0])
-		kids[2].add_label(label)
+		listify(kids[2])[0].add_label(label)
 		return kids[2]
 	| K_PRINT P_LPAREN T_STRING print_list? P_RPAREN:
 		raise NotImplementedError(kids[0])

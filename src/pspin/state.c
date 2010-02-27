@@ -126,6 +126,8 @@ struct State *copy_state_add_process(const struct State *state, int proctype)
 	return new_state;
 }
 
+static int aborted = 0;
+
 /** 
  * @brief Perform transition, if possible.
  * 
@@ -157,9 +159,10 @@ int do_transition(int pid, int dest_ip,
 #define ASSERT(expr, repr)									\
 	if (!(expr)) {											\
 		fprintf(stderr, "ASSERTION `%s' FAILED\n", repr);	\
-		abort();											\
-	}														\
-
+		aborted = 1;										\
+	}														
+#define BEGIN_ATOMIC() STATEATOMIC(state) = pid
+#define END_ATOMIC()   STATEATOMIC(state) = -1
 
 #define TRANSITIONS
 #include CODEGEN_FILE
@@ -167,6 +170,8 @@ int do_transition(int pid, int dest_ip,
 
  passed:
 	PROCIP(current) = dest_ip;
+	if (STATEATOMIC(state) >= 0)
+		dprintf("ATOMIC now\n");
 	return 0;
  blocked:
 	dprintf(" BLOCKED\n");
@@ -228,19 +233,29 @@ void bfs(void)
 	while ((cur_state = BFS_TAKE()) != NULL) {
 		int pid = 0;
 
+		dprintf("---------------------------------\n");
 		trace_state_begin(cur_state);
 
 		dprintf("Transitions from state:\n");
 		dump_state(cur_state);
 
 		FOREACH_PROCESS(cur_state, ++pid) {
-			dprintf("Transitions for process %d\n", pid);
+			dprintf("Transitions for process %d", pid);
+			if (STATEATOMIC(cur_state) >= 0 && 
+				STATEATOMIC(cur_state) != pid) {
+				dprintf(" SKIPPED, in ATOMIC context\n");
+				continue;
+			} else
+				dprintf(":\n");
 
 			FOREACH_TRANSITION(transitions, src_ip, dest_ip) {
 				dprintf("\t%d -> %d ", src_ip, dest_ip);
 
 				if (do_transition(pid, dest_ip, cur_state, current, &next_state) < 0)
 					continue;
+
+				if (aborted)
+					goto aborted;
 
 				dprintf("New state:\n");
 				dump_state(next_state);
@@ -251,9 +266,11 @@ void bfs(void)
 				trace_state_new(next_state);
 			}
 		}
-
-		dprintf("---------------------------------\n");
 	}
+
+ end:
+ aborted:
+	dprintf("---------------------------------\n");
 }
 
 int main()

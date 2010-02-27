@@ -4,6 +4,14 @@
 import sys
 
 
+def listify(x):
+    """Make scalar a single-element array"""
+    if isinstance(x, list):
+        return x
+    else:
+        return [x]
+
+
 def flatten(a):
     """Flatten a list."""
     return bounce(flatten_k(a, lambda x: x))

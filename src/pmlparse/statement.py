@@ -48,6 +48,8 @@ class Stmt(object):
 
     def set_next(self, stmt):
         """Sets next statement for current statement
+        
+        MUST be called before complementary set_prev
 
         Arguments:
         - `stmt`: Stmt object
@@ -73,7 +75,8 @@ class Stmt(object):
     def set_prev(self, stmt):
         """Sets next statement for current statement
 
-        Is used in if/do to fixup links of preceding statements
+        Is used in compound statements to fixup links of preceding statements
+        MUST be called after complementary set_next
         """
         self._prev = stmt
 
@@ -362,3 +365,70 @@ class DoStmt(IfStmt):
 
     def debug_repr(self):
         return "do"
+
+
+class SequenceStmt(Stmt):
+    """Placeholder for a sequence of statements
+
+    Executable when first sub-statement is executable
+    Executes as no-op
+    """
+
+    def __init__(self, stmts):
+        """
+
+        Arguments:
+        - `stmts`: list of Stmt objects
+        """
+        Stmt.__init__(self)
+        self._stmts = stmts
+        self._next = [stmts[0]]
+
+    def set_next(self, stmt):
+        self._stmts[-1].set_next(stmt)
+
+    def set_prev(self, stmt):
+        self._prev = self._stmts[0].prev
+        self._prev.set_next(self)
+        stmt.set_next(self)
+
+    def debug_repr(self):
+        return "-(-"
+
+
+class AtomicStmt(SequenceStmt):
+    """Atomic statement sequence
+
+    Behaves like simple sequence.
+    Executes by setting global atomicity flag
+    """
+
+    def __init__(self, stmts):
+        """
+
+        Arguments:
+        - `stmts`: list of Stmt objects
+        """
+        super(AtomicStmt, self).__init__(stmts)
+
+    def executable(self):
+        return self._stmts[0].executable()
+
+    def execute(self):
+        return "BEGIN_ATOMIC()"
+
+    def debug_repr(self):
+        return "atomic"
+
+
+class AtomicEndStmt(Stmt):
+    """Closes atomic block
+
+    This statement is always inserted by grammar at the end of atomic block
+    """
+
+    def execute(self):
+        return "END_ATOMIC()"
+
+    def debug_repr(self):
+        return "-)-"
