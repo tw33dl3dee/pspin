@@ -13,7 +13,7 @@
 /**
  * Size of BFS queue (in states)
  */
-#define BFS_SIZE 1024
+#define BFS_SIZE 1048576
 
 /**
  * BFS queue

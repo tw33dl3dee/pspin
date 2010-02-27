@@ -16,3 +16,4 @@ TAGS
 ./src/pmlparse/*.c
 ./src/pspin/pan.c
 ./src/pspin/state
+*.log
