@@ -271,6 +271,8 @@ void bfs(void)
  end:
  aborted:
 	dprintf("---------------------------------\n");
+
+	trace_summary();
 }
 
 int main()

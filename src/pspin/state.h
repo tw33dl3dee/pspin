@@ -72,5 +72,6 @@ typedef int ***transitions_t;
 
 void trace_state_begin(struct State *state);
 void trace_state_new(struct State *state);
+void trace_summary(void);
 		
 #endif /* _STATE_H_ */
