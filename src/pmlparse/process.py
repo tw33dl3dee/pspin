@@ -132,14 +132,16 @@ class Process(object):
         """
         trans_init_tpl = "$trans = calloc(sizeof(int **), $state_count)"
         trans_init_from_tpl = "$trans[$ip_from] = calloc(sizeof(int *), $to_count)"
-        trans_add_tpl = "$trans[$ip_from][$i] = $ip_to"
+        trans_add_tpl = "$trans[$ip_from][$i] = $ip_to\t/* $descr */"
         lines = [Template(trans_init_tpl).substitute(trans=varname, state_count=self._state_count)]
         for stmt in self._stmts:
             lines.append(Template(trans_init_from_tpl).substitute(trans=varname, ip_from=stmt.ip,
                                                                   to_count=(len(stmt.next) + 1)))
             for (i, next) in enumerate(stmt.next):
-                lines.append(Template(trans_add_tpl).substitute(trans=varname, ip_from=stmt.ip, ip_to=next.ip, i=i))
-            lines.append(Template(trans_add_tpl).substitute(trans=varname, ip_from=stmt.ip, ip_to=0, i=len(stmt.next)))
+                lines.append(Template(trans_add_tpl).substitute(trans=varname, ip_from=stmt.ip, ip_to=next.ip,
+                                                                i=i, descr=str(next)))
+            lines.append(Template(trans_add_tpl).substitute(trans=varname, ip_from=stmt.ip, ip_to=0,
+                                                            i=len(stmt.next), descr="END"))
         return ";\n".join(lines)
 
     def transitions(self):
