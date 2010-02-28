@@ -1,0 +1,62 @@
+\documentclass[utf8]{G7-32}
+
+% С такими оно полями оно работает по-умолчанию. Ужасно, конечно.
+% \RequirePackage[left=20mm,right=10mm,top=20mm,bottom=20mm,headsep=0pt]{geometry}
+
+\sloppy 
+
+\EqInChapter
+\TableInChapter
+\PicInChapter
+
+\usepackage[
+bookmarks=true, colorlinks=true, unicode=true,
+urlcolor=black,linkcolor=black, anchorcolor=black,
+citecolor=black, menucolor=black, filecolor=bla,
+]{hyperref}
+
+\usepackage{cmap}       % теперь из pdf можно копипастить русский текст
+\usepackage{underscore} % Ура! Теперь можно писать подчёркивание.
+\usepackage{graphicx}	% Пакет для включения рисунков
+
+\usefont{T2A}{ftm}{m}{} % Ужирнение начертания шрифта --- после чего
+                        % выглдяит таймсоподобно и удобнее для чтения
+                        % в плохих условиях.
+
+\begin{document}
+
+\frontmatter
+
+\begin{abstract}
+
+\end{abstract}
+
+\tableofcontents
+
+\Abbreviations
+\begin{description}
+\item[МПХ] Мужской половой хуй.
+\end{description}
+
+\Introduction
+
+Замечательно входит.
+
+\mainmatter
+
+\chapter{Постановка задачи}
+\label{cha:whats-this-about}
+
+\backmatter
+
+\Conclusion
+
+Замечательно выходит.
+
+\begin{thebibliography}{99}
+\bibitem{Pup99} Василий Пупкин. Latex для <<чайников>>.~--- М.: 2009~--- 50 c.
+\end{thebibliography}
+
+\end{document}
+
+

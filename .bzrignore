@@ -17,3 +17,8 @@ TAGS
 ./src/pspin/pan.c
 ./src/pspin/state
 *.log
+*.out
+*.toc
+*.aux
+auto
+./report/tex/report.pdf
