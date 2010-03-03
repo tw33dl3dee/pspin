@@ -1,0 +1,6 @@
+pmlparse/*.c
+pspin/pan.c
+pspin/state
+*.log
+*_gramtab.*
+*_lextab.*
