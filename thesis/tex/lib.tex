@@ -3,7 +3,10 @@
 
 \usepackage{alltt}
 
-\newenvironment{CodeBlock}{\begin{alltt}}{\end{alltt}}
+\newenvironment{CodeBlock}{\begin{alltt}\small}{\end{alltt}}
+
+\DeclareMathOperator*{\StateTransInt}{\Rightarrow}
+\DeclareMathOperator{\StateTrans}{\StateTransInt^T}
 
 %%% Local Variables: 
 %%% mode: latex
