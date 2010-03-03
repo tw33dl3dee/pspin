@@ -20,11 +20,15 @@
 
 % Также дополнялся Иваном Коротковым и Всеволодом Крищенко.
 % Основные изменения:
-% 1) заработал cases и tabular;
-% 2) добавлены точки после номеров (по ГОСТ);
-% 3) добавлена опция utf8
-% 4) комментарии к UTF-8.
-% 5) разное.
+% 1) заработали cases и tabular;
+% 2) добавлена опция utf8;
+% 3) комментарии в UTF-8;
+% 4) изменены отступы после тире в description;
+% 5) добавлен \paragraph;
+% 6) уменьшены отспупы после заголовков и учеличены --- до (хотя это, возможно, и нарушает 7-32);
+% 7) сделаны отсупы в оглалвнеии (ГОСТ эту тему обходит, как мы поняли);
+% 8) убран \normalfont отовсюду --- теперь usefont действует на всё.
+% 9) разные мелочи.
 
 \ProvidesPackage{G2-105}[2003/07/07 v1.00 General reqs. GOST 2.105-95]
 \NeedsTeXFormat{LaTeX2e}
@@ -143,9 +147,17 @@
 
 %  Команды для подстройки вида заголовков:
 %   расстояние между заголовком и текстом
-\newlength\GostAfterTitleSkip    \setlength\GostAfterTitleSkip    {3.2ex}%15mm}
+
+
+% Уменьшено --- Seva
+% \newlength\GostAfterTitleSkip    \setlength\GostAfterTitleSkip    {3.2ex}%15mm}
+\newlength\GostAfterTitleSkip    \setlength\GostAfterTitleSkip    {1.2ex}%5mm}
+
 \newlength\GostBetweenTitleSkip  \setlength\GostBetweenTitleSkip  {1.8ex}%8mm}
-\newlength\GostBeforTitleSkip    \setlength\GostBeforTitleSkip    {1.8ex}%\GostAfterTitleSkip}
+
+% Увеличено --- Seva
+% \newlength\GostBeforTitleSkip    \setlength\GostBeforTitleSkip    {1.8ex}%\GostAfterTitleSkip}
+\newlength\GostBeforTitleSkip    \setlength\GostBeforTitleSkip    {3.2ex}%\GostAfterTitleSkip}
 \newlength\GostBeforNoTitleSkip  \setlength\GostBeforNoTitleSkip  {1.0ex}
 \newlength\GostHTitleSpace       \setlength\GostHTitleSpace       {2mm}
 \newlength\GostTitleIndent       \setlength\GostTitleIndent       {\parindent}
@@ -155,7 +167,7 @@
  \setlength\Gost@TitleDropSkip{\GostBetweenTitleSkip}
  \addtolength\Gost@TitleDropSkip{-\GostAfterTitleSkip}
 %  стиль всех заголовков
-\newcommand\GostTitleStyle{\normalfont\bfseries}
+\newcommand\GostTitleStyle{\normalfont\bfseries}% убран \normalfont
 \newcommand\Gost@MainChapterStyle{}
 \newcommand\Gost@ChapterStyle{\Gost@MainChapterStyle}
 
@@ -224,6 +236,14 @@
 }
 \newcommand\nsubpara[1]{\nsubsubsection\label{#1}}
 
+\newcommand\paragraph[1]{%
+ \par\vspace{\GostBeforNoTitleSkip}%
+ \textbf{#1}%
+ \hspace{\GostHTitleSpace}%
+}
+
+
+
 \newlength{\NirTitleDropSkip}
 %  Эта команда должна вставлятся между двумя заголовками
 \newcommand\ttl{\vspace{\Gost@TitleDropSkip}}
@@ -264,10 +284,14 @@
 }
 \renewcommand{\@listI} {\Gost@List}
 \renewcommand{\@listii}{\Gost@List}
-\setlength\GostItemGap{2mm} % небольшие отступы для пунктов перечисления
+
+% 2mm? -- Seva 
+\setlength\GostItemGap{1mm} % небольшие отступы для пунктов перечисления
 \setlength\leftmarginii{\parindent}
 \setlength\GostItemIndent{\parindent}
- \addtolength\GostItemIndent{-\GostItemGap}
+ 
+% ??? -- Seva 
+\addtolength\GostItemIndent{-\GostItemGap}
 
 %  ненумерованные перечисления
 \newcommand{\labelitemi}{--}
@@ -287,13 +311,13 @@
 %заменено на description для совместимости -- Коротков И.
 \newenvironment{description}{%
  \list{}{%
-  \labelwidth\z@ \itemindent-\leftmargin \leftmargin 25mm%
+  \labelwidth\z@ \itemindent-\leftmargin \leftmargin 29mm% 25mm --? Seva
   \let\makelabel\abbreviationlabel%
  }%
 }{%
  \endlist%
 }
-\newcommand*\abbreviationlabel[1]{\hspace\labelsep\normalfont #1~---}
+\newcommand*\abbreviationlabel[1]{\hspace\labelsep #1~---}% убран \normalfont
 
 % 4.2.15 - 4.2.19 Формулы
 
@@ -303,8 +327,7 @@
 \input{leqno.clo}
 
 \renewcommand\eqref[1]{\ref{#1}} %Было newcommand -- Коротков И.
-\def\@eqnnum{{\normalfont\normalcolor\theequation}}
-
+\def\@eqnnum{{\theequation}}% убран \normalfont
 
 % Убраны скобки вокруг  \arabic{equation} -- Крищенко В.
 % В какой-то момент (после ams*?) стало появляться две пары скобок вокруг номеров формул.
@@ -518,12 +541,13 @@
                 \item\relax}
                {\endlist}
 
-\DeclareOldFontCommand{\rm}{\normalfont\rmfamily}{\mathrm}
-\DeclareOldFontCommand{\sf}{\normalfont\sffamily}{\mathsf}
-\DeclareOldFontCommand{\tt}{\normalfont\ttfamily}{\mathtt}
-\DeclareOldFontCommand{\bf}{\normalfont\bfseries}{\mathbf}
-\DeclareOldFontCommand{\it}{\normalfont\itshape}{\mathit}
-\DeclareOldFontCommand{\sl}{\normalfont\slshape}{\@nomath\sl}
-\DeclareOldFontCommand{\sc}{\normalfont\scshape}{\@nomath\sc}
+% убран \normalfont из всех \DeclareOldFontCommand
+\DeclareOldFontCommand{\rm}{\rmfamily}{\mathrm}
+\DeclareOldFontCommand{\sf}{\sffamily}{\mathsf}
+\DeclareOldFontCommand{\tt}{\ttfamily}{\mathtt}
+\DeclareOldFontCommand{\bf}{\bfseries}{\mathbf}
+\DeclareOldFontCommand{\it}{\itshape}{\mathit}
+\DeclareOldFontCommand{\sl}{\slshape}{\@nomath\sl}
+\DeclareOldFontCommand{\sc}{\scshape}{\@nomath\sc}
 \DeclareRobustCommand*\cal{\@fontswitch\relax\mathcal}
 \DeclareRobustCommand*\mit{\@fontswitch\relax\mathnormal}
