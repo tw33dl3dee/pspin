@@ -62,6 +62,6 @@ void trace_summary()
 		dprintf("\t\tNode %2d: %d (%.1f%%)\n",
 				i, states_per_node[i], states_per_node[i]*100.f/state_count);
 	}
-	dprintf("\t\tMax/min: %.2f\n", 
-			states_max*1.f/states_min);
+	dprintf("\t\tMin/max: %.2f\n", 
+			states_min*1.f/states_max);
 }
