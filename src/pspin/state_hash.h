@@ -17,12 +17,15 @@
 
 typedef unsigned long state_hash_t;
 
-#define HASH(data, len)								\
-	({												\
-		int hash32 = 0;								\
-		for (int i = 0; i < (len); ++i)				\
-			hash32 = 3*hash32 + ((char *)data)[i];	\
-		(state_hash_t)hash32;						\
+/**
+ * Bernstein hash
+ */
+#define HASH(data, len)												\
+	({																\
+		state_hash_t hash = 5381;									\
+		for (int i = 0; i < (len); ++i)								\
+			hash = (hash << 5) + hash  + ((char *)data)[i];			\
+		(state_hash_t)hash;											\
 	})
 
 #define STATE_HASH(state) HASH(state, STATESIZE(state))
