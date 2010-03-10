@@ -1,6 +1,7 @@
 pmlparse/*.c
 pspin/pan.c
-pspin/state
+pspin/pspin
+pspin/Makefile
 *.log
 *_gramtab.*
 *_lextab.*

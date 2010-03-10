@@ -5,3 +5,7 @@
 *.pyc
 TAGS
 tmp
+CMakeCache.txt
+CMakeFiles
+cmake_install.cmake
+/Makefile
