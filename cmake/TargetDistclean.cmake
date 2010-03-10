@@ -64,8 +64,8 @@ MACRO(ENABLE_DISTCLEAN)
 		GET_FILENAME_COMPONENT(_path ${_prop} ABSOLUTE)
 		# TODO: this is dangerous, coz' it may contain other files
 		# Moreover, it doesn't work with Out-of-source builds
-		#MESSAGE(STATUS "Adding output directory ${_path} to distclean")
-		#ADD_DIR_TO_DISTCLEAN(${_path})
+		MESSAGE(STATUS "Adding output directory ${_path} to distclean")
+		ADD_DIR_TO_DISTCLEAN(${_path})
 	  ENDIF()
 	ENDFOREACH(_propname)
   ENDFOREACH(_target)
