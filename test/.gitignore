@@ -6,3 +6,6 @@ spin/peterson3
 spin/rip1
 spin/rip2
 spin/tsp
+mpi/test1
+mpi/test_async
+mpi/test_async_many

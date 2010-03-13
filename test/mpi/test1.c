@@ -19,9 +19,7 @@ int main(int argc, char *argv[])
 	int i;
 	MPI_Status stat; 
 
-	printf("before init: %f\n", 1.0f*clock()/CLOCKS_PER_SEC);
 	MPI_Init(&argc,&argv); /* all MPI programs start with MPI_Init; all 'N' processes exist thereafter */
-	printf("after init: %f\n", 1.0f*clock()/CLOCKS_PER_SEC);
 	MPI_Comm_size(MPI_COMM_WORLD,&numprocs); /* find out how big the SPMD world is */
 	MPI_Comm_rank(MPI_COMM_WORLD,&myid); /* and this processes' rank is */
  
