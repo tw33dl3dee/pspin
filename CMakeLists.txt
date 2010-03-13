@@ -22,12 +22,12 @@ find_package(Ctags)
 if(CTAGS_FOUND AND CTAGS_FLAVOR MATCHES Exuberant)
   set(TAGS_DIR ${CMAKE_SOURCE_DIR})
   add_custom_target(ctags
-	${CTAGS_EXECUTABLE} -R src gst-camcapture
+	${CTAGS_EXECUTABLE} -R src
 	WORKING_DIRECTORY ${TAGS_DIR}
 	COMMENT "Generating tags..."
 	)	
   add_custom_target(etags
-	${CTAGS_EXECUTABLE} -eR src gst-camcapture
+	${CTAGS_EXECUTABLE} -eR src
 	WORKING_DIRECTORY ${TAGS_DIR}
 	COMMENT "Generating Emacs tags..."
 	)
