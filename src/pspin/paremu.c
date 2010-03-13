@@ -14,12 +14,14 @@
 
 #include "state.h"
 #include "state_hash.h"
+#include "bfs.h"
 
 static int cur_node_idx;
 static int states_per_node[NODECOUNT];
 static int state_count;
 static int trans_count;
 static int xnode_count;
+static int max_bfs_size;
 
 void trace_state_begin(struct State *state)
 {
@@ -35,6 +37,8 @@ void trace_state_new(struct State *state)
 		dprintf("Message: node %d --> node %d \n", cur_node_idx, node_idx);
 		xnode_count++;
 	}
+	if (BFS_LEN() > max_bfs_size)
+		max_bfs_size = BFS_LEN();
 	trans_count++;
 }
 
@@ -64,4 +68,8 @@ void trace_summary()
 	}
 	dprintf("\t\tMin/max: %.2f\n", 
 			states_min*1.f/states_max);
+
+	dprintf("\tBFS max size:      %d (%.2f%% st, %.2f%% tr)\n",
+			max_bfs_size, 
+			max_bfs_size*100.f/state_count, max_bfs_size*100.f/trans_count);
 }

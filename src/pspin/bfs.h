@@ -18,11 +18,11 @@
 /**
  * BFS queue
  */
-static struct  State** bfs_queue = NULL;
+extern struct  State** bfs_queue;
 /**
  * Pointer to next element after queue top
  */
-static struct State** bfs_top = NULL;
+extern struct State** bfs_top;
 
 #define BFS_INIT()												\
 	{															\
@@ -33,7 +33,10 @@ static struct State** bfs_top = NULL;
 #define BFS_ADD(state)							\
 	(*bfs_top++ = state)						\
 	
-#define BFS_TAKE()									\
-	((bfs_top == bfs_queue) ? NULL : *--bfs_top)
+#define BFS_TAKE()								\
+	(BFS_LEN() ? *--bfs_top : NULL)
+
+#define BFS_LEN()								\
+	(bfs_top - bfs_queue)
 
 #endif /* _BFS_H_ */
