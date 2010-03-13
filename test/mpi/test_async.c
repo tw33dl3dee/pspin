@@ -19,7 +19,7 @@ struct mpi_queue {
 	int ntotal;
 
 	MPI_Datatype mpi_type;
-	int mpi_count;;
+	int mpi_count;
 };
 
 #define ASYNC_BUF(queue, bufno, type)			\
@@ -109,6 +109,15 @@ int async_put_buf(struct mpi_queue *queue, int bufno,
 
 void async_stop(struct mpi_queue *queue)
 {
+	int reqn;
+
+	for (reqn = 0; reqn < queue->ntotal; ++reqn)
+		if (queue->req[reqn] != MPI_REQUEST_NULL) {
+			MPI_Cancel(&queue->req[reqn]);
+			MPI_Wait(&queue->req[reqn], MPI_STATUS_IGNORE);
+		}
+	free(queue->buf);
+	free(queue->req);
 }
 
 #define BUFSIZE 1280
@@ -175,6 +184,8 @@ int main(int argc, char *argv[])
 		}
 		//sleep(5);
 	}
+
+	async_stop(&mq);
 
 	workstat();
 
