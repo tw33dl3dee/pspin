@@ -7,9 +7,6 @@
  * 
  */
 
-#include <stdlib.h>
-#include <stdio.h>
-
 #include "state.h"
 #include "state_hash.h"
 

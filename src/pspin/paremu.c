@@ -3,13 +3,13 @@
  * @author Ivan Korotkov <twee@tweedle-dee.org>
  * @date   Thu Feb 25 13:18:12 2010
  * 
- * @brief  Parallel exection emulation and statistics gathering.
+ * @brief  Sequential statespace driver with parallel execution emulation.
  * 
  * 
  */
 
-#include <stdlib.h>
-#include <stdio.h>
+#include <assert.h>
+#include <string.h>
 #include <time.h>
 
 #include "state.h"
@@ -23,14 +23,14 @@ static int trans_count;
 static int xnode_count;
 static int max_bfs_size;
 
-void trace_state_begin(struct State *state)
+static void trace_state_begin(struct State *state)
 {
 	cur_node_idx = STATE_NODE_IDX(state, NODECOUNT);
 	states_per_node[cur_node_idx]++;
 	state_count++;
 }
 
-void trace_state_new(struct State *state)
+static void trace_state_new(struct State *state)
 {
 	int node_idx = STATE_NODE_IDX(state, NODECOUNT);
 	if (node_idx != cur_node_idx) {
@@ -42,7 +42,7 @@ void trace_state_new(struct State *state)
 	trans_count++;
 }
 
-void trace_summary()
+static void trace_summary()
 {
 	float run_time = clock()*1.f/CLOCKS_PER_SEC;
 
@@ -72,4 +72,91 @@ void trace_summary()
 	dprintf("\tBFS max size:      %d (%.2f%% st, %.2f%% tr)\n",
 			max_bfs_size, 
 			max_bfs_size*100.f/state_count, max_bfs_size*100.f/trans_count);
+}
+
+/** 
+ * @brief Checks if state is already in hash table, adds it otherwise
+ * 
+ * @param state State structure
+ */
+static void queue_new_state(struct State *state)
+{
+	int is_new = state_hash_add(state);
+	if (is_new) {
+		dprintf(" - ADDED");
+		BFS_ADD(state);
+	}
+	dprintf("\n");
+}
+
+/** 
+ * @brief Perform BFS search and build hash-table of all states
+ * 
+ */
+static void bfs(void)
+{
+	struct State *init_state;
+	struct State *cur_state, *next_state;
+	transitions_t transitions;
+
+	BFS_INIT();
+
+	dprintf("Initial state:");
+	init_state = create_init_state();
+	queue_new_state(init_state);
+	transitions = init_transitions();
+
+	while ((cur_state = BFS_TAKE()) != NULL) {
+		int pid = 0;
+
+		dprintf("---------------------------------\n");
+		trace_state_begin(cur_state);
+
+		dprintf("Transitions from state:\n");
+		dump_state(cur_state);
+
+		FOREACH_PROCESS(cur_state, ++pid) {
+			dprintf("Transitions for process %d", pid);
+			if (STATEATOMIC(cur_state) >= 0 && 
+				STATEATOMIC(cur_state) != pid) {
+				dprintf(" SKIPPED, in ATOMIC context\n");
+				continue;
+			} else
+				dprintf(":\n");
+
+			FOREACH_TRANSITION(transitions, src_ip, dest_ip) {
+				dprintf("\t%d -> %d ", src_ip, dest_ip);
+
+				switch (do_transition(pid, dest_ip, cur_state, current, &next_state)) {
+				case TransitionCausedAbort:
+					goto aborted;
+
+				case TransitionPassed:
+					dprintf("New state:\n");
+					dump_state(next_state);
+					
+					assert(next_state != NULL);
+					queue_new_state(next_state);
+					
+					trace_state_new(next_state);
+					break;
+
+				case TransitionBlocked:
+					break;
+				}
+			}
+		}
+	}
+
+ end:
+ aborted:
+	dprintf("---------------------------------\n");
+
+	trace_summary();
+}
+
+int main()
+{
+	bfs();
+	return 0;
 }

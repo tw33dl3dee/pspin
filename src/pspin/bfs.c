@@ -11,5 +11,5 @@
 
 #include "bfs.h"
 
-struct  State** bfs_queue = NULL;
+struct State** bfs_queue = NULL;
 struct State** bfs_top = NULL;

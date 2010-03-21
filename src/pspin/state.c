@@ -8,14 +8,10 @@
  * 
  */
 
-#include <stdlib.h>
-#include <stdio.h>
 #include <assert.h>
 #include <string.h>
 
 #include "state.h"
-#include "bfs.h"
-#include "state_hash.h"
 
 /** 
  * @brief Initialize transition tables
@@ -40,7 +36,7 @@ transitions_t init_transitions(void)
  * 
  * @return State structure (or NULL if no memory available)
  */
-struct State *alloc_state(size_t svsize, int zero)
+static struct State *alloc_state(size_t svsize, int zero)
 {
 	struct State *state; 
 	//dprintf(" (alloc new state of size %d) ", svsize);
@@ -56,7 +52,7 @@ struct State *alloc_state(size_t svsize, int zero)
  * @param current Newly allocated process structure
  * @param proctype Proctype (is saved to `current')
  */
-void init_process(struct Process *current, int proctype)
+static void init_process(struct Process *current, int proctype)
 {
 	PROCTYPE(current) = proctype;
 	PROCIP(current) = 0;
@@ -97,7 +93,7 @@ struct State *create_init_state(void)
 /** 
  * @brief Copies state structure
  */
-struct State *copy_state(const struct State *state)
+static struct State *copy_state(const struct State *state)
 {
 	struct State *new_state = alloc_state(STATESIZE(state), 0);
 	if (new_state != NULL)
@@ -115,7 +111,7 @@ struct State *copy_state(const struct State *state)
  * 
  * @return New state structure
  */
-struct State *copy_state_add_process(const struct State *state, int proctype)
+static struct State *copy_state_add_process(const struct State *state, int proctype)
 {
 	assert(proctype < NPROCTYPE);
 	struct State *new_state = alloc_state(STATESIZE(state) + procsizes[proctype], 0);
@@ -126,8 +122,6 @@ struct State *copy_state_add_process(const struct State *state, int proctype)
 	return new_state;
 }
 
-static int aborted = 0;
-
 /** 
  * @brief Perform transition, if possible.
  * 
@@ -137,13 +131,17 @@ static int aborted = 0;
  * @param current Current process state
  * @param next_state Next state is stored here if transition passes
  * 
- * @return 0 if transition performed, -1 if it was blocked
+ * @return
+ *  - [TransitionBlocked]     -- transition blocked
+ *  - [TransitionPassed]      -- transition passed
+ *  - [TransitionCausedAbort] -- transition passed and caused abort
  */
-int do_transition(int pid, int dest_ip,
-				  struct State *state, struct Process *current, 
-				  struct State **next_state)
+enum TransitionResult 
+do_transition(int pid, int dest_ip,
+			  struct State *state, struct Process *current, 
+			  struct State **next_state)
 {
-	int current_offset;
+	int current_offset, aborted = TransitionPassed;
 
 #define RECORD_STEP(msg) dprintf(" PASSED\nPerforming step: *** %s ***\n", msg);
 #define COPY_STATE()										\
@@ -159,7 +157,7 @@ int do_transition(int pid, int dest_ip,
 #define ASSERT(expr, repr)									\
 	if (!(expr)) {											\
 		fprintf(stderr, "ASSERTION `%s' FAILED\n", repr);	\
-		aborted = 1;										\
+		aborted = TransitionCausedAbort;										\
 	}														
 #define BEGIN_ATOMIC() STATEATOMIC(state) = pid
 #define END_ATOMIC()   STATEATOMIC(state) = -1
@@ -172,10 +170,10 @@ int do_transition(int pid, int dest_ip,
 	PROCIP(current) = dest_ip;
 	if (STATEATOMIC(state) >= 0)
 		dprintf("ATOMIC now\n");
-	return 0;
+	return aborted;
  blocked:
 	dprintf(" BLOCKED\n");
-	return -1;
+	return TransitionBlocked;
 }
 
 /** 
@@ -196,87 +194,4 @@ void dump_state(struct State *state)
 #include CODEGEN_FILE
 #undef  PROCSTATE_DUMP
 	}
-}
-
-/** 
- * @brief Checks if state is already in hash table, adds it otherwise
- * 
- * @param state State structure
- */
-void queue_new_state(struct State *state)
-{
-	int is_new = state_hash_add(state);
-	if (is_new) {
-		dprintf(" - ADDED");
-		BFS_ADD(state);
-	}
-	dprintf("\n");
-}
-
-/** 
- * @brief Perform BFS search and build hash-table of all states
- * 
- */
-void bfs(void)
-{
-	struct State *init_state;
-	struct State *cur_state, *next_state;
-	transitions_t transitions;
-
-	BFS_INIT();
-
-	dprintf("Initial state:");
-	init_state = create_init_state();
-	queue_new_state(init_state);
-	transitions = init_transitions();
-
-	while ((cur_state = BFS_TAKE()) != NULL) {
-		int pid = 0;
-
-		dprintf("---------------------------------\n");
-		trace_state_begin(cur_state);
-
-		dprintf("Transitions from state:\n");
-		dump_state(cur_state);
-
-		FOREACH_PROCESS(cur_state, ++pid) {
-			dprintf("Transitions for process %d", pid);
-			if (STATEATOMIC(cur_state) >= 0 && 
-				STATEATOMIC(cur_state) != pid) {
-				dprintf(" SKIPPED, in ATOMIC context\n");
-				continue;
-			} else
-				dprintf(":\n");
-
-			FOREACH_TRANSITION(transitions, src_ip, dest_ip) {
-				dprintf("\t%d -> %d ", src_ip, dest_ip);
-
-				if (do_transition(pid, dest_ip, cur_state, current, &next_state) < 0)
-					continue;
-
-				if (aborted)
-					goto aborted;
-
-				dprintf("New state:\n");
-				dump_state(next_state);
-
-				assert(next_state != NULL);
-				queue_new_state(next_state);
-
-				trace_state_new(next_state);
-			}
-		}
-	}
-
- end:
- aborted:
-	dprintf("---------------------------------\n");
-
-	trace_summary();
-}
-
-int main()
-{
-	bfs();
-	return 0;
 }

@@ -11,6 +11,9 @@
 #ifndef _STATE_H_
 #define _STATE_H_
 
+#include <stdlib.h>
+#include <stdio.h>
+
 /**
  * General process structure
  */
@@ -37,14 +40,27 @@ struct Process {
 #include CODEGEN_FILE
 #undef  PROC_DECL
 
+/**
+ * Retrieves process substate at specific offset
+ */
 #define PROC_BY_OFFSET(state, offset)				\
 	(struct Process *)((char *)(state) + (offset))
 
+/**
+ * Returns offset of process substate inside whole state
+ */
 #define PROC_OFFSET(proc, state)				\
 	((char *)(proc) - (char *)(state))
 
+/**
+ * Retrieves state of the first active process
+ */
 #define FIRST_PROC(state) (struct Process *)(state)->_procs
 
+/**
+ * Enumerates processes (referred to as `current') inside `state' executing
+ * `increment_expr' on each new process before changing `current'.
+ */
 #define FOREACH_PROCESS(state, increment_expr)							\
 	for (struct Process													\
 			 *base = FIRST_PROC(state),									\
@@ -53,6 +69,10 @@ struct Process {
 		 (increment_expr),												\
 			 current = PROC_BY_OFFSET(current, PROCSIZE(current)))
 
+/**
+ * Enumerates all transitions (by `src_ip' and `dest_ip') for process
+ * specified by `current'.
+ */
 #define FOREACH_TRANSITION(transitions, src_ip, dest_ip)				\
 	for (int i = 0, src_ip = PROCIP(current), dest_ip = 0;				\
 		 /* PROCIP(current) *may* change during loop */					\
@@ -65,13 +85,37 @@ struct Process {
 typedef int ***transitions_t;
 
 /**
+ * Result of transition attempt
+ *
+ * @sa do_transition
+ */
+enum TransitionResult {
+	TransitionBlocked = -1,		///< Transition impossible
+	TransitionPassed,			///< Transition possible and was performed
+	TransitionCausedAbort,		///< Transition was performed and resulted in abortion
+};
+
+/*
+ * Exported to statespace drivers (sequential/parallel MPI/etc).
+ */
+
+transitions_t init_transitions(void);
+struct State *create_init_state(void);
+void dump_state(struct State *state);
+
+enum TransitionResult 
+do_transition(int pid, int dest_ip,
+			  struct State *state, struct Process *current, 
+			  struct State **next_state);
+
+/**
  *  Tracing facilities
  */
 
 #define dprintf printf
 
-void trace_state_begin(struct State *state);
-void trace_state_new(struct State *state);
-void trace_summary(void);
+/* void trace_state_begin(struct State *state); */
+/* void trace_state_new(struct State *state); */
+/* void trace_summary(void); */
 		
 #endif /* _STATE_H_ */
