@@ -150,7 +150,7 @@ class Process(object):
         switch_tpl = "\tswitch ($ipvar) {"
         case_tpl = """\t\tcase $ip:
             if ($executable) {
-                COPY_STATE();
+                NEW_STATE();
                 RECORD_STEP("$step_str");
                 $execute;
                 goto passed;
@@ -178,7 +178,7 @@ class Process(object):
     def state_dump(self):
         """Returns C-code (str) that dumps current proctype's variables
         """
-        print_var_tpl = '\t\tprintf("\\t-\\t$varname: $format\\n", $varref)'
+        print_var_tpl = '\t\tdump_dprintf("\\t-\\t$varname: $format\\n", $varref)'
         lines = []
         for v in sorted(self._vars.values()):
             lines.append(Template(print_var_tpl).substitute(format=v.printf_format(),

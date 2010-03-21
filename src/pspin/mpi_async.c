@@ -48,21 +48,22 @@ void mpi_async_send_start(struct mpi_queue *queue, int queuelen, int bufsize)
  * @brief Takes unused buffer from sending queue
  * 
  * @param queue Async queue (must be initialized)
+ * @param nowait Return immediately, never wait
  * 
- * @return Buffer index
+ * @return Buffer index (or -1 if no buffers available and nowait != 0)
  * @sa MPI_ASYNC_BUF
  */
-int mpi_async_get_buf(struct mpi_queue *queue)
+int mpi_async_get_buf(struct mpi_queue *queue, int nowait)
 {
-	mpi_dprintf("free buffers left: %d\n", queue->nfree);
-	queue->nfree--;
-	if (queue->nfree >= 0) {
+	mpi_dprintf("[free buffers left: %d] ", queue->nfree);
+	if (queue->nfree > 0) {
+		queue->nfree--;
 		for (int i = 0; i < queue->ntotal; ++i)
 			if (queue->req[i] == MPI_REQUEST_NULL)
 				return i;
 		assert(/* queue->nfree == 0 */ 0);
 	}
-	else {
+	else if (!nowait) {
 		int firstidx, idx, flag = 1;
 		MPI_Waitany(queue->ntotal, queue->req, &idx, MPI_STATUS_IGNORE);
 		firstidx = idx;
@@ -72,10 +73,12 @@ int mpi_async_get_buf(struct mpi_queue *queue)
 			queue->req[idx] = MPI_REQUEST_NULL;
 			queue->nfree++;
 		}
-		mpi_dprintf("wait idx: %d\n", firstidx);
-		mpi_dprintf("free bufs: %d\n", queue->nfree);
+		queue->nfree--;
+		mpi_dprintf("[wait idx: %d, free buffers: %d] ", firstidx, queue->nfree);
 		return firstidx;
 	}
+	else
+		return -1;
 }
 
 /** 
@@ -115,16 +118,29 @@ void mpi_async_recv_start(struct mpi_queue *queue, int queuelen, int bufsize)
  * @brief Deques buffer (waits for any receive operation to complete)
  * 
  * @param queue Async queue (must be initialized)
+ * @param nowait Return immediately, never wait
  * 
- * @return Buffer index
+ * @return Buffer index (or -1, if no receive operations have been completed
+ *                       and nowait != 0)
+ *
  * @sa MPI_ASYNC_BUF
  */
-int mpi_async_deque_buf(struct mpi_queue *queue)
+int mpi_async_deque_buf(struct mpi_queue *queue, int nowait)
 {
-	int idx;
-	MPI_Waitany(queue->ntotal, queue->req, &idx, MPI_STATUS_IGNORE);
+	int idx, flag;
+
+	if (nowait) {
+		MPI_Testany(queue->ntotal, queue->req, &idx, &flag, MPI_STATUS_IGNORE);
+		if (!flag)
+			return -1;
+	}
+	else
+		MPI_Waitany(queue->ntotal, queue->req, &idx, MPI_STATUS_IGNORE);
+	
+	/* Should be at least one recv operation in progress
+	 */
 	assert(idx != MPI_UNDEFINED);
-	/* We count unused request for debugging purposes only
+	/* We count unused requests for debugging purposes only
 	 */
 	assert(++queue->nfree);
 	queue->req[idx] = MPI_REQUEST_NULL;

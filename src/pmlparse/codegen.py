@@ -160,7 +160,7 @@ static int procactive[] = { $procactive }"""
     def state_dump(self):
         """Returns C-code (str) that dumps current global state variables
         """
-        print_var_tpl = 'printf("-\\t$varname:$format\\n", $varref)'
+        print_var_tpl = 'dump_dprintf("-\\t$varname:$format\\n", $varref)'
         lines = []
         for v in self._vars.values():
             lines.append(Template(print_var_tpl).substitute(format=v.printf_format(),

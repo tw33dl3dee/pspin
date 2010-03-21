@@ -9,6 +9,7 @@
 
 #include "state.h"
 #include "state_hash.h"
+#include "debug.h"
 
 /**
  * State bit-hashtable
@@ -27,6 +28,6 @@ int state_hash_add(struct State *state)
 	state_hash_t hash = STATE_HASH(state) % HASH_SIZE;
 	int old = BIT_TEST(state_hashtable, hash);
 	BIT_SET(state_hashtable, hash);
-	printf("State hash (%lu)", hash);
+	state_dprintf("State hash (%lu)", hash);
 	return !old;
 }

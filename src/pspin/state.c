@@ -9,7 +9,6 @@
  */
 
 #include <assert.h>
-#include <string.h>
 
 #include "state.h"
 #include "debug.h"
@@ -98,7 +97,7 @@ static struct State *copy_state(const struct State *state)
 {
 	struct State *new_state = alloc_state(STATESIZE(state), 0);
 	if (new_state != NULL)
-		memcpy(new_state, state, STATESIZE(state));
+		COPY_STATE(new_state, state);
 	return new_state;
 }
 
@@ -144,13 +143,15 @@ do_transition(int pid, int dest_ip,
 {
 	int current_offset, aborted = TransitionPassed;
 
-#define RECORD_STEP(msg) state_dprintf(" PASSED\nPerforming step: *** %s ***\n", msg);
-#define COPY_STATE()										\
+#define RECORD_STEP(msg)									\
+	state_dprintf(" PASSED\n");								\
+	state_dprintf("Performing step: *** %s ***\n", msg);	
+#define NEW_STATE()											\
 	*next_state = copy_state(state);						\
 	current_offset = PROC_OFFSET(current, state);			\
 	state = *next_state;									\
 	current = PROC_BY_OFFSET(state, current_offset);
-#define COPY_STATE_NEW_PROC(proctype)						\
+#define NEW_STATE_NEW_PROC(proctype)						\
 	*next_state = copy_state_add_process(state, proctype);	\
 	current_offset = PROC_OFFSET(current, state);			\
 	state = *next_state;									\
@@ -158,7 +159,7 @@ do_transition(int pid, int dest_ip,
 #define ASSERT(expr, repr)									\
 	if (!(expr)) {											\
 		fprintf(stderr, "ASSERTION `%s' FAILED\n", repr);	\
-		aborted = TransitionCausedAbort;										\
+		aborted = TransitionCausedAbort;					\
 	}														
 #define BEGIN_ATOMIC() STATEATOMIC(state) = pid
 #define END_ATOMIC()   STATEATOMIC(state) = -1
@@ -190,7 +191,7 @@ void dump_state(struct State *state)
 
 	int pid = 0;
 	FOREACH_PROCESS(state, ++pid) {
-		printf("\t-Process %d:\n", pid);
+		dump_dprintf("\t-Process %d:\n", pid);
 #define PROCSTATE_DUMP
 #include CODEGEN_FILE
 #undef  PROCSTATE_DUMP

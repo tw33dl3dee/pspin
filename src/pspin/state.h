@@ -13,6 +13,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 /**
  * General process structure
@@ -39,6 +40,9 @@ struct Process {
 #define PROC_DECL
 #include CODEGEN_FILE
 #undef  PROC_DECL
+
+#define COPY_STATE(dst, src)					\
+	memcpy(dst, src, STATESIZE(src));
 
 /**
  * Retrieves process substate at specific offset

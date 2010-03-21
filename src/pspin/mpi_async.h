@@ -50,16 +50,28 @@ struct mpi_queue {
 #define MPI_ASYNC_BUF(queue, bufno, type)				\
 	(type *)((queue)->buf + (queue)->bufsize*(bufno))
 
+/** 
+ * @brief Checks if address is an async buffer or not
+ * 
+ * @param queue MPI queue
+ * @param buf (Possible) buffer address
+ * 
+ * @return True if address points to an async buffer
+ */
+#define MPI_IS_ASYNC_BUF(queue, buf)									\
+	((queue)->buf <= (buf) &&											\
+	 (buf)        <  (queue)->buf + (queue)->bufsize*(queue)->ntotal)
+
 void mpi_async_init(struct mpi_queue *queue, int queuelen, int bufsize);
 void mpi_async_send_start(struct mpi_queue *queue, int queuelen, int bufsize);
 void mpi_async_recv_start(struct mpi_queue *queue, int queuelen, int size);
 void mpi_async_stop(struct mpi_queue *queue);
 
-int mpi_async_get_buf(struct mpi_queue *queue);
+int mpi_async_get_buf(struct mpi_queue *queue, int nowait);
 int mpi_async_queue_buf(struct mpi_queue *queue, int bufno, 
 						int count, MPI_Datatype type, int dest, int tag);
 
-int mpi_async_deque_buf(struct mpi_queue *queue);
+int mpi_async_deque_buf(struct mpi_queue *queue, int nowait);
 int mpi_async_put_buf(struct mpi_queue *queue, int bufno, 
 					  int count, MPI_Datatype type, int src, int tag);
 
