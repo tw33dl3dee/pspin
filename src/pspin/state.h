@@ -107,15 +107,5 @@ enum TransitionResult
 do_transition(int pid, int dest_ip,
 			  struct State *state, struct Process *current, 
 			  struct State **next_state);
-
-/**
- *  Tracing facilities
- */
-
-#define dprintf printf
-
-/* void trace_state_begin(struct State *state); */
-/* void trace_state_new(struct State *state); */
-/* void trace_summary(void); */
 		
 #endif /* _STATE_H_ */

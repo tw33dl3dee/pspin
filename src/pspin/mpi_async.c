@@ -7,11 +7,12 @@
  * 
  */
 
-#include "mpi_async.h"
-
 #include <stdlib.h>
 #include <assert.h>
 #include <stdio.h>
+
+#include "mpi_async.h"
+#include "debug.h"
 
 /** 
  * @brief Initializes async MPI queue for reception or delivery
@@ -53,12 +54,13 @@ void mpi_async_send_start(struct mpi_queue *queue, int queuelen, int bufsize)
  */
 int mpi_async_get_buf(struct mpi_queue *queue)
 {
-	//printf("free buffers left: %d\n", queue->nfree);
+	mpi_dprintf("free buffers left: %d\n", queue->nfree);
 	queue->nfree--;
 	if (queue->nfree >= 0) {
 		for (int i = 0; i < queue->ntotal; ++i)
 			if (queue->req[i] == MPI_REQUEST_NULL)
 				return i;
+		assert(/* queue->nfree == 0 */ 0);
 	}
 	else {
 		int firstidx, idx, flag = 1;
@@ -70,8 +72,8 @@ int mpi_async_get_buf(struct mpi_queue *queue)
 			queue->req[idx] = MPI_REQUEST_NULL;
 			queue->nfree++;
 		}
-		//printf("wait idx: %d\n", firstidx);
-		//printf("free bufs: %d\n", queue->nfree);
+		mpi_dprintf("wait idx: %d\n", firstidx);
+		mpi_dprintf("free bufs: %d\n", queue->nfree);
 		return firstidx;
 	}
 }

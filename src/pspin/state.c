@@ -12,6 +12,7 @@
 #include <string.h>
 
 #include "state.h"
+#include "debug.h"
 
 /** 
  * @brief Initialize transition tables
@@ -39,7 +40,7 @@ transitions_t init_transitions(void)
 static struct State *alloc_state(size_t svsize, int zero)
 {
 	struct State *state; 
-	//dprintf(" (alloc new state of size %d) ", svsize);
+	//state_dprintf(" (alloc new state of size %d) ", svsize);
 	state = malloc(svsize); 
 	if (state)
 		STATESIZE(state) = svsize;
@@ -143,7 +144,7 @@ do_transition(int pid, int dest_ip,
 {
 	int current_offset, aborted = TransitionPassed;
 
-#define RECORD_STEP(msg) dprintf(" PASSED\nPerforming step: *** %s ***\n", msg);
+#define RECORD_STEP(msg) state_dprintf(" PASSED\nPerforming step: *** %s ***\n", msg);
 #define COPY_STATE()										\
 	*next_state = copy_state(state);						\
 	current_offset = PROC_OFFSET(current, state);			\
@@ -169,10 +170,10 @@ do_transition(int pid, int dest_ip,
  passed:
 	PROCIP(current) = dest_ip;
 	if (STATEATOMIC(state) >= 0)
-		dprintf("ATOMIC now\n");
+		state_dprintf("ATOMIC now\n");
 	return aborted;
  blocked:
-	dprintf(" BLOCKED\n");
+	state_dprintf(" BLOCKED\n");
 	return TransitionBlocked;
 }
 
@@ -189,7 +190,7 @@ void dump_state(struct State *state)
 
 	int pid = 0;
 	FOREACH_PROCESS(state, ++pid) {
-		dprintf("\t-Process %d:\n", pid);
+		printf("\t-Process %d:\n", pid);
 #define PROCSTATE_DUMP
 #include CODEGEN_FILE
 #undef  PROCSTATE_DUMP
