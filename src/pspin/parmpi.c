@@ -17,6 +17,7 @@
 #include "state_hash.h"
 #include "bfs.h"
 #include "mpi_async.h"
+#include "mpi_tags.h"
 #include "debug.h"
 
 int node_count;
@@ -29,7 +30,6 @@ int output_flushed = 1;
 
 #define MAX_STATESIZE 1024
 #define MPI_QLEN      32
-#define TAG           0
 
 static int last_buf_no = -1;
 static struct mpi_queue sendq, recvq;
@@ -47,7 +47,7 @@ static void queue_new_state(struct State *state)
 	if (state_node != node_id) {
 		int buf_no = mpi_async_get_buf(&sendq, 0);
 		COPY_STATE(MPI_ASYNC_BUF(&sendq, buf_no, void), state);
-		mpi_async_queue_buf(&sendq, buf_no, STATESIZE(state), MPI_CHAR, state_node, TAG);
+		mpi_async_queue_buf(&sendq, buf_no, STATESIZE(state), MPI_CHAR, state_node, TagState);
 		mpi_dprintf("[SENT]");
 	}
 	else if (state_hash_add(state)) {
@@ -88,7 +88,7 @@ static void put_state(struct State *state)
 {
 	if (last_buf_no != -1) {
 		mpi_dprintf("[RELEASE BUF %d]\n", last_buf_no);
-		mpi_async_put_buf(&recvq, last_buf_no, MAX_STATESIZE, MPI_CHAR, MPI_ANY_SOURCE, TAG);
+		mpi_async_put_buf(&recvq, last_buf_no, MAX_STATESIZE, MPI_CHAR, MPI_ANY_SOURCE, MPI_ANY_TAG);
 	}				  
 }
 
@@ -107,7 +107,7 @@ static void dfs(void)
 	mpi_async_send_start(&sendq, MPI_QLEN, MAX_STATESIZE);
 	mpi_async_recv_start(&recvq, MPI_QLEN, MAX_STATESIZE);
 	for (int i = 0; i < MPI_QLEN; ++i)
-		mpi_async_put_buf(&recvq, i, MAX_STATESIZE, MPI_CHAR, MPI_ANY_SOURCE, TAG);
+		mpi_async_put_buf(&recvq, i, MAX_STATESIZE, MPI_CHAR, MPI_ANY_SOURCE, MPI_ANY_TAG);
 
 	state_dprintf("Initial state:");
 	init_state = create_init_state();
