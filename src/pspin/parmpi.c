@@ -120,7 +120,7 @@ static void dfs(void)
 		state_dprintf("---------------------------------\n");
 
 		state_dprintf("Transitions from state:\n");
-#if STATE_DEBUG == 1
+#ifdef STATE_DEBUG
 		dump_state(cur_state);
 #endif
 
@@ -142,7 +142,7 @@ static void dfs(void)
 
 				case TransitionPassed:
 					state_dprintf("New state:\n");
-#if STATE_DEBUG == 1
+#ifdef STATE_DEBUG
 					dump_state(next_state);
 #endif
 
@@ -172,6 +172,13 @@ int main(int argc, char *argv[])
 	MPI_Init(&argc, &argv);
 	MPI_Comm_size(MPI_COMM_WORLD, &node_count);
 	MPI_Comm_rank(MPI_COMM_WORLD, &node_id);
+
+#ifdef DEBUG
+	--node_count;
+	debug_node = node_count;
+	if (node_id == debug_node)
+		debug_logger();
+#endif
 
 	dfs();
 

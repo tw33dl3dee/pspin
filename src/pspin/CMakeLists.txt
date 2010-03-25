@@ -2,7 +2,7 @@ set(CODEGEN_FILE pan.c)
 
 set(PSPIN_SRC state.c state.h state_hash.c state_hash.h bfs.c bfs.h)
 set(PAREMU_SRC paremu.c)
-set(PARMPI_SRC parmpi.c mpi_async.c mpi_async.h)
+set(PARMPI_SRC parmpi.c mpi_async.c mpi_async.h mpi_debug.c)
 
 set(DEBUG_FLAGS STATE_DEBUG)
 set(MPI_DEBUG_FLAGS ${DEBUG_FLAGS};MPI_DEBUG)
@@ -19,6 +19,9 @@ add_executable(pspin-mpi ${PSPIN_SRC} ${PARMPI_SRC})
 target_link_libraries(pspin-mpi ${MPI_LIBRARIES})
 set_target_properties(pspin-mpi 
   PROPERTIES COMPILE_DEFINITIONS_DEBUG "${MPI_DEBUG_FLAGS}"
+)
+set_target_properties(pspin-mpi 
+  PROPERTIES COMPILE_DEFINITIONS "MPI"
 )
 
 add_executable(pspin-emu ${PSPIN_SRC} ${PAREMU_SRC})

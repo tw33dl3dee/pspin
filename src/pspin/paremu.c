@@ -114,7 +114,7 @@ static void bfs(void)
 		trace_state_begin(cur_state);
 
 		state_dprintf("Transitions from state:\n");
-#if STATE_DEBUG == 1
+#ifdef STATE_DEBUG
 		dump_state(cur_state);
 #endif
 
@@ -136,7 +136,7 @@ static void bfs(void)
 
 				case TransitionPassed:
 					state_dprintf("New state:\n");
-#if STATE_DEBUG == 1
+#ifdef STATE_DEBUG
 					dump_state(next_state);
 #endif
 
