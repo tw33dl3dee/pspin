@@ -58,7 +58,7 @@ int main(int argc, char *argv[])
 		short data = 0;
 
 		if (i || myid) {
-			bufn = mpi_async_deque_buf(&mq2);
+			bufn = mpi_async_deque_buf(&mq2, 0);
 			buf = MPI_ASYNC_BUF(&mq2, bufn, short);
 			//printf("[%lf] %d   recv %d-%d\n", MPI_Wtime(), myid, (int)buf[0], (int)buf[1]);
 			data = buf[1]; work();
@@ -67,7 +67,7 @@ int main(int argc, char *argv[])
 
 		for (int peer = 0; peer < numprocs; ++peer) {
 			if (peer == myid) continue;
-			bufn = mpi_async_get_buf(&mq1);
+			bufn = mpi_async_get_buf(&mq1, 0);
 			//printf("got buffer %d\n", bufn);
 			buf = MPI_ASYNC_BUF(&mq1, bufn, short);
 			buf[0] = myid; buf[1] = data + 1;

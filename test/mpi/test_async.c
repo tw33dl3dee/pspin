@@ -52,7 +52,7 @@ int main(int argc, char *argv[])
 	if (myid == 0) {
 		mpi_async_send_start(&mq, QLEN, BUFSIZE);
 		for (int i = 0; i < MAXREQ; ++i) {
-			bufn = mpi_async_get_buf(&mq);
+			bufn = mpi_async_get_buf(&mq, 0);
 			//printf("got buffer %d\n", bufn);
 			buf = MPI_ASYNC_BUF(&mq, bufn, short);
 			work(); buf[0] = i;
@@ -67,7 +67,7 @@ int main(int argc, char *argv[])
 		for (int i = 0; i < QLEN; ++i)
 			mpi_async_put_buf(&mq, i, BUFSIZE, MPI_CHAR, 0, TAG);
 		for (int i = 0; i < MAXREQ; ++i) {
-			bufn = mpi_async_deque_buf(&mq);
+			bufn = mpi_async_deque_buf(&mq, 0);
 			buf = MPI_ASYNC_BUF(&mq, bufn, short);
 			//printf("[%d]     recv %d\n", getpid(), (int)buf[0]);
 			assert(buf[0] == i);
