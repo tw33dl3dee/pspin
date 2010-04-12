@@ -60,7 +60,7 @@ init ->
 	init_hdr prio? P_LBRACE sequence P_RBRACE:
 		codegen.cur_proc.set_args(kids[2])
 		codegen.cur_proc.set_body(kids[7])
-		codegen.end_proc()		
+		codegen.end_proc()
 	;
 
 init_hdr ->
@@ -122,7 +122,7 @@ typename ->
 	| K_CHAN:
 		raise NotImplementedError(kids[0])
 	| uname:
-		raise NotImplementedError(kids[0])	
+		raise NotImplementedError(kids[0])
 	;
 
 active ->
@@ -152,7 +152,7 @@ sequence ->
 	| step:
 		return kids[0]
 	| step sep sequence:
-	  	return kids[0] + kids[2]
+		return kids[0] + kids[2]
 	;
 
 sep ->
@@ -298,7 +298,7 @@ stmt ->
 		listify(kids[2])[0].add_label(label)
 		return kids[2]
 	| K_PRINT P_LPAREN T_STRING print_list? P_RPAREN:
-		raise NotImplementedError(kids[0])
+		return PrintStmt(kids[2], kids[3])
 	| K_ASSERT P_LPAREN expr P_RPAREN:
 		return AssertStmt(kids[2])
 	| expr:
@@ -308,6 +308,18 @@ stmt ->
 print_list ->
 	P_COMMA arg_list:
 		return kids[1]
+	;
+
+arg_list ->
+	arg:
+		return kids
+	| arg_list P_COMMA arg:
+		return kids[0] + [kids[2]]
+	;
+
+arg ->
+	expr:
+		return kids[0]
 	;
 
 options ->
@@ -380,4 +392,3 @@ const ->
 	T_NUMBER:
 		return kids[0]
 	;
-

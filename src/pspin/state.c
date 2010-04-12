@@ -148,7 +148,7 @@ do_transition(int pid, int dest_ip,
 
 #define RECORD_STEP(msg)									\
 	state_dprintf(" PASSED\n");								\
-	state_dprintf("Performing step: *** %s ***\n", msg);	
+	state_dprintf("Performing step: <<< %s >>>\n", msg);	
 #define NEW_STATE()											\
 	*next_state = copy_state(state);						\
 	current_offset = PROC_OFFSET(current, state);			\
@@ -165,6 +165,8 @@ do_transition(int pid, int dest_ip,
 		fprintf(stderr, "ASSERTION `%s' FAILED\n", repr);	\
 		aborted = TransitionCausedAbort;					\
 	}														
+#define PRINTF(fmt, args...)					\
+	state_dprintf("*** " fmt " ***", ##args);
 #define BEGIN_ATOMIC() STATEATOMIC(state) = pid
 #define END_ATOMIC()   STATEATOMIC(state) = -1
 

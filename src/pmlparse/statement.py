@@ -432,3 +432,26 @@ class AtomicEndStmt(Stmt):
 
     def debug_repr(self):
         return "-)-"
+
+
+class PrintStmt(Stmt):
+    """Prints message to log
+
+    Always executable
+    """
+
+    def __init__(self, fmt_string, args):
+        """
+        :arg fmt_string Printf-like format string
+        :arg args list of Expr objects to pass to printf()
+        """
+        super(PrintStmt, self).__init__()
+        self._args = args
+        self._fmt_string = fmt_string
+
+    def execute(self):
+        return 'PRINTF(%s, %s)' % (self._fmt_string,
+                                   ', '.join([e.code() for e in self._args]))
+
+    def debug_repr(self):
+        return 'printf'
