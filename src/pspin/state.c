@@ -41,8 +41,11 @@ static struct State *alloc_state(size_t svsize, int zero)
 	struct State *state; 
 	//state_dprintf(" (alloc new state of size %d) ", svsize);
 	state = malloc(svsize); 
-	if (state)
+	if (state != NULL) {
+		if (zero)
+			memset(state, 0, svsize);
 		STATESIZE(state) = svsize;
+	}
 	return state;
 }
 
@@ -158,6 +161,7 @@ do_transition(int pid, int dest_ip,
 	current = PROC_BY_OFFSET(state, current_offset);	
 #define ASSERT(expr, repr)									\
 	if (!(expr)) {											\
+		state_dprintf(  "ASSERTION `%s' FAILED\n", repr);	\
 		fprintf(stderr, "ASSERTION `%s' FAILED\n", repr);	\
 		aborted = TransitionCausedAbort;					\
 	}														
