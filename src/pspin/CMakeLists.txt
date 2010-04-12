@@ -1,4 +1,7 @@
-set(CODEGEN_FILE pan.c)
+set(PROMELA_MODEL test.pml)
+
+set(STATEGEN_FILE ${CMAKE_CURRENT_BINARY_DIR}/stategen.c)
+set(PROMELA_FILE  ${CMAKE_CURRENT_SOURCE_DIR}/${PROMELA_MODEL})
 
 set(PSPIN_SRC state.c state.h state_hash.c state_hash.h bfs.c bfs.h)
 set(PAREMU_SRC paremu.c)
@@ -8,12 +11,24 @@ set(DEBUG_FLAGS STATE_DEBUG)
 set(MPI_DEBUG_FLAGS ${DEBUG_FLAGS};MPI_DEBUG)
 
 set_source_files_properties(${PSPIN_SRC} ${PAREMU_SRC} ${PARMPI} PROPERTIES
-  OBJECT_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${CODEGEN_FILE}
+  OBJECT_DEPENDS ${STATEGEN_FILE}
+)
+
+add_custom_command(OUTPUT ${STATEGEN_FILE}
+  DEPENDS ${PROMELA_FILE}
+  COMMAND ./pmlparse.py ${PROMELA_FILE} ${STATEGEN_FILE}
+  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../pmlparse
+  COMMENT "Parsing ${PROMELA_MODEL}"
+)
+
+add_custom_command(OUTPUT ${PROMELA_MODEL}
+  COMMAND echo "You must create symlink ${PROMELA_MODEL}" && exit 1
+  COMMENT "Checking ${PROMELA_MODEL} existence"
 )
 
 include_directories(${MPI_INCLUDE_PATH})
 
-add_definitions(-DCODEGEN_FILE=\"${CODEGEN_FILE}\" -DNODECOUNT=4 -DSTATE_PARTITION_HASH -USTATE_PARTITION_FIRST_PROC)
+add_definitions(-DSTATEGEN_FILE=\"${STATEGEN_FILE}\" -DNODECOUNT=4 -DSTATE_PARTITION_HASH -USTATE_PARTITION_FIRST_PROC)
 
 add_executable(pspin-mpi ${PSPIN_SRC} ${PARMPI_SRC})
 target_link_libraries(pspin-mpi ${MPI_LIBRARIES})

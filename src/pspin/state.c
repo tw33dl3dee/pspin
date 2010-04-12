@@ -22,7 +22,7 @@ transitions_t init_transitions(void)
 	transitions_t transitions;
 
 #define TRANSITIONS_INIT
-#include CODEGEN_FILE
+#include STATEGEN_FILE
 #undef  TRANSITIONS_INIT
 
 	return transitions;
@@ -61,7 +61,7 @@ static void init_process(struct Process *current, int proctype)
 	PROCIP(current) = 0;
 	
 #define PROCSTATE_INIT
-#include CODEGEN_FILE
+#include STATEGEN_FILE
 #undef  PROCSTATE_INIT
 }
 
@@ -80,7 +80,7 @@ struct State *create_init_state(void)
 	state = alloc_state(svsize, 1);
 
 #define STATE_INIT
-#include CODEGEN_FILE
+#include STATEGEN_FILE
 #undef  STATE_INIT
 
 	proc = FIRST_PROC(state);
@@ -171,7 +171,7 @@ do_transition(int pid, int dest_ip,
 #define END_ATOMIC()   STATEATOMIC(state) = -1
 
 #define TRANSITIONS
-#include CODEGEN_FILE
+#include STATEGEN_FILE
 #undef  TRANSITIONS
 
  passed:
@@ -192,14 +192,14 @@ do_transition(int pid, int dest_ip,
 void dump_state(struct State *state) 
 {
 #define STATE_DUMP
-#include CODEGEN_FILE
+#include STATEGEN_FILE
 #undef  STATE_DUMP
 
 	int pid = 0;
 	FOREACH_PROCESS(state, ++pid) {
 		dump_dprintf("\t-Process %d:\n", pid);
 #define PROCSTATE_DUMP
-#include CODEGEN_FILE
+#include STATEGEN_FILE
 #undef  PROCSTATE_DUMP
 	}
 }

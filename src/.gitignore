@@ -1,5 +1,6 @@
 pmlparse/*.c
-pspin/pan.c
+pspin/stategen.c
+pspin/test.pml
 pspin/pspin*
 pspin/Makefile
 *.log

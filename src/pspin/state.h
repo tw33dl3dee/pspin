@@ -34,11 +34,11 @@ struct Process {
 };
 
 #define STATE_DECL
-#include CODEGEN_FILE
+#include STATEGEN_FILE
 #undef  STATE_DECL
 
 #define PROC_DECL
-#include CODEGEN_FILE
+#include STATEGEN_FILE
 #undef  PROC_DECL
 
 #define COPY_STATE(dst, src)					\
