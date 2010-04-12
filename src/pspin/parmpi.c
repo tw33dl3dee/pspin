@@ -68,19 +68,24 @@ static struct State *get_state(void)
 	 * @todo Drain MPI queue into local queue instead of deque/put
 	 */
 	last_buf_no = mpi_async_get_buf(&recvq, 1);
-	if (last_buf_no != -1)
-		return MPI_ASYNC_BUF(&recvq, last_buf_no, struct State);
+	if (last_buf_no != -1) {
+		state = MPI_ASYNC_BUF(&recvq, last_buf_no, struct State);
+		if (state_hash_add(state))
+			return state;
+	}
 	/*
 	 * Then check local queue 
 	 */
-	else if ((state = BFS_TAKE()) != NULL)
+	if ((state = BFS_TAKE()) != NULL)
 		return state;
 	/*
 	 * Block and wait for new messages 
 	 */
-	else {
+	for (;;) {
 		last_buf_no = mpi_async_deque_buf(&recvq, 0);
-		return MPI_ASYNC_BUF(&recvq, last_buf_no, struct State);
+		state = MPI_ASYNC_BUF(&recvq, last_buf_no, struct State);
+		if (state_hash_add(state))
+			return state;
 	}
 }
 
