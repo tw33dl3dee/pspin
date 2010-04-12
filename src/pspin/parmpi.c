@@ -34,6 +34,51 @@ int output_flushed = 1;
 static int last_buf_no = -1;
 static struct mpi_queue sendq, recvq;
 
+static int state_count;
+static int trans_count;
+static int xnode_count;
+static int max_bfs_size;
+static double start_time;
+
+static void trace_start()
+{
+	start_time = MPI_Wtime();
+}
+
+static void trace_state_begin(struct State *state)
+{
+	state_count++;
+}
+
+static void trace_state_new(struct State *state)
+{
+	if (BFS_LEN() > max_bfs_size)
+		max_bfs_size = BFS_LEN();
+	trans_count++;
+}
+
+static void trace_state_send(struct State *state, int node_idx)
+{
+	xnode_count++;
+}
+
+static void trace_summary()
+{
+	float run_time = MPI_Wtime() - start_time;
+
+	state_dprintf("Parallel run summary:\n");
+
+	state_dprintf("\tTransitions taken: %d (%.1f/sec)\n",
+				  trans_count, trans_count/run_time);
+	state_dprintf("\tMessages passed:   %d (%.2f%%)\n",
+				  xnode_count, xnode_count*100.f/trans_count);
+	state_dprintf("\tStates:            %d (%.1f/sec)\n",
+			state_count, state_count/run_time);
+	state_dprintf("\tBFS max size:      %d (%.2f%% st, %.2f%% tr)\n",
+			max_bfs_size, 
+			max_bfs_size*100.f/state_count, max_bfs_size*100.f/trans_count);
+}
+
 /** 
  * @brief Checks if state is already in hash table, adds it otherwise
  * 
@@ -49,6 +94,7 @@ static void queue_new_state(struct State *state)
 		COPY_STATE(MPI_ASYNC_BUF(&sendq, buf_no, void), state);
 		mpi_async_queue_buf(&sendq, buf_no, STATESIZE(state), MPI_CHAR, state_node, TagState);
 		mpi_dprintf("[SENT]");
+		trace_state_send(state, state_node);
 	}
 	else if (state_hash_add(state)) {
 		state_dprintf(" - ADDED");
@@ -114,6 +160,8 @@ static void dfs(void)
 	for (int i = 0; i < MPI_QLEN; ++i)
 		mpi_async_put_buf(&recvq, i, MAX_STATESIZE, MPI_CHAR, MPI_ANY_SOURCE, MPI_ANY_TAG);
 
+	trace_start();
+
 	state_dprintf("Initial state: ");
 	init_state = create_init_state();
 	queue_new_state(init_state);
@@ -123,6 +171,7 @@ static void dfs(void)
 		int pid = 0;
 
 		state_dprintf("---------------------------------\n");
+		trace_state_begin(cur_state);
 
 		state_dprintf("Transitions from state:\n");
 #ifdef STATE_DEBUG
@@ -153,6 +202,8 @@ static void dfs(void)
 
 					assert(next_state != NULL);
 					queue_new_state(next_state);
+
+					trace_state_new(next_state);
 					break;
 
 				case TransitionBlocked:
@@ -167,6 +218,8 @@ static void dfs(void)
  end:
  aborted:
 	state_dprintf("---------------------------------\n");
+
+	trace_summary();
 
 	mpi_async_stop(&sendq);
 	mpi_async_stop(&recvq);
