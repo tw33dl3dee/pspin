@@ -67,7 +67,7 @@ static struct State *get_state(void)
 	 * First check if there are incoming messages 
 	 * @todo Drain MPI queue into local queue instead of deque/put
 	 */
-	last_buf_no = mpi_async_get_buf(&recvq, 1);
+	last_buf_no = mpi_async_deque_buf(&recvq, 1);
 	if (last_buf_no != -1) {
 		state = MPI_ASYNC_BUF(&recvq, last_buf_no, struct State);
 		if (state_hash_add(state))
@@ -114,7 +114,7 @@ static void dfs(void)
 	for (int i = 0; i < MPI_QLEN; ++i)
 		mpi_async_put_buf(&recvq, i, MAX_STATESIZE, MPI_CHAR, MPI_ANY_SOURCE, MPI_ANY_TAG);
 
-	state_dprintf("Initial state:");
+	state_dprintf("Initial state: ");
 	init_state = create_init_state();
 	queue_new_state(init_state);
 	transitions = init_transitions();
@@ -184,6 +184,8 @@ int main(int argc, char *argv[])
 	if (node_id == debug_node)
 		debug_logger();
 #endif
+
+	mpi_dprintf("MPI node (%d of %d) starting...\n", node_id, node_count);
 
 	dfs();
 
