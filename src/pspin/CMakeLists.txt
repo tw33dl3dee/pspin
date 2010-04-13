@@ -2,6 +2,7 @@ set(PROMELA_MODEL test.pml)
 
 set(STATEGEN_FILE ${CMAKE_CURRENT_BINARY_DIR}/stategen.c)
 set(PROMELA_FILE  ${CMAKE_CURRENT_SOURCE_DIR}/${PROMELA_MODEL})
+set(PMLPARSE_DIR  ${CMAKE_CURRENT_SOURCE_DIR}/../pmlparse)
 
 set(PSPIN_SRC state.c state.h state_hash.c state_hash.h bfs.c bfs.h)
 set(PAREMU_SRC paremu.c)
@@ -15,9 +16,9 @@ set_source_files_properties(${PSPIN_SRC} ${PAREMU_SRC} ${PARMPI} PROPERTIES
 )
 
 add_custom_command(OUTPUT ${STATEGEN_FILE}
-  DEPENDS ${PROMELA_FILE}
+  DEPENDS ${PROMELA_FILE} ${PMLPARSE_DIR}/*.py*
   COMMAND ./pmlparse.py ${PROMELA_FILE} ${STATEGEN_FILE}
-  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../pmlparse
+  WORKING_DIRECTORY ${PMLPARSE_DIR}
   COMMENT "Parsing ${PROMELA_MODEL}"
 )
 
