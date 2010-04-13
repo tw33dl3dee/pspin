@@ -42,6 +42,7 @@ class Process(object):
         self._stmts = []
         self._state_count = 0
         self._last_stmt = None
+        self._end_stmts = []
         self.add_var(SpecialVariable("_pid", "pid", Type('pid')))
         self.add_stmt(NoopStmt("-start-"))
 
@@ -137,9 +138,9 @@ class Process(object):
         for stmt in self._stmts:
             lines.append(Template(trans_init_from_tpl).substitute(trans=varname, ip_from=stmt.ip,
                                                                   to_count=(len(stmt.next) + 1)))
-            for (i, next) in enumerate(stmt.next):
-                lines.append(Template(trans_add_tpl).substitute(trans=varname, ip_from=stmt.ip, ip_to=next.ip,
-                                                                i=i, descr=str(next)))
+            for (i, next_stmt) in enumerate(stmt.next):
+                lines.append(Template(trans_add_tpl).substitute(trans=varname, ip_from=stmt.ip, ip_to=next_stmt.ip,
+                                                                i=i, descr=str(next_stmt)))
             lines.append(Template(trans_add_tpl).substitute(trans=varname, ip_from=stmt.ip, ip_to=0,
                                                             i=len(stmt.next), descr="END"))
         return ";\n".join(lines)
@@ -186,6 +187,14 @@ class Process(object):
                                                             varname=str(v)))
         return ";\n".join(lines)
 
+    def valid_endstate_ips(self):
+        """Return C-code (str) with array of valid endstate IP values for this proctype
+        """
+        valid_ips_tpl = '(int []){ $ips }'
+        valid_ips = [str(stmt.ip) for stmt in self._end_stmts]
+        valid_ips.append(str(-1))
+        return Template(valid_ips_tpl).substitute(ips=', '.join(valid_ips))
+
     def add_stmt(self, stmt):
         """Adds new statement (not necessarily from topmost block) to process
 
@@ -207,7 +216,9 @@ class Process(object):
     def finish(self):
         """Settles Process object, must be called after all statements and declarations
         """
-        self.add_stmt(NoopStmt("-end-"))
+        end_stmt = NoopStmt("-end-")
+        self.add_stmt(end_stmt)
+        self._end_stmts.append(end_stmt)
         self.add_var(Variable("_ip", Type('byte')))
         self.add_var(Variable("_proctype", Type('byte')))
         self.sanity_check()

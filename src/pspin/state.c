@@ -162,7 +162,7 @@ do_transition(int pid, int dest_ip,
 #define ASSERT(expr, repr)									\
 	if (!(expr)) {											\
 		state_dprintf(  "ASSERTION `%s' FAILED\n", repr);	\
-		fprintf(stderr, "ASSERTION `%s' FAILED\n", repr);	\
+		fprintf(stderr, "(EE) ASSERTION `%s' FAILED\n", repr);	\
 		aborted = TransitionCausedAbort;					\
 	}
 #define PRINTF(fmt, args...)					\
@@ -182,6 +182,40 @@ do_transition(int pid, int dest_ip,
  blocked:
 	state_dprintf(" BLOCKED\n");
 	return TransitionBlocked;
+}
+
+#define VALID_ENDSTATES
+#include STATEGEN_FILE
+#undef  VALID_ENDSTATES
+
+/** 
+ * @brief Check if state is a valid endstate.
+ *
+ * All processes must be blocked at theirs valid endstate IPs for check to pass.
+ * If state is not actually endstate (i.e. some processes are executable), result undefined.
+ * 
+ * @param state State to check
+ * 
+ * @return 0 if check passed (valid endstate), -1 otherwise.
+ */
+int
+check_endstate(struct State *state)
+{
+	FOREACH_PROCESS(state, 1) {
+		for (int i = 0; valid_endstates[PROCTYPE(current)][i] != -1; ++i)
+			if (valid_endstates[PROCTYPE(current)][i] == PROCIP(current))
+				goto next_proc;
+		goto invalid;
+	next_proc:
+		continue;
+	}
+
+	return 0;
+
+ invalid:
+	state_dprintf(  "INVALID END STATE\n");
+	fprintf(stderr, "(EE) INVALID END STATE\n");
+	return -1;
 }
 
 /** 

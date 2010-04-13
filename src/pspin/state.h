@@ -111,5 +111,8 @@ enum TransitionResult
 do_transition(int pid, int dest_ip,
 			  struct State *state, struct Process *current, 
 			  struct State **next_state);
+
+int
+check_endstate(struct State *state);
 		
 #endif /* _STATE_H_ */

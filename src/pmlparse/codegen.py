@@ -28,6 +28,7 @@ class Codegen(object):
             self.write_block(f, 'PROC_DECL', self.proc_decl())
             self.write_block(f, 'PROCSTATE_DUMP', self.procstate_dump())
             self.write_block(f, 'PROCSTATE_INIT', self.procstate_init())
+            self.write_block(f, 'VALID_ENDSTATES', self.valid_endstates())
             self.write_block(f, 'TRANSITIONS_INIT', self.transitions_init())
             self.write_block(f, 'TRANSITIONS', self.transitions())
 
@@ -203,6 +204,13 @@ $init;
              lines.append(Template(case_tpl).substitute(proctype=i, init=p.state_init()))
         lines += ["default:\n\tassert(0)", "}"]
         return ";\n".join(lines)
+
+    def valid_endstates(self):
+        """Returns C-code (str) with array of valid endstate IP values of all proctypes
+        """
+        valid_endstates_tpl = "static int *valid_endstates[] = { $endstates }"
+        endstates = ', '.join([p.valid_endstate_ips() for p in self._procs])
+        return Template(valid_endstates_tpl).substitute(endstates=endstates)
 
     def finish(self):
         """Settles Codegen object, must be called after all proctypes and declarations
