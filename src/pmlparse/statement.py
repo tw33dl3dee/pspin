@@ -446,12 +446,13 @@ class PrintStmt(Stmt):
         :arg args list of Expr objects to pass to printf()
         """
         super(PrintStmt, self).__init__()
-        self._args = args
+        self._args = args or []
         self._fmt_string = fmt_string
 
     def execute(self):
-        return 'PRINTF(%s, %s)' % (self._fmt_string,
-                                   ', '.join([e.code() for e in self._args]))
+        printf_args = [self._fmt_string]
+        printf_args += [e.code() for e in self._args]
+        return 'PRINTF(%s)' % (', '.join(printf_args))
 
     def debug_repr(self):
         return 'printf'

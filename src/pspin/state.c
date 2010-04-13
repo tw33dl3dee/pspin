@@ -164,9 +164,9 @@ do_transition(int pid, int dest_ip,
 		state_dprintf(  "ASSERTION `%s' FAILED\n", repr);	\
 		fprintf(stderr, "ASSERTION `%s' FAILED\n", repr);	\
 		aborted = TransitionCausedAbort;					\
-	}														
+	}
 #define PRINTF(fmt, args...)					\
-	state_dprintf("*** " fmt " ***", ##args);
+	state_dprintf("*** " fmt, ##args);
 #define BEGIN_ATOMIC() STATEATOMIC(state) = pid
 #define END_ATOMIC()   STATEATOMIC(state) = -1
 
