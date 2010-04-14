@@ -29,7 +29,7 @@ code:
 
 
 spec ->
-	module+:
+	(module sep?)+:
 		codegen.finish()
 		return codegen
 	;

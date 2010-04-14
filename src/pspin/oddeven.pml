@@ -1,9 +1,9 @@
-int x = 2
+int x = 2;
 
 active proctype Counter() {
 	do
-	 :: x < 10000 -> x++
-	 :: break
+	 :: x < 10000 -> x++;
+	 :: break;
 	od;
 
 	printf("COUNTER: %d\n", x);
@@ -11,7 +11,7 @@ active proctype Counter() {
 	do
 	 :: x%2      -> x = 3*x + 1
 	 :: x%2 == 0 -> x = x/2
-	od
+	od;
 }
 
 active proctype Checker() {
