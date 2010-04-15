@@ -161,8 +161,7 @@ do_transition(int pid, int dest_ip,
 	current = PROC_BY_OFFSET(state, current_offset);	
 #define ASSERT(expr, repr)									\
 	if (!(expr)) {											\
-		state_dprintf(  "ASSERTION `%s' FAILED\n", repr);	\
-		fprintf(stderr, "(EE) ASSERTION `%s' FAILED\n", repr);	\
+		iprintf(  "ASSERTION `%s' FAILED\n", repr);			\
 		aborted = TransitionCausedAbort;					\
 	}
 #define PRINTF(fmt, args...)					\
@@ -213,8 +212,7 @@ check_endstate(struct State *state)
 	return 0;
 
  invalid:
-	state_dprintf(  "INVALID END STATE\n");
-	fprintf(stderr, "(EE) INVALID END STATE\n");
+	iprintf("INVALID END STATE\n");
 	return -1;
 }
 

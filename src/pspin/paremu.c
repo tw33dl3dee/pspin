@@ -8,6 +8,10 @@
  * 
  */
 
+#ifdef MPI
+#	error "MPI macro must not be defined in emulation version"
+#endif
+
 #include <assert.h>
 #include <string.h>
 #include <time.h>
@@ -47,14 +51,14 @@ static void trace_summary()
 {
 	float run_time = clock()*1.f/CLOCKS_PER_SEC;
 
-	state_dprintf("Emulation summary:\n");
+	iprintf("Emulation summary:\n");
 
-	state_dprintf("\tTransitions taken: %d (%.1f/sec)\n"
+	iprintf("\tTransitions taken: %d (%.1f/sec)\n"
 			"\tMessages passed:   %d (%.2f%%)\n",
 			trans_count, trans_count/run_time,
 			xnode_count, xnode_count*100.f/trans_count);
 
-	state_dprintf("\tStates:\n"
+	iprintf("\tStates:\n"
 			"\t\tTotal:   %d (%.1f/sec)\n",
 			state_count, state_count/run_time);
 	
@@ -64,13 +68,13 @@ static void trace_summary()
 			states_min = states_per_node[i];
 		if (states_max < states_per_node[i])
 			states_max = states_per_node[i];
-		state_dprintf("\t\tNode %2d: %d (%.1f%%)\n",
+		iprintf("\t\tNode %2d: %d (%.1f%%)\n",
 				i, states_per_node[i], states_per_node[i]*100.f/state_count);
 	}
-	state_dprintf("\t\tMin/max: %.2f\n", 
+	iprintf("\t\tMin/max: %.2f\n", 
 			states_min*1.f/states_max);
 
-	state_dprintf("\tBFS max size:      %d (%.2f%% st, %.2f%% tr)\n",
+	iprintf("\tBFS max size:      %d (%.2f%% st, %.2f%% tr)\n",
 			max_bfs_size, 
 			max_bfs_size*100.f/state_count, max_bfs_size*100.f/trans_count);
 }

@@ -7,6 +7,10 @@
  * 
  */
 
+#ifndef MPI
+#	error "MPI macro must be defined in MPI version"
+#endif
+
 #include <assert.h>
 #include <mpi.h>
 #include <string.h>
@@ -66,15 +70,15 @@ static void trace_summary()
 {
 	float run_time = MPI_Wtime() - start_time;
 
-	state_dprintf("Parallel run summary:\n");
+	iprintf("Parallel run summary:\n");
 
-	state_dprintf("\tTransitions taken: %d (%.1f/sec)\n",
-				  trans_count, trans_count/run_time);
-	state_dprintf("\tMessages passed:   %d (%.2f%%)\n",
-				  xnode_count, xnode_count*100.f/trans_count);
-	state_dprintf("\tStates:            %d (%.1f/sec)\n",
+	iprintf("\tTransitions taken: %d (%.1f/sec)\n",
+			trans_count, trans_count/run_time);
+	iprintf("\tMessages passed:   %d (%.2f%%)\n",
+			xnode_count, xnode_count*100.f/trans_count);
+	iprintf("\tStates:            %d (%.1f/sec)\n",
 			state_count, state_count/run_time);
-	state_dprintf("\tBFS max size:      %d (%.2f%% st, %.2f%% tr)\n",
+	iprintf("\tBFS max size:      %d (%.2f%% st, %.2f%% tr)\n",
 			max_bfs_size, 
 			max_bfs_size*100.f/state_count, max_bfs_size*100.f/trans_count);
 }
@@ -243,13 +247,15 @@ int main(int argc, char *argv[])
 #ifdef DEBUG
 	--node_count;
 	debug_node = node_count;
-	if (node_id == debug_node)
+	if (node_id == debug_node) {		
 		debug_logger();
+		return MPI_Finalize();
+	}
 #endif
 
-	mpi_dprintf("MPI node (%d of %d) starting...\n", node_id, node_count);
-
+	iprintf("MPI node (%d of %d) starting...\n", node_id, node_count);
 	dfs();
+	iprintf("MPI node (%d of %d) stopped\n", node_id, node_count);
 
 	return MPI_Finalize();
 }
