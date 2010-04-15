@@ -13,7 +13,7 @@
 /**
  * Initial size of hashtable
  */
-#define HASH_SIZE 1048576
+#define HASH_SIZE (1048576*128 + 1)
 
 typedef unsigned long state_hash_t;
 

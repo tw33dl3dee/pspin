@@ -14,7 +14,7 @@
 /**
  * State bit-hashtable
  */
-static char state_hashtable[HASH_SIZE/8];
+static char state_hashtable[HASH_SIZE/8 + 1];
 
 /** 
  * @brief Lookups state and hash table, adding new if none was found.
