@@ -21,6 +21,10 @@ struct mpi_queue {
 	 */
 	MPI_Request *req;
 	/**
+	 * Status array
+	 */
+	MPI_Status *status;
+	/**
 	 * Buffers used for requests
 	 */
 	void *buf;
@@ -49,6 +53,18 @@ struct mpi_queue {
  */
 #define MPI_ASYNC_BUF(queue, bufno, type)				\
 	(type *)((queue)->buf + (queue)->bufsize*(bufno))
+
+/** 
+ * @brief Converts buffer number to it's MPI_Status record address
+ * 
+ * @param queue MPI queue
+ * @param bufno Buffer number 
+ * 
+ * @return Pointer to MPI_Status structure (undefined unless buffer number was returned 
+ *                                          by deque_buf and not reclaimed by put_buf yet).
+ */
+#define MPI_ASYNC_STATUS(queue, bufno)			\
+	&((queue)->status[bufno])
 
 /** 
  * @brief Checks if address is an async buffer or not

@@ -24,8 +24,9 @@
 void mpi_async_init(struct mpi_queue *queue, int queuelen, int bufsize)
 {
 	queue->bufsize = bufsize;
-	queue->buf = malloc(queuelen * bufsize);
-	queue->req = malloc(queuelen * sizeof(MPI_Request));
+	queue->buf	  = malloc(queuelen * bufsize);
+	queue->req	  = malloc(queuelen * sizeof(MPI_Request));
+	queue->status = malloc(queuelen * sizeof(MPI_Status));
 	for (int i = 0; i < queuelen; ++i)
 		queue->req[i] = MPI_REQUEST_NULL;
 	queue->nfree = queuelen;
@@ -128,14 +129,15 @@ void mpi_async_recv_start(struct mpi_queue *queue, int queuelen, int bufsize)
 int mpi_async_deque_buf(struct mpi_queue *queue, int nowait)
 {
 	int idx, flag;
+	MPI_Status status;
 
 	if (nowait) {
-		MPI_Testany(queue->ntotal, queue->req, &idx, &flag, MPI_STATUS_IGNORE);
+		MPI_Testany(queue->ntotal, queue->req, &idx, &flag, &status);
 		if (!flag)
 			return -1;
 	}
 	else
-		MPI_Waitany(queue->ntotal, queue->req, &idx, MPI_STATUS_IGNORE);
+		MPI_Waitany(queue->ntotal, queue->req, &idx, &status);
 	
 	/* Should be at least one recv operation in progress
 	 */
@@ -143,6 +145,7 @@ int mpi_async_deque_buf(struct mpi_queue *queue, int nowait)
 	/* We count unused requests for debugging purposes only
 	 */
 	assert(++queue->nfree);
+	queue->status[idx] = status;
 	queue->req[idx] = MPI_REQUEST_NULL;
 	return idx;
 }
