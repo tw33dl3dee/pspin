@@ -27,6 +27,13 @@ add_custom_command(OUTPUT ${PROMELA_MODEL}
   COMMENT "Checking ${PROMELA_MODEL} existence"
 )
 
+set(MPI_TEST_NODE_COUNT 4)
+add_custom_target(mpirun 
+  COMMAND mpirun -n ${MPI_TEST_NODE_COUNT} ./pspin-mpi
+  DEPENDS pspin-mpi
+  COMMENT "Running ${MPI_TEST_NODE_COUNT} MPI nodes..."
+)
+
 include_directories(${MPI_INCLUDE_PATH})
 
 add_definitions(-DSTATEGEN_FILE=\"${STATEGEN_FILE}\" -DNODECOUNT=4 -DSTATE_PARTITION_HASH -USTATE_PARTITION_FIRST_PROC)
