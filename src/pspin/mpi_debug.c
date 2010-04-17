@@ -22,6 +22,7 @@
 #define DEBUG_MAX_LEN 4096
 
 extern int node_id;
+extern int node_count;
 
 /**
  * Node number which is receives debugging messages
@@ -51,12 +52,21 @@ void debug_logger()
 {
 	MPI_Status status;
 	int res;
+	/**
+	 * Number of "terminate" messages received.
+	 */
+	int termination_count = 0;
 
 	while ((res = MPI_Recv(debug_output, sizeof(debug_output), MPI_CHAR, 
 						   MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status)) == MPI_SUCCESS) {
 		switch (status.MPI_TAG) {
 		case TagTerminate:
-			return;
+			/* Logger can terminate only after every other node has terminated.
+			 * So we receive termination request from each node and exit then only.
+			 */
+			if (++termination_count >= node_count)
+				return;
+			break;
 
 		case TagDebugLog:
 			printf("[%d] %s", status.MPI_SOURCE, debug_output);
