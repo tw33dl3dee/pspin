@@ -113,7 +113,9 @@ static void bfs(void)
 
 	while ((cur_state = BFS_TAKE()) != NULL) {
 		int pid = 0;
+#ifdef ENDSTATE
 		int transitions_possible = 0;
+#endif
 
 		state_dprintf("---------------------------------\n");
 		trace_state_begin(cur_state);
@@ -140,7 +142,9 @@ static void bfs(void)
 					goto aborted;
 
 				case TransitionPassed:
+#ifdef ENDSTATE
 					++transitions_possible;
+#endif
 
 					state_dprintf("New state:\n");
 #ifdef STATE_DEBUG
@@ -159,14 +163,15 @@ static void bfs(void)
 			}
 		}
 
+#ifdef ENDSTATE
 		if (!transitions_possible) {
 			state_dprintf("End-state, performing validity check...\n");
 			if (check_endstate(cur_state) < 0)
 				goto aborted;
 		}
+#endif
 	}
 
- end:
  aborted:
 	state_dprintf("---------------------------------\n");
 
