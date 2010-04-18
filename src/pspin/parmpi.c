@@ -217,19 +217,6 @@ static void announce_termination()
 }
 
 /** 
- * @brief Prints out values of message counters
- */
-static void print_msg_counter()
-{
-#ifdef DEBUG
-	mpi_dprintf("=== Message counter: %d, node color: %s", msg_counter.count, (msg_counter.color == White ? "W" : "B"));
-	if (has_accum)
-		mpi_dprintf(", token value: %d, token color: %s", msg_accum.count, (msg_accum.color == White ? "W" : "B"));
-	mpi_dprintf("===\n");
-#endif
-}
-
-/** 
  * @brief Initializes message counting data
  *
  * Actually does nothing (it's already initialized), just marks
@@ -255,9 +242,6 @@ static void send_msg_counter(int target_node)
 	/* If a black machine forwards the token, the token turns black */
 	if (msg_counter.color == Black)
 		msg_accum.color = Black;
-
-	mpi_dprintf("--> NXT ");
-	print_msg_counter();
 
 	int buf_no = mpi_async_get_buf(&sendq, 0);
 	memcpy(MPI_ASYNC_BUF(&sendq, buf_no, void), &msg_accum, sizeof(struct MsgCount));
@@ -316,9 +300,6 @@ static void msg_count_accum(struct MsgCount *new_accum)
 {
 	msg_accum = *new_accum;
 	has_accum = 1;
-
-	mpi_dprintf("ACCUM   ");
-	print_msg_counter();
 }
 
 /** 
@@ -327,8 +308,6 @@ static void msg_count_accum(struct MsgCount *new_accum)
 static void msg_count_sent()
 {
 	msg_counter.count++;
-	mpi_dprintf("ON SEND ");
-	print_msg_counter();
 }
 
 /** 
@@ -339,9 +318,6 @@ static void msg_count_recv()
 	msg_counter.count--;
 	/* When a node receives a message, the node turns black. */
 	msg_counter.color = Black;
-
-	mpi_dprintf("ON RECV ");
-	print_msg_counter();
 }
 
 /** 
@@ -359,15 +335,16 @@ static void queue_new_state(struct State *state)
 		int buf_no = mpi_async_get_buf(&sendq, 0);
 		COPY_STATE(MPI_ASYNC_BUF(&sendq, buf_no, void), state);
 		mpi_async_queue_buf(&sendq, buf_no, STATESIZE(state), MPI_CHAR, state_node, TagState);
-		mpi_dprintf("[SENT]\n");
+		mpi_dprintf("[SENT]");
 		trace_state_send(state, state_node);
 		msg_count_sent();
 	}
 	else if (state_hash_add(state)) {
 		/* Local state */
-		state_dprintf(" - ADDED\n");
+		state_dprintf(" - ADDED");
 		BFS_ADD(state);
 	}
+	dprintf("\n");
 }
 
 /**
