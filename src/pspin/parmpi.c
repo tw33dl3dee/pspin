@@ -148,15 +148,36 @@ static void trace_summary()
 }
 
 /**
- * Array of message counters.
- * i-th element is number of messages sent to that node and not yet received.
+ * Each node and token has color
  */
-static int *msg_counters;
-static int *msg_counters_update;
-static int msg_counters_update_pending;
-static int termination_check_pending;
+enum Color { Black = 0, White };
 
-#define msg_counters_size (sizeof(msg_counters[0])*node_count)
+struct MsgCount {
+	/**
+	 * Message counter.
+	 * Each node has it's local counter.
+	 */
+	int count;
+	/**
+	 * Color, used in termination detection algorithm.
+	 */
+	enum Color color;
+};
+
+/**
+ * Local message counter and node's color
+ */
+static struct MsgCount msg_counter = { .color = White };
+/**
+ * Passed message counter ("token") and it's color
+ * Color is initialized to Black so that 0'th node doesn't 
+ * detect termination immediately.
+ */
+static struct MsgCount msg_accum   = { .color = Black };
+/**
+ * If non-zero, node holds token
+ */
+static int has_accum;
 
 /**
  * If non-negative, termination has been already detected by that node
@@ -166,14 +187,12 @@ static int termination_detected_id = -1;
 /** 
  * @brief Record termination as been detected
  * 
- * Next call to get_state() will return NULL.
- * 
  * @param node Node that detected termination
  */
 static void termination_detected(int node)
 {
 	if (node == node_id)
-		mpi_dprintf("===Detected termination===\n");
+		mpi_dprintf("=== INITIATING TERMINATION ===\n");
 	termination_detected_id = node;
 }
 
@@ -200,127 +219,129 @@ static void announce_termination()
 /** 
  * @brief Prints out values of message counters
  */
-static void print_msg_counters()
+static void print_msg_counter()
 {
 #ifdef DEBUG
-	mpi_dprintf("===Message counters: ");
-	for (int i = 0; i < node_count; ++i) 
-		mpi_dprintf("%d ", msg_counters[i]);
+	mpi_dprintf("=== Message counter: %d, node color: %s", msg_counter.count, (msg_counter.color == White ? "W" : "B"));
+	if (has_accum)
+		mpi_dprintf(", token value: %d, token color: %s", msg_accum.count, (msg_accum.color == White ? "W" : "B"));
 	mpi_dprintf("===\n");
 #endif
 }
 
 /** 
- * @brief Initializers message counters array
+ * @brief Initializes message counting data
+ *
+ * Actually does nothing (it's already initialized), just marks
+ * 0'th node as token holder.
  */
-static void init_msg_counters()
+static void init_msg_counter()
 {
-	msg_counters = calloc(sizeof(msg_counters[0]), node_count);
-	msg_counters_update = calloc(sizeof(msg_counters[0]), node_count);
-	mpi_dprintf("INIT    ");
-	print_msg_counters();
+	if (node_id == 0)
+		has_accum = 1;
 }
 
 /** 
- * @brief Sends message counters to another node
+ * @brief Sends message counter to another node
+ * 
+ * Current node must be the token holder.
  * 
  * @param target_node Target node number
  */
-static void send_msg_counters(int target_node)
+static void send_msg_counter(int target_node)
 {
-	mpi_dprintf("---> next node (%d)\n", target_node);
+	msg_accum.count += msg_counter.count;
+
+	/* If a black machine forwards the token, the token turns black */
+	if (msg_counter.color == Black)
+		msg_accum.color = Black;
+
+	mpi_dprintf("--> NXT ");
+	print_msg_counter();
+
 	int buf_no = mpi_async_get_buf(&sendq, 0);
-	memcpy(MPI_ASYNC_BUF(&sendq, buf_no, void), msg_counters, msg_counters_size);
-	mpi_async_queue_buf(&sendq, buf_no, msg_counters_size, MPI_CHAR, target_node, TagMsgCount);
+	memcpy(MPI_ASYNC_BUF(&sendq, buf_no, void), &msg_accum, sizeof(struct MsgCount));
+	mpi_async_queue_buf(&sendq, buf_no, sizeof(struct MsgCount), MPI_CHAR, target_node, TagMsgCount);
 	trace_ctrl_send(target_node);
+
+	/* When a node forwards the token, the node turns white. */
+	msg_counter.color = White;
+	has_accum = 0;
 }
 
 /** 
- * @brief Updates message counters with data received from another node
+ * @brief Called when node is inactive, performs termination check and sends token forward.
  * 
- * @param msg_count_accum Cumulative counters received
+ * If node does not hold the token, does nothing.
  * 
- * @return 0 if distributed system still running, -1 if termination has been detected.
- */
-static void post_msg_counters_update(int msg_count_accum[])
-{
-	memcpy(msg_counters_update, msg_count_accum, msg_counters_size);
-	msg_counters_update_pending = 1;
-	termination_check_pending = 1;	
-}
-
-static void update_msg_counters()
-{
-	/* COUNT <- COUNT + ACCU */
-	for (int i = 0; i < node_count; ++i)
-		msg_counters[i] += msg_counters_update[i];
-	mpi_dprintf("UPDATE  ");
-	print_msg_counters();
-	msg_counters_update_pending = 0;
-}
-
-/** 
- * @brief Check if distributed system had terminated globally.
- * 
- * @return 0 if distributed system still running, -1 if termination has been detected.
+ * @return -1 if termination detected, 0 otherwise.
  */
 static int termination_check()
 {
-	if (!termination_check_pending)
+	if (!has_accum)
 		return 0;
-	termination_check_pending = 0;
 
 	/*
-	 * Check pending update
+	 * Only 0'th node does termination detection, 
+	 * others just forward token, updating it.
 	 */
-	if (msg_counters_update_pending)
-		update_msg_counters();
-
-	/* if COUNT[j] <= 0 THEN */
-	if (msg_counters[node_id] <= 0) {
-		for (int i = 0; i < node_count; ++i)
-			/* if COUNT != 0* */
-			if (msg_counters[i] != 0) {
-				/* send <COUNT> to Pj+1 */
-				send_msg_counters((node_id + 1)%node_count);
-				/* COUNT <- 0* */
-				memset(msg_counters, 0, msg_counters_size);
-				return 0;
-			}
-		/* if COUNT = 0* */
-		/* We've detected termination.
-		 * Current call to get_state() will return NULL and node will stop.
+	if (node_id == 0) {
+		/*
+		 * When node 0 receives the token again, it can conclude termination, if 
+		 * - node 0 is passive and white, 
+		 * - the token is white, and it's value is 0
 		 */
-		termination_detected(node_id);
-		return -1;
+		if (msg_counter.color == White && msg_accum.color == White && msg_accum.count == 0) {
+			termination_detected(node_id);
+			return -1;
+		}
+		/* Otherwise, node 0 may start a new probe. */
+		else {
+			msg_accum.count = 0;
+			msg_accum.color = White;
+		}
 	}
 
-	return 0;	
+	send_msg_counter((node_id + 1)%node_count);
+	
+	return 0;
 }
 
 /** 
- * @brief Updates message counters after sending message to another node.
+ * @brief Processes received token (message counter accumulator)
  * 
- * @param node Node to which message was sent
+ * @param new_accum Accumulator data (counter and color)
  */
-static void msg_count_sent(int node)
+static void msg_count_accum(struct MsgCount *new_accum)
 {
-	msg_counters[node]++;
-	mpi_dprintf("ON SEND ");
-	print_msg_counters();
+	msg_accum = *new_accum;
+	has_accum = 1;
+
+	mpi_dprintf("ACCUM   ");
+	print_msg_counter();
 }
 
 /** 
- * @brief Updates message counters after received message has been processed.
- *
- * @return 0 if distributed system still running, -1 if termination has been detected.
+ * @brief Updates message counter after sending message to another node.
+ */
+static void msg_count_sent()
+{
+	msg_counter.count++;
+	mpi_dprintf("ON SEND ");
+	print_msg_counter();
+}
+
+/** 
+ * @brief Updates message counter after receiving message from another node.
  */
 static void msg_count_recv()
 {
-	msg_counters[node_id]--;
+	msg_counter.count--;
+	/* When a node receives a message, the node turns black. */
+	msg_counter.color = Black;
+
 	mpi_dprintf("ON RECV ");
-	print_msg_counters();
-	termination_check_pending = 1;
+	print_msg_counter();
 }
 
 /** 
@@ -340,7 +361,7 @@ static void queue_new_state(struct State *state)
 		mpi_async_queue_buf(&sendq, buf_no, STATESIZE(state), MPI_CHAR, state_node, TagState);
 		mpi_dprintf("[SENT]\n");
 		trace_state_send(state, state_node);
-		msg_count_sent(state_node);
+		msg_count_sent();
 	}
 	else if (state_hash_add(state)) {
 		/* Local state */
@@ -363,7 +384,7 @@ union Message {
 	 * Message carries other node's message counters.
 	 * @sa TagMsgCount
 	 */
-	int msg_count_accum[0];
+	struct MsgCount msg_accum;
 	/**
 	 * Message carries termination request.
 	 * In this case, it contains number of node that detected termination.
@@ -371,44 +392,6 @@ union Message {
 	 */
 	int termination_originator;
 };
-
-/** 
- * @brief Processes incoming MPI message.
- * 
- * Classifies received messages and updates counters, if needed.
- * 
- * @param msg Message received
- * @param status MPI_Status of receive operation (contains message tag and source)
- * 
- * @return Message classification
- */
-static 
-enum { 	
-	NewState,					///< Message carries new state (already added to local hash)
-	OldState,					///< Message carries old state (was present in hash already)
-	NoState,					///< Message carries control data, poll further
-	Terminate,					///< Message was a termination request, stop polling.
-} process_msg(union Message *msg, const MPI_Status *status)
-{
-	switch (status->MPI_TAG) {
-	case TagTerminate:
-		/* Termination detected by another node
-		 */
-		termination_detected(msg->termination_originator);
-		return Terminate;
-
-	case TagState:
-		return state_hash_add(&msg->state) ? NewState : OldState;
-
-	case TagMsgCount:
-		post_msg_counters_update(msg->msg_count_accum);
-		return NoState;
-
-	default:
-		printf("ERROR: unexpected message tag (%d)\n", status->MPI_TAG);
-		assert(/* invalid message tag */ 0);
-	}
-}
 
 /** 
  * @brief Reclaims last received message buffer.
@@ -429,9 +412,52 @@ static void release_last_msg()
  */
 static void put_state()
 {
-	if (last_buf_no != -1) {
+	if (last_buf_no != -1)
 		release_last_msg();
+}
+
+/** 
+ * @brief Processes incoming MPI message.
+ * 
+ * Classifies received messages and updates counters, if needed.
+ * 
+ * @param msg Message received
+ * @param status MPI_Status of receive operation (contains message tag and source)
+ * 
+ * @return Message classification
+ */
+static 
+enum { 	
+	NewState,					///< Message carries new state (already added to local hash)
+	OldState,					///< Message carries old state (was present in hash, already released)
+	NoState,					///< Message carries control data, poll further
+	Terminate,					///< Message was a termination request, stop polling.
+} process_msg(union Message *msg, const MPI_Status *status)
+{
+	switch (status->MPI_TAG) {
+	case TagTerminate:
+		/* Termination detected by another node
+		 */
+		termination_detected(msg->termination_originator);
+		return Terminate;
+
+	case TagState:
 		msg_count_recv();
+		if (state_hash_add(&msg->state)) 
+			return NewState;
+		else {
+			put_state();
+			return OldState;
+		}
+
+	case TagMsgCount:
+		msg_count_accum(&msg->msg_accum);
+		release_last_msg();
+		return NoState;
+
+	default:
+		printf("ERROR: unexpected message tag (%d)\n", status->MPI_TAG);
+		assert(/* invalid message tag */ 0);
 	}
 }
 
@@ -462,16 +488,9 @@ static struct State *get_state(void)
 		if (last_buf_no != -1) {
 			switch (process_msg(MPI_ASYNC_BUF(&recvq, last_buf_no, union Message), 
 								MPI_ASYNC_STATUS(&recvq, last_buf_no))) {
-			case NewState:
-				return state;
-			case Terminate:
-				return NULL;
-			case OldState:
-				put_state();
-				break;
-			case NoState:
-				release_last_msg();
-				break;
+			case NewState:	return state;
+			case Terminate:	return NULL;
+			default:		break;
 			}
 		}
 	} while (last_buf_no != -1);
@@ -483,7 +502,7 @@ static struct State *get_state(void)
 		return state;
 
 	/*
-	 * Local actions done -- check for termination
+	 * Inactive: check if need to pass message counter to next node
 	 */
 	if (termination_check() < 0)
 		return NULL;
@@ -497,20 +516,13 @@ static struct State *get_state(void)
 
 		switch (process_msg(MPI_ASYNC_BUF(&recvq, last_buf_no, union Message), 
 							MPI_ASYNC_STATUS(&recvq, last_buf_no))) {
-		case NewState:
-			return state;
-		case Terminate:
-			return NULL;
-		case OldState:
-			put_state();
-			break;
-		case NoState:
-			release_last_msg();
-			break;
+		case NewState:	return state;
+		case Terminate:	return NULL;
+		default:		break;
 		}
 		
 		/*
-		 * Nothing to do again -- check for termination
+		 * Inactive: check if need to pass message counter to next node
 		 */
 		if (termination_check() < 0)
 			return NULL;
@@ -535,10 +547,7 @@ static void dfs(void)
 
 	trace_start();
 
-	init_msg_counters();
-	/* first node initiates termination detection algorithm */
-	if (node_id == 0)
-		send_msg_counters(1);
+	init_msg_counter();
 
 	state_dprintf("Initial state: ");
 	init_state = create_init_state();
