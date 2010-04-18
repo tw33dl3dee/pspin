@@ -344,6 +344,8 @@ static void queue_new_state(struct State *state)
 		state_dprintf(" - ADDED");
 		BFS_ADD(state);
 	}
+	else
+		state_dprintf(" - OLD");
 	dprintf("\n");
 }
 

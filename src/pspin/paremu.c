@@ -88,10 +88,11 @@ static void queue_new_state(struct State *state)
 {
 	int is_new = state_hash_add(state);
 	if (is_new) {
-		state_dprintf(" - ADDED");
+		state_dprintf(" - ADDED\n");
 		BFS_ADD(state);
 	}
-	state_dprintf("\n");
+	else
+		state_dprintf(" - OLD\n");
 }
 
 /** 
