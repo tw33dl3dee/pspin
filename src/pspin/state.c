@@ -161,7 +161,7 @@ do_transition(int pid, int dest_ip,
 	current = PROC_BY_OFFSET(state, current_offset);	
 #define ASSERT(expr, repr)									\
 	if (!(expr)) {											\
-		iprintf(  "ASSERTION `%s' FAILED\n", repr);			\
+		iprintf(  "ASSERTION VIOLATED: %s\n", repr);			\
 		aborted = TransitionCausedAbort;					\
 	}
 #define PRINTF(fmt, args...)					\
