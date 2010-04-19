@@ -7,6 +7,7 @@
  * 
  */
 
+#include "config.h"
 #include "state.h"
 #include "state_hash.h"
 #include "debug.h"

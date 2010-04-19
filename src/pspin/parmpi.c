@@ -17,6 +17,7 @@
 #include <time.h>
 #include <unistd.h>
 
+#include "config.h"
 #include "state.h"
 #include "state_hash.h"
 #include "bfs.h"

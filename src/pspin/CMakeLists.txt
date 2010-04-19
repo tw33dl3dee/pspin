@@ -36,7 +36,7 @@ add_custom_target(mpirun
 
 include_directories(${MPI_INCLUDE_PATH})
 
-add_definitions(-DSTATEGEN_FILE=\"${STATEGEN_FILE}\" -DNODECOUNT=4 -UENDSTATE -DSTATE_PARTITION_HASH -USTATE_PARTITION_FIRST_PROC)
+add_definitions(-DSTATEGEN_FILE=\"${STATEGEN_FILE}\")
 
 add_executable(pspin-mpi ${PSPIN_SRC} ${PARMPI_SRC})
 target_link_libraries(pspin-mpi ${MPI_LIBRARIES})
@@ -50,6 +50,9 @@ set_target_properties(pspin-mpi
 add_executable(pspin-emu ${PSPIN_SRC} ${PAREMU_SRC})
 set_target_properties(pspin-emu 
   PROPERTIES COMPILE_DEFINITIONS_DEBUG "${DEBUG_FLAGS}"
+)
+set_target_properties(pspin-emu 
+  PROPERTIES COMPILE_DEFINITIONS "EMULATION"
 )
 
 enable_distclean(pspin)

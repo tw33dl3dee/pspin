@@ -16,6 +16,7 @@
 #include <string.h>
 #include <time.h>
 
+#include "config.h"
 #include "state.h"
 #include "state_hash.h"
 #include "bfs.h"

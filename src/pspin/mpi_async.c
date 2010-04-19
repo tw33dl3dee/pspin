@@ -11,6 +11,7 @@
 #include <assert.h>
 #include <stdio.h>
 
+#include "config.h"
 #include "mpi_async.h"
 #include "debug.h"
 

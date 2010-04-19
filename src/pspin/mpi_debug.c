@@ -11,6 +11,8 @@
 #include <stdio.h>
 #include <assert.h>
 #include <mpi.h>
+
+#include "config.h"
 #include "debug.h"
 #include "mpi_tags.h"
 

@@ -18,7 +18,7 @@
 /**
  * BFS queue
  */
-extern struct  State** bfs_queue;
+extern struct State** bfs_queue;
 /**
  * Pointer to next element after queue top
  */

@@ -9,6 +9,7 @@
 
 #include <stdlib.h>
 
+#include "config.h"
 #include "bfs.h"
 
 struct State** bfs_queue = NULL;

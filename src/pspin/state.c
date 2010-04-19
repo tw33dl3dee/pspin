@@ -10,6 +10,7 @@
 
 #include <assert.h>
 
+#include "config.h"
 #include "state.h"
 #include "debug.h"
 
