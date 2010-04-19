@@ -15,16 +15,15 @@ set_source_files_properties(${PSPIN_SRC} ${PAREMU_SRC} ${PARMPI} PROPERTIES
   OBJECT_DEPENDS ${STATEGEN_FILE}
 )
 
+if (NOT EXISTS ${PROMELA_FILE})
+  message(FATAL_ERROR "You must create symlink ${PROMELA_MODEL} to a file with PROMELA model")
+endif()
+
 add_custom_command(OUTPUT ${STATEGEN_FILE}
   DEPENDS ${PROMELA_FILE} ${PMLPARSE_DIR}/*.py*
   COMMAND ./pmlparse.py ${PROMELA_FILE} ${STATEGEN_FILE}
   WORKING_DIRECTORY ${PMLPARSE_DIR}
   COMMENT "Parsing ${PROMELA_MODEL}"
-)
-
-add_custom_command(OUTPUT ${PROMELA_MODEL}
-  COMMAND echo "You must create symlink ${PROMELA_MODEL}" && exit 1
-  COMMENT "Checking ${PROMELA_MODEL} existence"
 )
 
 set(MPI_TEST_NODE_COUNT 4)
