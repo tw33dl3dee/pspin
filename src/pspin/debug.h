@@ -10,6 +10,7 @@
  * 
  *  - [MPI_DEBUG]   - debug MPI
  *  - [STATE_DEBUG] - debug statespace generation
+ *  - [HASH_DEBUG]  - debug hashtable operations
  *
  * Logging must be globally enabled by defining DEBUG macro.
  * If DEBUG is not defined, logging is turned off in whole program.
@@ -35,6 +36,12 @@
 #else
 #	define state_dprintf (void)
 #	define dump_dprintf  (void)
+#endif
+
+#ifdef HASH_DEBUG
+#	define hash_dprintf dprintf
+#else
+#	define hash_dprintf (void)
 #endif
 
 #ifdef DEBUG

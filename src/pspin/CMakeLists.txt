@@ -8,7 +8,7 @@ set(PSPIN_SRC state.c state.h state_hash.c state_hash.h bfs.c bfs.h)
 set(PAREMU_SRC paremu.c)
 set(PARMPI_SRC parmpi.c mpi_async.c mpi_async.h mpi_debug.c)
 
-set(DEBUG_FLAGS STATE_DEBUG)
+set(DEBUG_FLAGS STATE_DEBUG;HASH_DEBUG)
 set(MPI_DEBUG_FLAGS ${DEBUG_FLAGS};MPI_DEBUG)
 
 set_source_files_properties(${PSPIN_SRC} ${PAREMU_SRC} ${PARMPI} PROPERTIES

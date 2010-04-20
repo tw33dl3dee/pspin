@@ -43,8 +43,8 @@ static void trace_state_new(struct State *state)
 		state_dprintf("Message: node %d --> node %d \n", cur_node_idx, node_idx);
 		xnode_count++;
 	}
-	if (BFS_LEN() > max_bfs_size)
-		max_bfs_size = BFS_LEN();
+	if (BFS_CUR_LEN() > max_bfs_size)
+		max_bfs_size = BFS_CUR_LEN();
 	trans_count++;
 }
 
@@ -78,6 +78,8 @@ static void trace_summary()
 	iprintf("\tBFS max size:      %d (%.2f%% st, %.2f%% tr)\n",
 			max_bfs_size, 
 			max_bfs_size*100.f/state_count, max_bfs_size*100.f/trans_count);
+
+	state_hash_stats();
 }
 
 /** 
@@ -88,12 +90,8 @@ static void trace_summary()
 static void queue_new_state(struct State *state)
 {
 	int is_new = state_hash_add(state);
-	if (is_new) {
-		state_dprintf(" - ADDED\n");
+	if (is_new)
 		BFS_ADD(state);
-	}
-	else
-		state_dprintf(" - OLD\n");
 }
 
 /** 

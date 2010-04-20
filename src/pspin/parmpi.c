@@ -103,8 +103,8 @@ static void trace_state_begin(struct State *state)
  */
 static void trace_state_new(struct State *state)
 {
-	if (BFS_LEN() > max_bfs_size)
-		max_bfs_size = BFS_LEN();
+	if (BFS_CUR_LEN() > max_bfs_size)
+		max_bfs_size = BFS_CUR_LEN();
 	trans_count++;
 }
 
@@ -147,6 +147,8 @@ static void trace_summary()
 	iprintf("\tBFS max size:      %d (%.2f%% states, %.2f%% trans)\n",
 			max_bfs_size, 
 			max_bfs_size*100.f/state_count, max_bfs_size*100.f/trans_count);
+
+	state_hash_stats();
 }
 
 /**
@@ -337,18 +339,13 @@ static void queue_new_state(struct State *state)
 		int buf_no = mpi_async_get_buf(&sendq, 0);
 		COPY_STATE(MPI_ASYNC_BUF(&sendq, buf_no, void), state);
 		mpi_async_queue_buf(&sendq, buf_no, STATESIZE(state), MPI_CHAR, state_node, TagState);
-		mpi_dprintf("[SENT]");
+		mpi_dprintf("[SENT]\n");
 		trace_state_send(state, state_node);
 		msg_count_sent();
 	}
-	else if (state_hash_add(state)) {
+	else if (state_hash_add(state))
 		/* Local state */
-		state_dprintf(" - ADDED");
 		BFS_ADD(state);
-	}
-	else
-		state_dprintf(" - OLD");
-	dprintf("\n");
 }
 
 /**

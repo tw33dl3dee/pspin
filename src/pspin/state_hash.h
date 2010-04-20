@@ -10,12 +10,9 @@
 #ifndef _HASH_H_
 #define _HASH_H_
 
-/**
- * Initial size of hashtable
- */
-#define HASH_SIZE (1048576*128 + 1)
+typedef unsigned long long state_hash_t;
 
-typedef unsigned long state_hash_t;
+#define HASH_FMT "%llu"
 
 /**
  * Bernstein hash
@@ -35,6 +32,8 @@ typedef unsigned long state_hash_t;
 #define BIT_RESET(bits, number) ((bits)[(number)/8] &= ~(1 << (number)%8))
 
 extern int state_hash_add(struct State *state);
+extern int state_hash_init();
+extern void state_hash_stats(void);
 
 #if defined(STATE_PARTITION_HASH)
 #	define STATE_NODE_IDX(state, node_count) (STATE_HASH(state)%(node_count))

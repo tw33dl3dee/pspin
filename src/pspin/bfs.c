@@ -12,5 +12,12 @@
 #include "config.h"
 #include "bfs.h"
 
-struct State** bfs_queue = NULL;
-struct State** bfs_top = NULL;
+#ifdef FULLSTATE
+
+void *statespace = NULL;
+void *bfs_bottom = NULL;	// struct State *
+void *bfs_top = NULL;		// struct State *
+void *bfs_ceil = NULL;
+int bfs_len = 0;
+
+#endif

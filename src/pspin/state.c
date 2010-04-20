@@ -13,6 +13,7 @@
 #include "config.h"
 #include "state.h"
 #include "debug.h"
+#include "bfs.h"
 
 /** 
  * @brief Initialize transition tables
@@ -41,7 +42,7 @@ static struct State *alloc_state(size_t svsize, int zero)
 {
 	struct State *state; 
 	//state_dprintf(" (alloc new state of size %d) ", svsize);
-	state = malloc(svsize); 
+	state = BFS_ALLOC(svsize);
 	if (state != NULL) {
 		if (zero)
 			memset(state, 0, svsize);
@@ -150,6 +151,8 @@ do_transition(int pid, int dest_ip,
 #define RECORD_STEP(msg)									\
 	state_dprintf(" PASSED\n");								\
 	state_dprintf("Performing step: <<< %s >>>\n", msg);	
+	/** @attention Check NULL pointer returned by copy_state
+	 */
 #define NEW_STATE()											\
 	*next_state = copy_state(state);						\
 	current_offset = PROC_OFFSET(current, state);			\
