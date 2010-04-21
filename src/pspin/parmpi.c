@@ -343,9 +343,12 @@ static void queue_new_state(struct State *state)
 		trace_state_send(state, state_node);
 		msg_count_sent();
 	}
-	else if (state_hash_add(state))
-		/* Local state */
-		BFS_ADD(state);
+	else 
+		/*
+		 * Local state;
+		 * this will already push new state to BFS.
+		 */
+		state_hash_add(state, /* don't copy */ 0);
 }
 
 /**
@@ -384,14 +387,17 @@ static void release_last_msg()
  * @brief Releases last state received by get_state().
  *
  * Releases buffer hold by state and updates message counters.
+ * @attention sets last_buf_no to -1 so that subsequent calls do nothing.
  * 
  * @sa get_state
  * @sa release_last_msg
  */
 static void put_state()
 {
-	if (last_buf_no != -1)
+	if (last_buf_no != -1) {
 		release_last_msg();
+		last_buf_no = -1;
+	}
 }
 
 /** 
@@ -406,12 +412,14 @@ static void put_state()
  */
 static 
 enum { 	
-	NewState,					///< Message carries new state (already added to local hash)
+	NewState,					///< Message carries new state (already added to local hash and pushed to BFS)
 	OldState,					///< Message carries old state (was present in hash, already released)
 	NoState,					///< Message carries control data, poll further
 	Terminate,					///< Message was a termination request, stop polling.
 } process_msg(union Message *msg, const MPI_Status *status)
 {
+	int is_new;
+
 	switch (status->MPI_TAG) {
 	case TagTerminate:
 		/* Termination detected by another node
@@ -421,12 +429,9 @@ enum {
 
 	case TagState:
 		msg_count_recv();
-		if (state_hash_add(&msg->state)) 
-			return NewState;
-		else {
-			put_state();
-			return OldState;
-		}
+		is_new = state_hash_add(&msg->state, /* copy to statespace */ 1);
+		put_state();
+		return is_new ? NewState : OldState;
 
 	case TagMsgCount:
 		msg_count_accum(&msg->msg_accum);
@@ -457,21 +462,19 @@ static struct State *get_state(void)
 
 	/*
 	 * First check if there are incoming messages 
-	 * @todo Drain MPI queue into local queue instead of deque/put
 	 */
-	do {
+	for (;;) {
 		last_buf_no = mpi_async_deque_buf(&recvq, 1);
-		state = MPI_ASYNC_BUF(&recvq, last_buf_no, struct State);
-
 		if (last_buf_no != -1) {
 			switch (process_msg(MPI_ASYNC_BUF(&recvq, last_buf_no, union Message), 
 								MPI_ASYNC_STATUS(&recvq, last_buf_no))) {
-			case NewState:	return state;
+			case NewState:	return BFS_TAKE();
 			case Terminate:	return NULL;
-			default:		break;
+			default:		continue;
 			}
 		}
-	} while (last_buf_no != -1);
+		else break;
+	}
 
 	/*
 	 * Then check local queue 
@@ -490,11 +493,9 @@ static struct State *get_state(void)
 	 */
 	for (;;) {
 		last_buf_no = mpi_async_deque_buf(&recvq, 0);
-		state = MPI_ASYNC_BUF(&recvq, last_buf_no, struct State);
-
 		switch (process_msg(MPI_ASYNC_BUF(&recvq, last_buf_no, union Message), 
 							MPI_ASYNC_STATUS(&recvq, last_buf_no))) {
-		case NewState:	return state;
+		case NewState:	return BFS_TAKE();
 		case Terminate:	return NULL;
 		default:		break;
 		}

@@ -11,6 +11,7 @@
 #include "state.h"
 #include "state_hash.h"
 #include "debug.h"
+#include "bfs.h"
 
 #ifdef FULLSTATE
 
@@ -50,12 +51,15 @@ int state_hash_init()
 
 /** 
  * @brief Lookups state and hash table, adding new if none was found.
+ *
+ * New state is immediately pushed to BFS.
  * 
  * @param state state structure
+ * @param do_copy If non-zero, new state is copied before adding it to hash
  * 
  * @return 1 if new state was added, 0 if it was present.
  */
-int state_hash_add(struct State *state)
+int state_hash_add(struct State *state, int do_copy)
 {
 	state_hash_t hash = STATE_HASH(state) % HASHTABLE_SIZE;
 	state_hash_t offset = 0;
@@ -64,6 +68,9 @@ int state_hash_add(struct State *state)
 	int had_collisions = 0;
 
 	hash_dprintf("State hash (" HASH_FMT ")", hash);
+
+	dump_dprintf(" ");
+	hexdump_state(state);
 
 	for (st = state_hashtable[hash];
 		 st != NULL 
@@ -83,6 +90,9 @@ int state_hash_add(struct State *state)
 		hash += SQR(++offset);
 		hash %= HASHTABLE_SIZE;
 		hash_dprintf(", NEXT " HASH_FMT "}", hash);
+
+		dump_dprintf(" := ");
+		hexdump_state(st);
 	}
 
 	if (had_collisions)
@@ -93,9 +103,10 @@ int state_hash_add(struct State *state)
 	 * otherwise same state was found in hash.
 	 */
 	if (st == NULL) {
-		hash_dprintf(" - ADDED");
 		found = 1;
-		state_hashtable[hash] = state;
+		state_hashtable[hash] = do_copy ? copy_state(state) : state;
+		BFS_ADD(state_hashtable[hash]);
+		hash_dprintf(" - ADDED");
 		++used_hash_entries;
 	} else
 		hash_dprintf(" - OLD");

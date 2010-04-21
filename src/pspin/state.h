@@ -105,7 +105,9 @@ enum TransitionResult {
 
 transitions_t init_transitions(void);
 struct State *create_init_state(void);
+struct State *copy_state(const struct State *state);
 void dump_state(struct State *state);
+void hexdump_state(struct State *state);
 
 enum TransitionResult 
 do_transition(int pid, int dest_ip,

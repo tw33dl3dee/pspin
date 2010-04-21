@@ -31,7 +31,7 @@ typedef unsigned long long state_hash_t;
 #define BIT_SET(bits, number)   ((bits)[(number)/8] |=  (1 << (number)%8))
 #define BIT_RESET(bits, number) ((bits)[(number)/8] &= ~(1 << (number)%8))
 
-extern int state_hash_add(struct State *state);
+extern int state_hash_add(struct State *state, int do_copy);
 extern int state_hash_init();
 extern void state_hash_stats(void);
 

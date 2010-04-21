@@ -98,7 +98,7 @@ struct State *create_init_state(void)
 /** 
  * @brief Copies state structure
  */
-static struct State *copy_state(const struct State *state)
+struct State *copy_state(const struct State *state)
 {
 	struct State *new_state = alloc_state(STATESIZE(state), 0);
 	if (new_state != NULL)
@@ -231,6 +231,8 @@ void dump_state(struct State *state)
 #include STATEGEN_FILE
 #undef  STATE_DUMP
 
+	dump_dprintf("-\tHASH:      " HASH_FMT "\n", STATE_HASH(state) % HASHTABLE_SIZE);
+
 	int pid = 0;
 	FOREACH_PROCESS(state, ++pid) {
 		dump_dprintf("\t-Process %d:\n", pid);
@@ -238,4 +240,19 @@ void dump_state(struct State *state)
 #include STATEGEN_FILE
 #undef  PROCSTATE_DUMP
 	}
+}
+
+/** 
+ * @brief Dumps state bytes in hexadecimal view
+ * 
+ * @param state State to dump
+ */
+void hexdump_state(struct State *state) 
+{
+	unsigned char *data = (unsigned char *)state;
+
+	dump_dprintf("(%d)<%02X", STATESIZE(state), data[0]);
+	for (int i = 1; i < STATESIZE(state); ++i)
+		dump_dprintf(" %02X", data[i]);
+	dump_dprintf(">");
 }

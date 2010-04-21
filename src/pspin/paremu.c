@@ -89,9 +89,10 @@ static void trace_summary()
  */
 static void queue_new_state(struct State *state)
 {
-	int is_new = state_hash_add(state);
-	if (is_new)
-		BFS_ADD(state);
+	/*
+	 * This will already push new state to BFS.
+	 */
+	state_hash_add(state, /* don't copy */ 0);
 }
 
 /** 
