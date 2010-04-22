@@ -407,16 +407,17 @@ static void put_state()
  * 
  * @param msg Message received
  * @param status MPI_Status of receive operation (contains message tag and source)
+ * @param new_state Location to store pointer to new state to (defined only if return value is NewState)
  * 
  * @return Message classification
  */
 static 
 enum { 	
-	NewState,					///< Message carries new state (already added to local hash and pushed to BFS)
+	NewState,					///< Message carries new state (already added to local hash, returned in *new_state)
 	OldState,					///< Message carries old state (was present in hash, already released)
 	NoState,					///< Message carries control data, poll further
 	Terminate,					///< Message was a termination request, stop polling.
-} process_msg(union Message *msg, const MPI_Status *status)
+} process_msg(union Message *msg, const MPI_Status *status, struct State **new_state)
 {
 	int is_new;
 
@@ -429,9 +430,32 @@ enum {
 
 	case TagState:
 		msg_count_recv();
-		is_new = state_hash_add(&msg->state, /* copy to statespace */ 1);
+
+#ifdef NETWORK_TO_LOCAL_QUEUE
+		/*
+		 * Copy state from MPI buffer to local statespace
+		 */
+		is_new = state_hash_add(&msg->state, /* copy */ 1);
+		if (is_new) {
+			*new_state = BFS_TAKE();
+			put_state();
+			return NewState;
+		}
+#else
+		/*
+		 * Use states directly in MPI buffer, don't release it 
+		 */
+		is_new = state_hash_add(&msg->state, /* don't copy */ 0);
+		if (is_new) {
+			*new_state = &msg->state;
+			return NewState;
+		}
+#endif
+		/*
+		 * MPI buffer with old state is released anyway
+		 */
 		put_state();
-		return is_new ? NewState : OldState;
+		return OldState;
 
 	case TagMsgCount:
 		msg_count_accum(&msg->msg_accum);
@@ -467,8 +491,8 @@ static struct State *get_state(void)
 		last_buf_no = mpi_async_deque_buf(&recvq, 1);
 		if (last_buf_no != -1) {
 			switch (process_msg(MPI_ASYNC_BUF(&recvq, last_buf_no, union Message), 
-								MPI_ASYNC_STATUS(&recvq, last_buf_no))) {
-			case NewState:	return BFS_TAKE();
+								MPI_ASYNC_STATUS(&recvq, last_buf_no), &state)) {
+			case NewState:	return state;
 			case Terminate:	return NULL;
 			default:		continue;
 			}
@@ -494,8 +518,8 @@ static struct State *get_state(void)
 	for (;;) {
 		last_buf_no = mpi_async_deque_buf(&recvq, 0);
 		switch (process_msg(MPI_ASYNC_BUF(&recvq, last_buf_no, union Message), 
-							MPI_ASYNC_STATUS(&recvq, last_buf_no))) {
-		case NewState:	return BFS_TAKE();
+							MPI_ASYNC_STATUS(&recvq, last_buf_no), &state)) {
+		case NewState:	return state;
 		case Terminate:	return NULL;
 		default:		break;
 		}
@@ -598,8 +622,13 @@ static void dfs(void)
 #endif
 
 		state_dprintf("PUT STATE\n");
+#ifndef NETWORK_TO_LOCAL_QUEUE
+		/*
+		 * No need to re-release buffer when states are copied to statespace
+		 */
 		put_state();
-	}
+#endif
+}
 
  aborted:
 	state_dprintf("---------------------------------\n");
