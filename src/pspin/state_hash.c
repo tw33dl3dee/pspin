@@ -13,6 +13,8 @@
 #include "debug.h"
 #include "bfs.h"
 
+#include <limits.h>
+
 #ifdef FULLSTATE
 
 /*
@@ -30,6 +32,9 @@ static struct State **state_hashtable;
 static int used_hash_entries;
 static int hash_collisions;
 static int hash_collision_shifts;
+static size_t min_state_size = UINT_MAX;
+static size_t max_state_size;
+static size_t total_state_size;
 
 /** 
  * @brief Initializes hash table, allocating memory for it.
@@ -106,6 +111,11 @@ int state_hash_add(struct State *state, int do_copy)
 		found = 1;
 		state_hashtable[hash] = do_copy ? copy_state(state) : state;
 		BFS_ADD(state_hashtable[hash]);
+
+		total_state_size += STATESIZE(state);
+		min_state_size = (min_state_size < STATESIZE(state)) ? min_state_size : STATESIZE(state);
+		max_state_size = (max_state_size > STATESIZE(state)) ? max_state_size : STATESIZE(state);
+
 		hash_dprintf(" - ADDED");
 		++used_hash_entries;
 	} else
@@ -129,6 +139,11 @@ void state_hash_stats(void)
 			hash_collisions, hash_collisions*100.f/used_hash_entries);
 	iprintf("\t\tAvg col. len.: %.1f\n", 
 			hash_collision_shifts*1.f/hash_collisions);
+
+	iprintf("\tState size:\n");
+	iprintf("\t\tMin:           %d\n", min_state_size);
+	iprintf("\t\tMax:           %d\n", max_state_size);
+	iprintf("\t\tAvg:           %.1f\n", total_state_size*1.0f/used_hash_entries);
 }
 
 #else
