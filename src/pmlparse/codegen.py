@@ -107,7 +107,11 @@ class Codegen(object):
 struct State {
     $fields;
 }"""
-        fields = [v.decl() for v in sorted(self._vars.values())]
+        # sort variables by name, then by base type alignment so that
+        # they are aligned with minimal padding (size decreasing)
+        fields = [v.decl() for v in sorted(sorted(self._vars.values()),
+                                           key=lambda v: v.type.c_align(),
+                                           reverse=True)]
         fields.append("char _procs[0]")
         return Template(state_tpl).substitute(fields = ";\n\t".join(fields))
 

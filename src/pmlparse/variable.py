@@ -7,20 +7,26 @@ class Type(object):
 
     c_types = {'bit': 'unsigned', 'bool': 'unsigned', 'byte': 'unsigned char',
                'short': 'short', 'int': 'int', 'pid':'char'}
-    c_sizes = {'bit': 1, 'bool': 1}
-    
+    c_bitsizes = {'bit': 1, 'bool': 1}
+    # Need not be actual alignments, see c_align()
+    c_aligns = {'unsigned':4, 'int':4, 'short':2, 'unsigned char':1, 'char':1}
+    # Maximum possible alignment (used for special variable to enforce order)
+    MAX_ALIGN = 256
+
     printf_codes = {}  # no special cases here
     printf_types = {}  # no special cases here
-    
-    def __init__(self, name):
+
+    def __init__(self, name, align=None):
         """
 
         Arguments:
         - `name`: type name (str)
+        - `align`: type alignment requirement (instead of default, given by c_aligns)
         """
         if not name in self.c_types:
             raise RuntimeError, "Unknown type `%s'" % name
         self._name = name
+        self._align = align
 
     def __str__(self):
         return self._name
@@ -30,12 +36,20 @@ class Type(object):
         """
         return self.c_types[self._name]
 
+    def c_align(self):
+        """Not actual align (depends on platform) but score telling
+        how this type is expected to be aligned
+
+        Bigger values mean higher alignment requirement
+        """
+        return self._align or self.c_aligns[self.c_type()]
+
     def c_bitsize(self):
         """Bit-size of C type corresponding to this type (int)
 
         Returns 0 if type has no fixed bit-size.
         """
-        return self.c_sizes.get(self._name)
+        return self.c_bitsizes.get(self._name)
 
     def printf_format(self):
         """printf specifier to use for this type (str)
