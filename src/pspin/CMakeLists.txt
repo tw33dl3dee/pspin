@@ -11,7 +11,7 @@ set(PARMPI_SRC parmpi.c mpi_async.c mpi_async.h mpi_debug.c)
 set(DEBUG_FLAGS STATE_DEBUG;HASH_DEBUG)
 set(MPI_DEBUG_FLAGS ${DEBUG_FLAGS};MPI_DEBUG)
 
-set_source_files_properties(${PSPIN_SRC} ${PAREMU_SRC} ${PARMPI} PROPERTIES
+set_source_files_properties(${PSPIN_SRC} ${PAREMU_SRC} ${PARMPI_SRC} PROPERTIES
   OBJECT_DEPENDS ${STATEGEN_FILE}
 )
 
