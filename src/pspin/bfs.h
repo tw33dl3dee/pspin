@@ -12,9 +12,13 @@
 
 #include "config.h"
 
+#include "state.h"
+#include "state_hash.h"
+
 #ifdef FULLSTATE 
 #	include "bfs_fullstate.h"
 #else
+#	include "bfs_nostate.h"
 #endif
 
 #endif /* _BFS_H_ */

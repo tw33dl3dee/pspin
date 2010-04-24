@@ -4,19 +4,37 @@
  * @date   Tue Apr 20 00:43:49 2010
  * 
  * @brief  BFS queue operations for fullstate search.
+ *
+ * Statespace stores both visited states and BFS queue.
  * 
+ * visited states  ... | ... BFS queue ...  | ... free space <- BFS ceil
+ *                     V                    V
+ *                 BFS bottom            BFS top
+ *
  */
 
 #ifndef _BFS_FULLSTATE_H_
 #define _BFS_FULLSTATE_H_
 
-#include "state.h"
-#include "state_hash.h"
-
+/**
+ * Memory for storing states.
+ */
 extern void *statespace;
-extern void *bfs_bottom;	// struct State *
-extern void *bfs_top;		// struct State *
+/**
+ * Pointer to the first queued (not visited yet) state.
+ */
+extern void *bfs_bottom;
+/**
+ * Pointer to the beginning of free space after BFS queue.
+ */
+extern void *bfs_top;
+/**
+ * Pointer to the end of free space.
+ */
 extern void *bfs_ceil;
+/**
+ * Number of states currently in BFS queue.
+ */
 extern int bfs_len;
 
 #define BFS_INIT()														\
