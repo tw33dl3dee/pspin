@@ -23,7 +23,8 @@
  * 
  * @return Hash value
  */
-#define HASH(data, len, num) murmur_hash(data, len, 1<<(num))
+#define HASH(data, len, num)											\
+	murmur_hash(data, len, ((state_hash_t)1<<(num+1))+((state_hash_t)(-1)>>(num+1)))
 
 /** 
  * @brief N-th hash value of state

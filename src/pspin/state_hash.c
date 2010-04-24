@@ -245,7 +245,7 @@ int state_hash_add(struct State *state, enum HashAddAction add_action)
 	 * Check each bit, setting it to 1.
 	 */
 	for (int i = 0; i < BITSTATE_HASH_COUNT; 
-		 hash = STATE_HASH(state, ++i) % HASHTABLE_LENGTH) {
+		 ++i, hash = STATE_HASH(state, i) % HASHTABLE_LENGTH) {
 		hash_dprintf(" (" HASH_FMT ")", hash);
 		if (BIT_TEST(state_hashtable, hash))
 			++found;
