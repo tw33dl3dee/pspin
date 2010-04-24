@@ -214,13 +214,13 @@ static inline state_hash_t murmur_hash64(const void *key, size_t len,
 	const unsigned char * data2 = (const unsigned char*)data;
 
 	switch (len & 7) {
-	case 7: h ^= state_hash_t(data2[6]) << 48;
-	case 6: h ^= state_hash_t(data2[5]) << 40;
-	case 5: h ^= state_hash_t(data2[4]) << 32;
-	case 4: h ^= state_hash_t(data2[3]) << 24;
-	case 3: h ^= state_hash_t(data2[2]) << 16;
-	case 2: h ^= state_hash_t(data2[1]) << 8;
-	case 1: h ^= state_hash_t(data2[0]); h *= m;
+	case 7: h ^= (state_hash_t)data2[6] << 48;
+	case 6: h ^= (state_hash_t)data2[5] << 40;
+	case 5: h ^= (state_hash_t)data2[4] << 32;
+	case 4: h ^= (state_hash_t)data2[3] << 24;
+	case 3: h ^= (state_hash_t)data2[2] << 16;
+	case 2: h ^= (state_hash_t)data2[1] << 8;
+	case 1: h ^= (state_hash_t)data2[0]; h *= m;
 	}
 
 	h ^= h >> r;

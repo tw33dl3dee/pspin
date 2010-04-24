@@ -139,8 +139,8 @@ void state_hash_stats(void)
 			hash_collision_shifts*1.f/hash_collisions);
 
 	iprintf("\tState size:\n");
-	iprintf("\t\tMin:           %d\n", min_state_size);
-	iprintf("\t\tMax:           %d\n", max_state_size);
+	iprintf("\t\tMin:           %zd\n", min_state_size);
+	iprintf("\t\tMax:           %zd\n", max_state_size);
 	iprintf("\t\tAvg:           %.1f\n", total_state_size*1.0f/used_hash_entries);
 }
 
