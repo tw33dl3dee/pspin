@@ -97,5 +97,11 @@ extern void *bfs_current;
 #define BFS_CUR_LEN()							\
 	bfs_len
 
+/** 
+ * @brief BFS queue size (space occupied by queues states, in bytes)
+ */
+#define BFS_CUR_SIZE()									\
+	((bfs_top - statespace) + (bfs_ceil - bfs_current))
+
 
 #endif /* _BFS_QUESTATE_H_ */

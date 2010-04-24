@@ -27,7 +27,7 @@ static int states_per_node[NODECOUNT];
 static int state_count;
 static int trans_count;
 static int xnode_count;
-static int max_bfs_size;
+static int max_bfs_len;
 
 static void trace_state_begin(struct State *state)
 {
@@ -43,8 +43,8 @@ static void trace_state_new(struct State *state)
 		state_dprintf("Message: node %d --> node %d \n", cur_node_idx, node_idx);
 		xnode_count++;
 	}
-	if (BFS_CUR_LEN() > max_bfs_size)
-		max_bfs_size = BFS_CUR_LEN();
+	if (BFS_CUR_LEN() > max_bfs_len)
+		max_bfs_len = BFS_CUR_LEN();
 	trans_count++;
 }
 
@@ -55,7 +55,7 @@ static void trace_summary()
 	iprintf("Emulation summary:\n");
 
 	iprintf("\tTransitions taken: %d (%.1f/sec)\n"
-			"\tMessages passed:   %d (%.2f%%)\n",
+			"\tMessages passed:   %d (%.2f%% trans)\n",
 			trans_count, trans_count/run_time,
 			xnode_count, xnode_count*100.f/trans_count);
 
@@ -75,9 +75,9 @@ static void trace_summary()
 	iprintf("\t\tMin/max: %.2f\n", 
 			states_min*1.f/states_max);
 
-	iprintf("\tBFS max size:      %d (%.2f%% st, %.2f%% tr)\n",
-			max_bfs_size, 
-			max_bfs_size*100.f/state_count, max_bfs_size*100.f/trans_count);
+	iprintf("\tBFS queue len:     %d (%.2f%% states, %.2f%% trans)\n",
+			max_bfs_len, 
+			max_bfs_len*100.f/state_count, max_bfs_len*100.f/trans_count);
 
 	state_hash_stats();
 }

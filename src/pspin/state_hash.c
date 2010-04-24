@@ -44,6 +44,12 @@ static size_t max_state_size;
  * Average state size
  */
 static size_t total_state_size;
+#ifndef FULLSTATE
+/**
+ * Maximum size occupied by states on BFS queue
+ */
+static size_t max_bfs_state_size;
+#endif
 
 /** 
  * @brief Prints hash statistics: used entries, collisions, etc.
@@ -63,6 +69,14 @@ void state_hash_stats(void)
 	iprintf("\t\tMin:           %zd\n", min_state_size);
 	iprintf("\t\tMax:           %zd\n", max_state_size);
 	iprintf("\t\tAvg:           %.1f\n", total_state_size*1.0f/used_hash_entries);
+
+	iprintf("\tMemory usage:\n");
+	iprintf("\t\tHashtable:     %.1f MiB\n", hashtable_size*1.f/MiB);
+#ifdef FULLSTATE
+	iprintf("\t\tVisited:       %.1f MiB\n", total_state_size*1.f/MiB);
+#else
+	iprintf("\t\tBFS queue:     %.1f MiB\n", max_bfs_state_size*1.f/MiB);
+#endif
 }
 
 #if defined(FULLSTATE)
@@ -257,6 +271,8 @@ int state_hash_add(struct State *state, enum HashAddAction add_action)
 			state = copy_state(state);
 		case BfsAdd:
 			BFS_ADD(state);
+			if (max_bfs_state_size < BFS_CUR_SIZE())
+				max_bfs_state_size = BFS_CUR_SIZE();
 		case BfsNoAdd:
 			break;
 		}

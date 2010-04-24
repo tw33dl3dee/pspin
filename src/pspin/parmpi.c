@@ -76,7 +76,7 @@ static int ctrl_msg_count;
 /**
  * Maximum BFS queue length in use.
  */
-static int max_bfs_size;
+static int max_bfs_len;
 /**
  * Start time of run.
  */
@@ -103,8 +103,8 @@ static void trace_state_begin(struct State *state)
  */
 static void trace_state_new(struct State *state)
 {
-	if (BFS_CUR_LEN() > max_bfs_size)
-		max_bfs_size = BFS_CUR_LEN();
+	if (BFS_CUR_LEN() > max_bfs_len)
+		max_bfs_len = BFS_CUR_LEN();
 	trans_count++;
 }
 
@@ -144,9 +144,9 @@ static void trace_summary()
 			ctrl_msg_count, ctrl_msg_count*100.f/(ctrl_msg_count + state_msg_count));
 	iprintf("\tStates:            %d (%.1f/sec)\n",
 			state_count, state_count/run_time);
-	iprintf("\tBFS max size:      %d (%.2f%% states, %.2f%% trans)\n",
-			max_bfs_size, 
-			max_bfs_size*100.f/state_count, max_bfs_size*100.f/trans_count);
+	iprintf("\tBFS queue len:     %d (%.2f%% states, %.2f%% trans)\n",
+			max_bfs_len, 
+			max_bfs_len*100.f/state_count, max_bfs_len*100.f/trans_count);
 
 	state_hash_stats();
 }
