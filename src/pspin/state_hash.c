@@ -13,8 +13,6 @@
 #include "debug.h"
 #include "bfs.h"
 
-#include <limits.h>
-
 #ifdef FULLSTATE
 
 /*
@@ -66,7 +64,7 @@ int state_hash_init()
  */
 int state_hash_add(struct State *state, int do_copy)
 {
-	state_hash_t hash = STATE_HASH(state) % HASHTABLE_SIZE;
+	state_hash_t hash = STATE_HASH(state, 0) % HASHTABLE_SIZE;
 	state_hash_t offset = 0;
 	struct State *st;
 	int found = 0;
