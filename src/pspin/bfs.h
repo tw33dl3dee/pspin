@@ -15,6 +15,23 @@
 #include "state.h"
 #include "state_hash.h"
 
+/**
+ * Memory for storing states.
+ */
+extern void *statespace;
+/**
+ * Number of states currently in BFS queue.
+ */
+extern int bfs_len;
+/**
+ * Pointer to the beginning of free space after BFS queue.
+ */
+extern void *bfs_top;
+/**
+ * Pointer to the end of free space.
+ */
+extern void *bfs_ceil;
+
 #ifdef FULLSTATE 
 #	include "bfs_fullstate.h"
 #else

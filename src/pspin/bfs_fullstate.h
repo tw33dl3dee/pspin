@@ -7,6 +7,9 @@
  *
  * Statespace stores both visited states and BFS queue.
  * 
+ * New states are pushed at BFS top. As they are processed and become visited, 
+ * BFS bottom is advanced.
+ * 
  * visited states  ... | ... BFS queue ...  | ... free space <- BFS ceil
  *                     V                    V
  *                 BFS bottom            BFS top
@@ -17,26 +20,15 @@
 #define _BFS_FULLSTATE_H_
 
 /**
- * Memory for storing states.
- */
-extern void *statespace;
-/**
  * Pointer to the first queued (not visited yet) state.
  */
 extern void *bfs_bottom;
-/**
- * Pointer to the beginning of free space after BFS queue.
- */
-extern void *bfs_top;
-/**
- * Pointer to the end of free space.
- */
-extern void *bfs_ceil;
-/**
- * Number of states currently in BFS queue.
- */
-extern int bfs_len;
 
+/** 
+ * @brief Initializes statespace and BFS queue
+ *
+ * On error, returns from current function.
+ */
 #define BFS_INIT()														\
 	({																	\
 		statespace = calloc(1, STATESPACE_SIZE);						\
@@ -50,15 +42,36 @@ extern int bfs_len;
 		bfs_ceil = bfs_top + STATESPACE_SIZE;							\
 	})
 
-#define BFS_ALLOC(size)								\
+/** 
+ * @brief Allocates new state on BFS queue
+ * 
+ * After allocation a state, it's either fixated by BFS_ADD()
+ * or thrown away (and it's memory reused) by subsequent BFS_ALLOC().
+ * 
+ * @param size Size of new state
+ * 
+ * @return Pointer to allocated state
+ */
+#define BFS_ALLOC(size)							\
 	((bfs_top + size > bfs_ceil) ? NULL : bfs_top)
 
+/** 
+ * @brief Advances BFS top by the size of state on top of it
+ * 
+ * @param state State on top of BFS. It's memory must have been first
+ *              first allocated by BFS_ALLOC().
+ */
 #define BFS_ADD(state)							\
 	({											\
 		++bfs_len;								\
 		bfs_top += STATESIZE(state);			\
 	})
 
+/** 
+ * @brief Dequeues state from BFS
+ * 
+ * @return Pointer to state that was next in BFS queue (NULL if queue is empty)
+ */
 #define BFS_TAKE()								\
 	(BFS_CUR_LEN() ?							\
 	 ({											\
@@ -69,6 +82,9 @@ extern int bfs_len;
 	 })											\
 	 : NULL)
 
+/** 
+ * @brief BFS queue length (number of states queued)
+ */
 #define BFS_CUR_LEN()							\
 	bfs_len
 

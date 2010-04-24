@@ -41,6 +41,19 @@ struct Process {
 #include STATEGEN_FILE
 #undef  PROC_DECL
 
+/**
+ * Size required to hold state's size
+ */
+#define STATESIZE_SIZE (sizeof(STATESIZE(NULL)))
+
+/**
+ * Typename that stores state's size
+ */
+#define STATESIZE_TYPE (__typeof__(STATESIZE(NULL)))
+
+/**
+ * Copies state structure as byte array
+ */
 #define COPY_STATE(dst, src)					\
 	memcpy(dst, src, STATESIZE(src));
 

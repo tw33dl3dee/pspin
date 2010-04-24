@@ -90,16 +90,12 @@
 #	define STATESPACE_SIZE (128*MiB)
 #else
 /**
- * Depth of BFS queue (entries).
- * 
+ * Size of BFS queue (bytes)
+ *
  * When bitstate or hashcompact hashing is used, BFS is a separate state queue.
  * With fullstate hashing, visited states and BFS are stored continously, so this is unused.
  */
-#	define BFS_DEPTH 1024
-/**
- * Size of BFS queue (bytes)
- */
-#	define BFS_SIZE  1*MiB
+#	define BFS_QUEUE_SIZE  1*MiB
 #endif
 
 #ifdef BITSTATE 

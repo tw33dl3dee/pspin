@@ -5,6 +5,8 @@
  * 
  * @brief  BFS (breadth-first search) queue operations.
  * 
+ * This file is solely for global data definitions, all operations
+ * are defined as macros in appropriate header files.
  */
 
 #include <stdlib.h>
@@ -12,12 +14,13 @@
 #include "config.h"
 #include "bfs.h"
 
-#ifdef FULLSTATE
-
 void *statespace = NULL;
-void *bfs_bottom = NULL;	// struct State *
-void *bfs_top = NULL;		// struct State *
+void *bfs_top = NULL;
 void *bfs_ceil = NULL;
 int bfs_len = 0;
 
+#ifdef FULLSTATE
+void *bfs_bottom = NULL;
+#else
+void *bfs_current = NULL;
 #endif
