@@ -92,7 +92,7 @@ static void queue_new_state(struct State *state)
 	/*
 	 * This will already push new state to BFS.
 	 */
-	state_hash_add(state, /* don't copy */ 0);
+	state_hash_add(state, /* don't copy */ BfsAdd);
 }
 
 /** 

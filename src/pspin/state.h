@@ -49,7 +49,7 @@ struct Process {
 /**
  * Typename that stores state's size
  */
-#define STATESIZE_TYPE (__typeof__(STATESIZE(NULL)))
+#define STATESIZE_TYPE __typeof__(STATESIZE(NULL))
 
 /**
  * Copies state structure as byte array

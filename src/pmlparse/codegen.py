@@ -101,8 +101,8 @@ class Codegen(object):
         """Return C-code that declares global state structure
         """
         state_tpl = """
-#define STATESIZE(state) ((state)->_svsize)
-#define STATEATOMIC(state) ((state)->_atomic)
+#define STATESIZE(state) (((struct State *)(state))->_svsize)
+#define STATEATOMIC(state) (((struct State *)(state))->_atomic)
 
 struct State {
     $fields;

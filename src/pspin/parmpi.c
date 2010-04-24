@@ -348,7 +348,7 @@ static void queue_new_state(struct State *state)
 		 * Local state;
 		 * this will already push new state to BFS.
 		 */
-		state_hash_add(state, /* don't copy */ 0);
+		state_hash_add(state, /* don't copy */ BfsAdd);
 }
 
 /**
@@ -435,7 +435,7 @@ enum {
 		/*
 		 * Copy state from MPI buffer to local statespace
 		 */
-		is_new = state_hash_add(&msg->state, /* copy */ 1);
+		is_new = state_hash_add(&msg->state, /* copy */ BfsAddCopy);
 		if (is_new) {
 			*new_state = BFS_TAKE();
 			put_state();
@@ -445,7 +445,7 @@ enum {
 		/*
 		 * Use states directly in MPI buffer, don't release it 
 		 */
-		is_new = state_hash_add(&msg->state, /* don't copy */ 0);
+		is_new = state_hash_add(&msg->state, /* don't copy nor add to BFS */ BfsNoAdd);
 		if (is_new) {
 			*new_state = &msg->state;
 			return NewState;

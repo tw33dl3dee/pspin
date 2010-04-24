@@ -41,7 +41,7 @@ extern void *bfs_current;
 		if (state_hash_init() < 0)										\
 			return;														\
 		bfs_top = statespace;											\
-		bfs_current = bfs_ceil = bfs_top + STATESPACE_SIZE;				\
+		bfs_current = bfs_ceil = bfs_top + BFS_QUEUE_SIZE;				\
 	})
 
 /** 
@@ -67,9 +67,10 @@ extern void *bfs_current;
  */
 #define BFS_ADD(state)									\
 	({													\
+		struct State *st = (state);						\
 		++bfs_len;										\
-		bfs_top += STATESIZE(state);					\
-		*(STATESIZE_TYPE *)bfs_top = STATESIZE(state);	\
+		bfs_top += STATESIZE(st);						\
+		*(STATESIZE_TYPE *)bfs_top = STATESIZE(st);		\
 		bfs_top += STATESIZE_SIZE;						\
 	})
 

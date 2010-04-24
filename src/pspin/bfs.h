@@ -35,7 +35,7 @@ extern void *bfs_ceil;
 #ifdef FULLSTATE 
 #	include "bfs_fullstate.h"
 #else
-#	include "bfs_nostate.h"
+#	include "bfs_questate.h"
 #endif
 
 #endif /* _BFS_H_ */

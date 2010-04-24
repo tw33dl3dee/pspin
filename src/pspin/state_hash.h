@@ -38,11 +38,20 @@
 /*
  * Bit functions 
  */
-#define BIT_TEST(bits, number)  ((bits)[(number)/8] &   (1 << (number)%8))
-#define BIT_SET(bits, number)   ((bits)[(number)/8] |=  (1 << (number)%8))
-#define BIT_RESET(bits, number) ((bits)[(number)/8] &= ~(1 << (number)%8))
+#define BIT_TEST(bits, number)  ((bits)[(number)/CHAR_BIT] &   (1 << (number)%CHAR_BIT))
+#define BIT_SET(bits, number)   ((bits)[(number)/CHAR_BIT] |=  (1 << (number)%CHAR_BIT))
+#define BIT_RESET(bits, number) ((bits)[(number)/CHAR_BIT] &= ~(1 << (number)%CHAR_BIT))
 
-extern int state_hash_add(struct State *state, int do_copy);
+/**
+ * Action to perform when adding new state to hash
+ */
+enum HashAddAction {
+	BfsNoAdd = 0,			///< Do nothing
+	BfsAdd,					///< Add to BFS queue
+	BfsAddCopy,				///< Copy and add copy to BFS queue
+};
+
+extern int state_hash_add(struct State *state, enum HashAddAction add_action);
 extern int state_hash_init();
 extern void state_hash_stats(void);
 

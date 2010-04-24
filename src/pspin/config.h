@@ -57,7 +57,7 @@
 /**
  * Use bitstate hashing
  */
-#undef BITSTATE
+#define BITSTATE
 /**
  * Use hashcompact hashing
  */
@@ -65,7 +65,7 @@
 /**
  * Use full state hashing
  */
-#define FULLSTATE
+#undef FULLSTATE
 
 /*
  * Hashtable and hashing function options 
@@ -73,21 +73,33 @@
 
 /**
  * Size of hashtable (entries)
+ * 
+ * This is better a prime.
  */
-#define HASHTABLE_SIZE (1*MiB + 1)
+#define HASHTABLE_LENGTH (1*MiB + 1)
+
+/**
+ * When reading states from network queue, push them immediately to local queue
+ * before processing (reduces network queue stalls).
+ * 
+ * Not recommended for bistate and hashcompact hashing because stores
+ * many full states consuming much memory.
+ * 
+ * In fullstate this option is forced because otherwise pointers
+ * in hash table would become invalid.
+ */
+#define NETWORK_TO_LOCAL_QUEUE
 
 #ifdef FULLSTATE
-/**
- * With fullstate hashing, states from network queue are pushed immediately to local queue.
- *
- * This is not the case with bitstate and hashcompact hashing, where it would be waste of
- * statespace (because storing full states is avoided where possible).
- */
-#	define NETWORK_TO_LOCAL_QUEUE
 /**
  * Size of memory which is allocated to store states, both visited and in-queue (in bytes).
  */
 #	define STATESPACE_SIZE (128*MiB)
+/*
+ * Force moving states from network to local queue 
+ */
+#undef  NETWORK_TO_LOCAL_QUEUE
+#define NETWORK_TO_LOCAL_QUEUE
 #else
 /**
  * Size of BFS queue (bytes)
