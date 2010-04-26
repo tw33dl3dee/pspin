@@ -18,6 +18,7 @@ find_package(MPI REQUIRED)
 find_package(Dia REQUIRED)
 
 add_subdirectory(src/pspin)
+add_subdirectory(graphics)
 add_subdirectory(articles)
 
 find_package(Ctags)
