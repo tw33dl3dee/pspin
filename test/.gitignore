@@ -9,3 +9,4 @@ spin/tsp
 mpi/test1
 mpi/test_async
 mpi/test_async_many
+!Makefile

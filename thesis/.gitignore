@@ -5,3 +5,4 @@
 *.pdf
 *.fmt
 auto
+!Makefile

@@ -4,8 +4,8 @@
 *.o
 *.pyc
 TAGS
-tmp
+/tmp
 CMakeCache.txt
 CMakeFiles
 cmake_install.cmake
-/Makefile
+Makefile
