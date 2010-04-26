@@ -1,0 +1,114 @@
+\documentclass[12pt]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[english, russian]{babel}
+
+\usepackage{slides}
+
+% ШРИФТЫ
+% Нужны рубленные шрифты -- раскомментируйте стоку ниже. 
+% Нужны шрифты с засечками --- закомментируйте эту строку. 
+\renewcommand{\familydefault}{\sfdefault} % Переключает на рубленный шрифт.
+% Шрифты Times и Arial, если стоит пакет cyrtimes. 
+% Если он не стоит, результат будет плохой!
+%\usepackage{cyrtimespatched}
+% Если нет cyrtimes, то попробуйте включить полужирный шрифт:
+% \renewcommand{\seriesdefault}{b} % для шрифта с засечками, это предпочтительно
+% \renewcommand{\seriesdefault}{sbc} % для рубленного шрифта
+
+\usepackage{graphicx}
+
+\def\Student{Коротков Иван Андреевич}
+\def\Advisor{Крищенко Всеволод Александрович}
+\def\Title{Параллельное построение пространства состояний конечной модели}
+\def\SubTitle{Квалификационная работа}
+
+% Верхний заголовок: пустой
+% Нижний заголовок по-умолчанию:
+% \lfoot{\Title} % слева
+% \cfoot{} % цент пуст
+% \rfoot{\thepage} % справа
+
+% \renewcommand{\baselinestretch}{1.5}
+ \linespread{1.2}
+
+\begin{document}
+
+\TitleSlide
+
+\section{Ошибки в ПО}
+\label{sec:sw-errors}
+
+\begin{tabular}[ht]{|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|}
+  \hline 
+  Вероятность возникновения & Критические & Некритичные \\
+  \hline
+  высокая & Тестирование, верификация & Тестирование \\
+  \hline
+  низкая & Верификация & \\
+  \hline
+\end{tabular}
+
+\section{Проблемы верификации}
+\label{sec:verif-troubles}
+
+\begin{itemize}
+\item Размер пространства состояний растет экспоненциально
+
+\item Модели среднего размера требуют более 10 Гб оперативной памяти для хранения пространства состояний
+
+\item На верификацию средней модели уходят недели
+\end{itemize}
+
+\section{Уменьшение требований к оперативной памяти}
+\label{sec:ram-lightening}
+
+Генерация состояний:
+
+\begin{itemize}
+\item Последовательная
+  \begin{itemize}
+  \item Битовое хэширование
+  \item Сжатие состояний
+  \item Сокращение частных порядков
+  \end{itemize}
+\item Параллельная
+\end{itemize}
+
+\section{Параллельная генерация}
+\label{sec:par-gen}
+
+\begin{itemize}
+\item Распределенное хранилище состояний
+  \begin{itemize}
+  \item Генерация состояний только на одном узле
+  \item Неэффективно из-за неиспользования вычислительных ресурсов и большого количества
+    удаленных вызовов
+  \item Позволяет выполнять обход в глубину и поиск циклов
+  \end{itemize}
+
+\item Распределенная генерация состояний
+  \begin{itemize}
+  \item Каждый узел является хранилищем и генератором
+  \item Используются вычислительные ресурсы всех узлов
+  \item Необходимо использовать поиск в ширину: поиск циклов затруднен
+  \end{itemize}
+
+\section{Распределение состояний между узлами}
+\label{sec:state-partitioning}
+
+\section{Сравнение распределений}
+\label{sec:partition-compare}
+
+\begin{tabular}[ht]{|r|l|l|p{0.25\textwidth}|p{0.25\textwidth}|}
+  \hline 
+  P & Состояния & Переходы & Удаленные вызовы & Загруженность узлов    \\ \hline
+  5 & 28351     & 42658    & 31356  (73\%)/ 7047  (16\%) & 0.99 / 0.66 \\ \hline
+  6 & 147774    & 232748   & 170378 (73\%)/ 31668 (13\%) & 0.99 / 0.68 \\ \hline
+  7 & 360354    & 601462   & 453789 (75\%)/ 66438 (11\%) & 0.99 / 0.74 \\ \hline
+\end{tabular}
+
+\end{itemize}
+
+\end{document}
+
