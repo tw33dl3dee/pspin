@@ -15,8 +15,10 @@ set(CMAKE_C_FLAGS_DEBUG   "${CMAKE_C_FLAGS_DEBUG}   -Wall -Wno-unused -DDEBUG -g
 set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -UDEBUG -O3")
 
 find_package(MPI REQUIRED)
+find_package(Dia REQUIRED)
 
 add_subdirectory(src/pspin)
+add_subdirectory(articles)
 
 find_package(Ctags)
 if(CTAGS_FOUND AND CTAGS_FLAVOR MATCHES Exuberant)
