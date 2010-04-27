@@ -32,6 +32,8 @@
 % \renewcommand{\baselinestretch}{1.5}
  \linespread{1.2}
 
+\hyphenpenalty=0
+
 \begin{document}
 
 \TitleSlide
@@ -49,6 +51,8 @@
   \hline
 \end{tabular}
 
+\textit{Старый слайд, удалить?}
+
 \section{Проблемы верификации}
 \label{sec:verif-troubles}
 
@@ -59,6 +63,8 @@
 
 \item На верификацию средней модели уходят недели
 \end{itemize}
+
+\textit{Старый слайд, удалить?}
 
 \section{Уменьшение требований к оперативной памяти}
 \label{sec:ram-lightening}
@@ -74,6 +80,8 @@
   \end{itemize}
 \item Параллельная
 \end{itemize}
+
+\textit{Старый слайд, удалить?}
 
 \section{Параллельная генерация}
 \label{sec:par-gen}
@@ -99,7 +107,9 @@
 \section{Распределение состояний между узлами}
 \label{sec:state-partitioning}
 
-\includegraphics[width=0.9\textwidth]{../graphics/state-partition}
+\begin{center}
+  \includegraphics[width=0.9\textwidth]{../graphics/state-partition}
+\end{center}
 
 \section{Сравнение распределений}
 \label{sec:partition-compare}
@@ -112,10 +122,126 @@
   7 & 360354    & 601462   & 453789 (75\%)/ 66438 (11\%) & 0.99 / 0.74 \\ \hline
 \end{tabular}
 
+\section{Взаимодействие узлов (MPI)}
+\label{sec:mpi-interaction}
+
+\section{Хранение состояний \\ \small{Полное хэширование}}
+\label{sec:fullstate}
+
+\begin{center}
+  \includegraphics[height=0.8\textheight]{../graphics/fullstate}
+\end{center}
+
+\section{Хранение состояний \\ \small{Битовое хэширование}}
+\label{sec:buthash}
+
+\begin{center}
+  \includegraphics[height=0.7\textheight]{../graphics/bitstate}
+\end{center}
 
 \section{Распределенное завершение}
 \label{sec:distributed-termination}
 
+\begin{center}
+  \includegraphics[width=1\textwidth]{../graphics/distr-termination}
+\end{center}
+
+\section{Нотация PROMELA}
+\label{sec:promela-notation}
+
+%              <--------------------- глобальные переменные 
+%     <------ класс процесса (3 начальных экземпляра)
+
+\begin{minipage}[t]{.53\textwidth}
+\scriptsize
+\begin{verbatim}
+byte fork[3]
+byte nr_eat
+
+active [3] proctype Philosopher() { 
+Think:
+  atomic { fork[_pid] == 0 -> 
+           fork[_pid] = 1 };
+One:
+  atomic { fork[(_pid + 1)%3] == 0 -> 
+           fork[(_pid + 1)%3] = 1; nr_eat++ };
+Eat:
+  atomic { nr_eat--; fork[(_pid + 1)%3] = 0 };
+  fork[_pid] = 0;
+  goto Think
+}
+\end{verbatim}
+\normalsize
+\end{minipage}
+%
+\begin{minipage}[t]{.47\textwidth}
+\scriptsize
+\begin{verbatim}
+Глобальные переменные
+
+
+класс процесса (3 начальных экземпляра)
+
+условие выполнимости
+действие
+
+внутри atomic может быть лишь один процесс
+
+
+
+
+бесконечный цикл в каждом процессе
+
+\end{verbatim}
+\normalsize
+\end{minipage}
+
+% \begin{minipage}[m]{.34\textwidth}
+% \centerline{Результаты}
+% \end{minipage}
+% %
+% \begin{minipage}[m]{.65\textwidth}
+
+% Для вёрстки отдельных слайдов в две колонки используется окружение
+%   \verb+minipage+.
+
+% Пример кода с неравномерными колонками (для равномерных используйте 49 и 49):
+
+% \begin{verbatim}
+% \begin{minipage}[m]{.34\textwidth}
+%   \includegraphics...
+% \end{minipage}
+% \begin{minipage}[m]{.64\textwidth}
+%   Текст
+% \end{minipage}
+% \end{verbatim}
+
+% Недостаток использования \verb+minipage+ --- исчезают интервалы между абзацами.
+% \end{minipage}
+
+\section{Процесс верификации}
+\label{sec:idef0}
+
+\begin{center}
+  \includegraphics[width=1.0\textwidth]{../graphics/idef0-codegen}
+\end{center}
+
+\section{Представление состояний}
+\label{sec:state-represent}
+
+\begin{center}
+  \includegraphics[height=0.8\textheight]{../graphics/state-representation}
+\end{center}
+
+\section{Итоги}
+\label{sec:publications}
+
+\begin{itemize}
+\item По результатам работы имеется публикация: \\ И.\,Коротков. Параллельное построение
+  пространства состояний конечной системы. Новые информационные технологии в
+  автоматизированных системах: материалы тринадцатого научно-практического семинара.~--
+  Моск. гос. ин-т электроники и математики. М., 2010, стр. 169-176.
+
+\end{itemize}
 
 \end{document}
-
