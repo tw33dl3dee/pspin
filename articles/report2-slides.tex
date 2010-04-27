@@ -17,11 +17,12 @@
 % \renewcommand{\seriesdefault}{sbc} % для рубленного шрифта
 
 \usepackage{graphicx}
+\usepackage{alltt}
 
 \def\Student{Коротков Иван Андреевич}
 \def\Advisor{Крищенко Всеволод Александрович}
 \def\Title{Параллельное построение пространства состояний конечной модели}
-\def\SubTitle{Квалификационная работа}
+\def\SubTitle{Квалификационная работа магистра}
 
 % Верхний заголовок: пустой
 % Нижний заголовок по-умолчанию:
@@ -38,44 +39,50 @@
 
 \TitleSlide
 
-\section{Цель и задачи}
-\label{sec:goal-tasks}
+\section{Цель}
+\label{sec:goal}
+
+\mbox{}
+
+\mbox{}
 
 \hline
-Разработка и исследование метода параллельной генерации состояний конечной модели.
-\\
+\begin{center}
+  Разработка и исследование метода параллельной генерации состояний конечной модели.
+\end{center}
 \hline
+
+\section{Задачи}
+\label{sec:tasks}
 
 \small
 \begin{itemize}
-\item Определение критериев оптимальности и выбор оптимального распределения состояний по
-  узлам вычисления;
-\item определение применимости различных оптимизаций, используемых при традиционном
-  построении пространства состояний;
-\item проектирование и реализация алгоритма параллельного построения пространства состояний;
-\item проектирование и реализация транслятора описания системы в некоторой нотации в
-  программный код генерации состояний;
-\item тестирование реализованного алгоритма и проведение экспериментов;
-\item интерпретация результатов.
+\item Определение применимости существующих методов построения пространства состояний для
+  параллельных вычислений.
+\item Выбор распределения состояний по узлам вычисления.
+\item Проектирование и реализация алгоритма параллельного построения пространства состояний.
+\item Трансляция формального описания системы в программный код для генерации состояний.
+\item Тестирование реализованного алгоритма и проведение экспериментов.
+\item Интерпретация результатов.
 \end{itemize}
 \normalsize
 
-\section{Ошибки в ПО}
-\label{sec:sw-errors}
+% \section{Ошибки в ПО}
+% \label{sec:sw-errors}
 
-\begin{tabular}[ht]{|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|}
-  \hline 
-  Вероятность возникновения & Критические & Некритичные \\
-  \hline
-  высокая & Тестирование, верификация & Тестирование \\
-  \hline
-  низкая & Верификация & \\
-  \hline
-\end{tabular}
+% \begin{tabular}[ht]{|p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}|}
+%   \hline 
+%   Вероятность возникновения & Критические & Некритичные \\
+%   \hline
+%   высокая & Тестирование, верификация & Тестирование \\
+%   \hline
+%   низкая & Верификация & \\
+%   \hline
+% \end{tabular}
 
-\textit{Старый слайд, удалить?}
+% \textit{Старый слайд, удалить?}
 
-\section{Проблемы верификации}
+\section{Проблемы верификации конечных моделей}
 \label{sec:verif-troubles}
 
 \begin{itemize}
@@ -86,9 +93,7 @@
 \item На верификацию средней модели уходят недели
 \end{itemize}
 
-\textit{Старый слайд, удалить?}
-
-\section{Уменьшение требований к оперативной памяти}
+\section{Уменьшение затрат на хранение состояний}
 \label{sec:ram-lightening}
 
 Генерация состояний:
@@ -103,9 +108,18 @@
 \item Параллельная
 \end{itemize}
 
-\textit{Старый слайд, удалить?}
+\section{Работы в области параллельной генерации состояний}
+\label{sec:analogues}
 
-\section{Параллельная генерация}
+\begin{itemize}
+\item Flavio Lerda, Riccardo Sisto. Distributed-Memory Model Checking with SPIN. Lecture
+  Notes In Computer Science, vol. 1680, pp 22-39.
+
+\item Jiri Barnat, Lubos Brim. Parallel Breadth-First Search LTL Model-Checking. 18th IEEE
+  International Conference on Automated Software Engineering (ASE'03), pp. 106-115.
+\end{itemize}
+
+\section{Распределение ролей между узлами}
 \label{sec:par-gen}
 
 \begin{itemize}
@@ -126,6 +140,30 @@
 
 \end{itemize}
 
+\section{Псевдокод метода \\ <<Распределенная генерация состояний>>}
+\label{sec:par-pseudocode}
+
+\scriptsize
+\begin{verbatim}
+Visited = []
+Queue = []
+
+if NodeId = 0:
+    Queue += start_state
+
+while not empty(Queue):
+    state <- Queue
+    node = StateNode(state)
+    if NodeId = node:
+        if not state in Visited:
+            Visited += state
+            for each state' in Next(state):
+                Queue <- state'
+    else:
+        node.Queue <- state
+\end{verbatim}
+\normalsize
+
 \section{Распределение состояний между узлами}
 \label{sec:state-partitioning}
 
@@ -133,7 +171,7 @@
   \includegraphics[width=0.9\textwidth]{../graphics/state-partition}
 \end{center}
 
-\section{Сравнение распределений}
+\section{Сравнение распределений на основе полученных результатов}
 \label{sec:partition-compare}
 
 \begin{tabular}[ht]{|r|l|l|p{0.25\textwidth}|p{0.25\textwidth}|}
@@ -146,6 +184,10 @@
 
 \section{Взаимодействие узлов (MPI)}
 \label{sec:mpi-interaction}
+
+\begin{center}
+  \includegraphics[height=0.8\textheight]{../graphics/mpi-async-seq}
+\end{center}
 
 \section{Хранение состояний \\ \small{Полное хэширование}}
 \label{sec:fullstate}
@@ -241,7 +283,7 @@ Eat:
 % Недостаток использования \verb+minipage+ --- исчезают интервалы между абзацами.
 % \end{minipage}
 
-\section{Процесс верификации}
+\section{Процесс верификации конечной модели}
 \label{sec:idef0}
 
 \begin{center}
@@ -255,6 +297,16 @@ Eat:
   \includegraphics[height=0.8\textheight]{../graphics/state-representation}
 \end{center}
 
+\section{Публикации}
+\label{sec:publications}
+
+По результатам работы имеется одна публикация:
+
+И.\,Коротков. Параллельное построение пространства состояний конечной системы. Новые
+информационные технологии в автоматизированных системах: материалы тринадцатого
+научно-практического семинара.~-- Моск. гос. ин-т электроники и математики. М., 2010,
+стр.~169-176.
+
 \section{Итоги}
 \label{sec:publications}
 
@@ -265,10 +317,6 @@ Eat:
 \item спроектировано и реализовано параллельное построение пространства состояний;
 \item реализованы 2 различных схемы хранения состояни;
 \item реализован транслятор для нотации PROMELA;
-\item по результатам работы имеется одна публикация: \\ И.\,Коротков. Параллельное
-  построение пространства состояний конечной системы. Новые информационные технологии в
-  автоматизированных системах: материалы тринадцатого научно-практического семинара.~--
-  Моск. гос. ин-т электроники и математики. М., 2010, стр. 169-176.
 \end{itemize}
 \normalsize
 
