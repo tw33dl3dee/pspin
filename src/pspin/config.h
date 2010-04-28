@@ -36,7 +36,7 @@
 /**
  * If defined, endstate validness is checked
  */
-#undef ENDSTATE
+#define ENDSTATE
 
 /*
  * Node partitioning function selection
@@ -57,7 +57,7 @@
 /**
  * Use bitstate hashing
  */
-#define BITSTATE
+#undef BITSTATE
 /**
  * Use hashcompact hashing
  */
@@ -65,7 +65,7 @@
 /**
  * Use full state hashing
  */
-#undef FULLSTATE
+#define FULLSTATE
 
 /*
  * Hashtable and hashing function options 
@@ -76,7 +76,7 @@
  * 
  * This is better a prime.
  */
-#define HASHTABLE_LENGTH (1*MiB + 1)
+#define HASHTABLE_LENGTH (1*MiB + 0)
 
 /**
  * When reading states from network queue, push them immediately to local queue

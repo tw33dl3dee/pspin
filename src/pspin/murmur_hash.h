@@ -34,6 +34,11 @@ typedef uint64_t big_state_hash_t;
 #define BIG_HASH_FMT "%llu"
 
 /*
+ * Maximum possible hash value
+ */
+#define HASH_MAX UINT32_MAX
+
+/*
  * On 32-bit platform, hashtables use 32-bit hash for lookups
  * and 64-bit for hashcompact method
  */
@@ -172,6 +177,11 @@ typedef uint64_t big_state_hash_t;
  */
 #define HASH_FMT     "%lu"
 #define BIG_HASH_FMT "%lu"
+
+/*
+ * Maximum possible hash value
+ */
+#define HASH_MAX UINT64_MAX
 
 /*
  * On 64-bit platform, both hashtable lookups and hashcompact method

@@ -36,6 +36,17 @@
  */
 #define STATE_HASH(state, num) HASH(state, STATESIZE(state), num)
 
+/** 
+ * @brief N-th hash value of state, mapped to 0..HASHTABLE_LENGTH-1
+ * 
+ * @param state State to hash
+ * @param num Hash function number (0..)
+ * 
+ * @return State hash value in 0..HASHTABLE_LENGTH-1 range
+ */
+#define STATE_TABLE_HASH(state, num) (STATE_HASH(state, num) % HASHTABLE_LENGTH)
+//#define STATE_TABLE_HASH(state, num) (state_hash_t)(STATE_HASH(state, num)*1./HASH_MAX*(HASHTABLE_LENGTH - 1))
+
 /*
  * Bit functions 
  */

@@ -125,7 +125,7 @@ int state_hash_init()
  */
 int state_hash_add(struct State *state, enum HashAddAction add_action)
 {
-	state_hash_t hash = STATE_HASH(state, 0) % HASHTABLE_LENGTH;
+	state_hash_t hash = STATE_TABLE_HASH(state, 0);
 	state_hash_t offset = 0;
 	struct State *st;
 	int found = 0;
@@ -233,7 +233,7 @@ int state_hash_init()
  */
 int state_hash_add(struct State *state, enum HashAddAction add_action)
 {
-	state_hash_t hash0 = STATE_HASH(state, 0) % HASHTABLE_LENGTH;
+	state_hash_t hash0 = STATE_TABLE_HASH(state, 0);
 	state_hash_t hash = hash0;
 	int found = 0;
 
@@ -245,7 +245,7 @@ int state_hash_add(struct State *state, enum HashAddAction add_action)
 	 * Check each bit, setting it to 1.
 	 */
 	for (int i = 0; i < BITSTATE_HASH_COUNT; 
-		 ++i, hash = STATE_HASH(state, i) % HASHTABLE_LENGTH) {
+		 ++i, hash = STATE_TABLE_HASH(state, i)) {
 		hash_dprintf(" (" HASH_FMT ")", hash);
 		if (BIT_TEST(state_hashtable, hash))
 			++found;
