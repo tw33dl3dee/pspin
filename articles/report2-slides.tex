@@ -39,21 +39,9 @@
 
 \TitleSlide
 
-\section{Цель}
-\label{sec:goal}
-
-\mbox{}
-
-\mbox{}
-
-\hline
-\begin{center}
-  Разработка и исследование метода параллельной генерации состояний конечной модели.
-\end{center}
-\hline
-
-\section{Задачи}
-\label{sec:tasks}
+\section{Цель: разработка и исследование метода параллельной генерации состояний конечной
+  модели.}
+\label{sec:goal-tasks}
 
 \small
 \begin{itemize}
@@ -61,7 +49,7 @@
   параллельных вычислений.
 \item Выбор распределения состояний по узлам вычисления.
 \item Проектирование и реализация алгоритма параллельного построения пространства состояний.
-\item Трансляция формального описания системы в программный код для генерации состояний.
+\item Реализация транслятора описания модели системы в программный код для генерации состояний.
 \item Тестирование реализованного алгоритма и проведение экспериментов.
 \item Интерпретация результатов.
 \end{itemize}
@@ -112,11 +100,12 @@
 \label{sec:analogues}
 
 \begin{itemize}
-\item Flavio Lerda, Riccardo Sisto. Distributed-Memory Model Checking with SPIN. Lecture
-  Notes In Computer Science, vol. 1680, pp 22-39.
+\item Flavio Lerda и Riccardo Sisto, Dipartimento di Automatica e Informatica Politecnico
+  di Torino: упрощенная модификация верификатора SPIN с параллельным построением
+  пространства состояний.
 
-\item Jiri Barnat, Lubos Brim. Parallel Breadth-First Search LTL Model-Checking. 18th IEEE
-  International Conference on Automated Software Engineering (ASE'03), pp. 106-115.
+\item Jiri Barnat, Lubos Brim, Faculty of Informatics, Masaryk University Brno: поиск
+  циклов и проверка LTL-формул при параллельной генерации состояний.
 \end{itemize}
 
 \section{Распределение ролей между узлами}
@@ -203,14 +192,7 @@ while not empty(Queue):
   \includegraphics[height=0.7\textheight]{../graphics/bitstate}
 \end{center}
 
-\section{Распределенное завершение}
-\label{sec:distributed-termination}
-
-\begin{center}
-  \includegraphics[width=1\textwidth]{../graphics/distr-termination}
-\end{center}
-
-\section{Нотация PROMELA}
+\section{Используемая нотация описания модели}
 \label{sec:promela-notation}
 
 %              <--------------------- глобальные переменные 
@@ -297,6 +279,13 @@ Eat:
   \includegraphics[height=0.8\textheight]{../graphics/state-representation}
 \end{center}
 
+\section{Распределенное завершение}
+\label{sec:distributed-termination}
+
+\begin{center}
+  \includegraphics[width=1\textwidth]{../graphics/distr-termination}
+\end{center}
+
 \section{Публикации}
 \label{sec:publications}
 
@@ -313,10 +302,10 @@ Eat:
 \small
 \begin{itemize}
 \item Найдено распределение состояний между узлами, значительно сокращающее накладные
-  расходы на удаленные вызовы;
-\item спроектировано и реализовано параллельное построение пространства состояний;
-\item реализованы 2 различных схемы хранения состояни;
-\item реализован транслятор для нотации PROMELA;
+  расходы на удаленные вызовы.
+\item Спроектировано и реализовано параллельное построение пространства состояний.
+\item Реализованы 2 различных схемы хранения состояний.
+\item Реализован транслятор для нотации PROMELA.
 \end{itemize}
 \normalsize
 
