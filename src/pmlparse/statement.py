@@ -2,7 +2,7 @@
 #
 
 from variable import *
-from expression import SimpleRef
+from expression import SimpleRef, ChanOpExpr
 from utils import flatten
 
 
@@ -456,3 +456,58 @@ class PrintStmt(Stmt):
 
     def debug_repr(self):
         return 'printf'
+
+
+class SendStmt(Stmt):
+    """Sends data to channel
+
+    Executable when channel not full
+    """
+    
+    def __init__(self, chan_ref, arg_list):
+        """
+        
+        Arguments:
+        - `chan_ref`: (VarRef) channel reference
+        - `arg_list`: list of Expression objects
+        """
+        super(SendStmt, self).__init__()
+        # TODO: check for channel type
+        self._chan_ref = chan_ref
+        self._arg_list = arg_list
+        
+    def executable(self):
+        return ChanOpExpr('nfull', self._chan_ref.code()).code()
+
+    def execute(self):
+        send_code_tpl = """CHAN_SEND($chan);
+$send_ops
+"""
+        send_op_tpl = "CHAN_QUE($chan, $value, $size, $offset"
+        offset = 0
+        return NotImplemented
+
+
+class RecvStmt(Stmt):
+    """Recieves data from channel
+
+    Executable when channel not empty
+    """
+    
+    def __init__(self, chan_ref, arg_list):
+        """
+        
+        Arguments:
+        - `chan_ref`: (VarRef) channel reference
+        - `arg_list`: list of Expression objects
+        """
+        super(RecvStmt, self).__init__()
+        # TODO: check for channel type
+        self._chan_ref = chan_ref
+        self._arg_list = arg_list
+        
+    def executable(self):
+        return ChanOpExpr('nempty', self._chan_ref.code()).code()
+
+    def execute(self):
+        return NotImplemented

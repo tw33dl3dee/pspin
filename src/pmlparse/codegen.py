@@ -71,7 +71,7 @@ class Codegen(object):
         - `vartype`: Type object
         """
         if vartype is not None:
-            var.type = vartype
+            var.set_type(vartype)
         if self.cur_proc is not None:
             return self.cur_proc.add_var(var)
         elif var.name in self._vars:
@@ -219,5 +219,5 @@ $init;
     def finish(self):
         """Settles Codegen object, must be called after all proctypes and declarations
         """
-        self.add_var(Variable('_svsize', Type('short')))
-        self.add_var(Variable('_atomic', Type('pid'), initval=-1))
+        self.add_var(Variable('_svsize', SimpleType('short')))
+        self.add_var(Variable('_atomic', SimpleType('pid'), initval=-1))

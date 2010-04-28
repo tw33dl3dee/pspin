@@ -28,7 +28,7 @@ definitions:
 	O_SEND		"!!?"
 	O_SHIFT		"(<<|>>)"
 	T_BUILTIN	"(enabled|pc_value)"
-	T_CHANPOLL	"(empty|nempty|full|nfull)"
+	T_CHANOP	"(empty|nempty|full|nfull|len)"
 	T_CONST		"(true|false|skip)"
 	T_ID		"[[:alpha:]_][[:alnum:]_$]*"
 	T_NUMBER	"[0-9]+"
@@ -104,9 +104,8 @@ INITIAL:
 			self.value = 0
 		return "K_VIS"		
 	
-	"len":			return "T_LEN"
 	"{T_BUILTIN}":	return "T_BUILTIN"
-	"{T_CHANPOLL}":	return "T_CHANPOLL"
+	"{T_CHANOP}":	return "T_CHANPOP"
 	"{T_CONST}":
 		if self.value == "false":
 			self.value = 0

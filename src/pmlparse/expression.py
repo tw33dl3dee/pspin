@@ -10,7 +10,7 @@ class Expr(object):
     def code(self):
         """Returns C expression which evaluates current expression value
         """
-        raise NotImplemented
+        raise NotImplementedError
 
 
 class ConstExpr(Expr):
@@ -207,11 +207,11 @@ class ChanOpExpr(Expr):
         - `chan`: channel (VarRef object)
         """
         Expr.__init__(self)
-        self._op = op
+        self._op = op.upper()
         self._chan = chan
 
     def __str__(self):
-        return "chan_%s(%s)" % (self._op, self._chan)
+        return "CHAN_%s(%s)" % (self._op, self._chan)
 
     def code(self):
-        return "chan_%s(%s)" % (self._op, self._chan.code())
+        return "CHAN_%s(%s)" % (self._op, self._chan.code())

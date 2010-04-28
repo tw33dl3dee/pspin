@@ -43,7 +43,7 @@ class Process(object):
         self._state_count = 0
         self._last_stmt = None
         self._end_stmts = []
-        self.add_var(SpecialVariable("_pid", "pid", Type('pid')))
+        self.add_var(SpecialVariable("_pid", "pid", SimpleType('pid')))
         self.add_stmt(NoopStmt("-start-"))
 
     def __str__(self):
@@ -228,8 +228,8 @@ class Process(object):
         self._end_stmts.append(end_stmt)
         # Alignment of special vars is forced to maximum value
         # so that they appear at the beginning of field list
-        self.add_var(Variable("_ip", Type('byte', Type.MAX_ALIGN)))
-        self.add_var(Variable("_proctype", Type('byte', Type.MAX_ALIGN)))
+        self.add_var(Variable("_ip", SimpleType('byte', SimpleType.MAX_ALIGN)))
+        self.add_var(Variable("_proctype", SimpleType('byte', SimpleType.MAX_ALIGN)))
         self.sanity_check()
         for stmt in self._stmts:
             stmt.settle()

@@ -116,11 +116,11 @@ ivar_list ->
 
 typename ->
 	T_TYPE:
-		return Type(kids[0])
+		return SimpleType(kids[0])
 	| K_MTYPE:
 		raise NotImplementedError(kids[0])
 	| K_CHAN:
-		raise NotImplementedError(kids[0])
+		return ChanType()
 	| uname:
 		raise NotImplementedError(kids[0])
 	;
@@ -178,22 +178,24 @@ varref_list ->
 	;
 
 ivar ->
-	name P_LSQBRACE const P_RSQBRACE ivar_init?:
-		return Variable(kids[0], None, kids[2], kids[4] or None)
-#	| name P_COLON const ivar_init?
+	name P_LSQBRACE const P_RSQBRACE:
+		return Variable(kids[0], None, kids[2], None)
+	| name ch_init:
+		return Channel(kids[0], *kids[1])
 	| name ivar_init?:
 		return Variable(kids[0], None, None, kids[1] or None)
+#	TODO: bit fields
+#	| name P_COLON const ivar_init?
 	;
 
 ivar_init ->
 	O_ASSIGN expr:
 		return kids[1]
-	| O_ASSIGN ch_init
 	;
 
 ch_init ->
-	P_LSQBRACE const P_RSQBRACE K_OF P_LBRACE typename_list P_RBRACE:
-		raise NotImplementedError(kids[0])
+	O_ASSIGN P_LSQBRACE const P_RSQBRACE K_OF P_LBRACE typename_list P_RBRACE:
+		return (kids[2], kids[6])
 	;
 
 typename_list ->
@@ -219,23 +221,24 @@ idx ->
 
 send ->
 	varref O_SEND send_args:
-		raise NotImplementedError(kids[0])
+		return SendStmt(kids[0], kids[2])
 	;
 
 recv ->
 	varref O_RECV recv_args:
-		raise NotImplementedError(kids[0])
-	| varref O_RECV P_LAQUO recv_args2:
-		raise NotImplementedError(kids[0])
+		return RecvStmt(kids[0], kids[2])
+	| varref O_RECV P_LAQUO recv_nd_args
+		raise NotImplementedError('non-destructive receive')
 	;
 
-recv_args2 ->
+recv_nd_args ->
 	recv_args P_RAQUO:
-		return kids[0]
+		return kids[1]
 	;
 
 poll ->
-	varref O_RECV P_LSQBRACE recv_args P_RSQBRACE
+	varref O_RECV P_LSQBRACE recv_args P_RSQBRACE:
+		raise NotImplementedError('poll')
 	;
 
 send_args ->
@@ -260,9 +263,12 @@ recv_list ->
 	;
 
 recv_arg ->
-	varref
-	| K_EVAL P_LPAREN varref P_RPAREN
-	| O_ADD? const
+	varref:
+		return kids[0]
+	| K_EVAL P_LPAREN varref P_RPAREN:
+		raise NotImplementedError(kids[0])
+	| O_ADD? const:
+		raise NotImplementedError('receive-matching')
 	;
 
 assign ->
@@ -283,8 +289,10 @@ stmt ->
 		raise NotImplementedError(kids[0])
 	| P_LBRACE sequence P_RBRACE:
 		raise NotImplementedError('nested blocks')
-	| send
-	| recv
+	| send:
+		return kids[0]
+	| recv:
+		return kids[0]
 	| assign:
 		return kids[0]
 	| K_ELSE:
@@ -362,12 +370,10 @@ expr ->
 		return kids[1]
 	| T_BUILTIN P_LPAREN expr P_RPAREN:
 		raise NotImplementedError(kids[0])
-	| T_CHANPOLL P_LPAREN varref P_RPAREN:
+	| T_CHANOP P_LPAREN varref P_RPAREN:
 		return ChanOpExpr(kids[0], kids[2])
 	| P_LPAREN expr P_SEQ expr P_COLON expr P_RPAREN:
 		return TernaryExpr(*kids[1:6])
-	| T_LEN P_LPAREN varref P_RPAREN:
-		return ChanOpExpr(kids[0], kids[2])
 	| poll:
 		return kids[0]
 	| varref:
