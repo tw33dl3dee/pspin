@@ -148,9 +148,9 @@ int state_hash_add(struct State *state, enum HashAddAction add_action)
 		++hash_collision_shifts;
 		had_collisions = 1;
 		/*
-		 * Square open addressing: slot, slot+1, slot+4, slot+9,..
+		 * Open addressing with quadratic probes: slot, slot+1, slot+3, slot+6,..
 		 */
-		hash += SQR(++offset);
+		hash += ++offset;
 		hash %= HASHTABLE_LENGTH;
 		hash_dprintf(", NEXT " HASH_FMT "}", hash);
 
