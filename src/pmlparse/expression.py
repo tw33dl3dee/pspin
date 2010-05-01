@@ -33,7 +33,10 @@ class ConstExpr(Expr):
 class VarRef(Expr):
     """Reference to a variable
     """
-    pass
+    def deref(self):
+        """Returns Variable object being referenced
+        """
+        return NotImplemented
 
 
 class SimpleRef(VarRef):
@@ -54,6 +57,9 @@ class SimpleRef(VarRef):
 
     def code(self):
         return self._var.ref()
+
+    def deref(self):
+        return self._var
 
 
 class IdxRef(VarRef):
@@ -76,6 +82,9 @@ class IdxRef(VarRef):
 
     def code(self):
         return "(%s[%s])" % (self._var.ref(), self._idx.code())
+
+    def deref(self):
+        return self._var
 
 
 class FieldRef(VarRef):

@@ -4,6 +4,7 @@
 from variable import *
 from expression import SimpleRef, ChanOpExpr
 from utils import flatten
+from string import Template
 
 
 class Stmt(object):
@@ -472,42 +473,53 @@ class SendStmt(Stmt):
         - `arg_list`: list of Expression objects
         """
         super(SendStmt, self).__init__()
-        # TODO: check for channel type
         self._chan_ref = chan_ref
+        self._chan = chan_ref.deref()
         self._arg_list = arg_list
+        if type(self._chan) is not Channel:
+            raise RuntimeError, "Must be a channel"
+        self._chan.check_args(arg_list)
         
     def executable(self):
-        return ChanOpExpr('nfull', self._chan_ref.code()).code()
+        return ChanOpExpr('nfull', self._chan_ref).code()
 
     def execute(self):
-        send_code_tpl = """CHAN_SEND($chan);
-$send_ops
-"""
-        send_op_tpl = "CHAN_QUE($chan, $value, $size, $offset"
-        offset = 0
-        return NotImplemented
+        send_code_tpl = "$send_ops; CHAN_SEND($chan)"
+        send_op_tpl = "$field_ref = $value"
+        send_ops = []
+        chan = self._chan_ref.code()
+        chan_len = ChanOpExpr('len', self._chan_ref).code()
+        for i, arg in enumerate(self._arg_list):
+            send_ops.append(Template(send_op_tpl).substitute(field_ref=self._chan.field_ref(chan_len, i),
+                                                             value=arg.code()))
+        return Template(send_code_tpl).substitute(chan=chan,
+                                                  send_ops="; ".join(send_ops))
 
-
-class RecvStmt(Stmt):
-    """Recieves data from channel
-
-    Executable when channel not empty
+    def debug_repr(self):
+        return "SEND"
+        
+                            
+class RecvStmt(SendStmt):
+    """Receives data from channel
+    
+    Executable when channel not empty.
+    _arg_list is a list of VarRef objects
     """
     
-    def __init__(self, chan_ref, arg_list):
-        """
-        
-        Arguments:
-        - `chan_ref`: (VarRef) channel reference
-        - `arg_list`: list of Expression objects
-        """
-        super(RecvStmt, self).__init__()
-        # TODO: check for channel type
-        self._chan_ref = chan_ref
-        self._arg_list = arg_list
-        
     def executable(self):
-        return ChanOpExpr('nempty', self._chan_ref.code()).code()
-
+        return ChanOpExpr('nempty', self._chan_ref).code()
+    
     def execute(self):
-        return NotImplemented
+        recv_code_tpl = "CHAN_RECV($chan); $recv_ops"
+        recv_op_tpl = "$var = $field_ref"
+        recv_ops = []
+        chan = self._chan_ref.code()
+        chan_len = ChanOpExpr('len', self._chan_ref).code()
+        for i, arg in enumerate(self._arg_list):
+            recv_ops.append(Template(recv_op_tpl).substitute(field_ref=self._chan.field_ref(chan_len, i),
+                                                             var=arg.code()))
+        return Template(recv_code_tpl).substitute(chan=chan,
+                                                  recv_ops="; ".join(recv_ops))
+
+    def debug_repr(self):
+        return "RECV"

@@ -2,6 +2,7 @@
 #
 
 from utils import property3
+from string import Template
 
 
 class Type(object):
@@ -18,13 +19,18 @@ class Type(object):
     def __str__(self):
         return self._name
 
+    def c_size(self):
+        """Returns C code which evaluates to machine size of this type
+        """
+        return NotImplemented
+
 
 class BuiltinType(Type):
     """Built-in type (can be represented with built-in C types)
 
     Arrays and bit-fields do count as built-in, too.
     """
-    
+
     c_types = {'bit': 'unsigned', 'bool': 'unsigned', 'byte': 'unsigned char',
                'short': 'short', 'int': 'int', 'pid':'char'}
     c_bitsizes = {'bit': 1, 'bool': 1}
@@ -51,6 +57,9 @@ class BuiltinType(Type):
         """C-type corresponding to this type (str)
         """
         return self.c_types[self._name]
+
+    def c_size(self):
+        return "sizeof(%s)" % self.c_type()
 
     def c_align(self):
         """Not actual align (depends on platform) but score telling
@@ -86,13 +95,12 @@ class SimpleType(BuiltinType):
     pass
 
 
-class ChanType(Type):
-    """Channel type is actually a pointer to state area
-    where channel data is stored
+class ChanType(BuiltinType):
+    """Channel data is stored as byte array for now
     """
     def __init__(self):
-        # As state size is "short", any part of it can be addressed with it
-        super(ChanType, self).__init__("short")
+        # Minimal align, so that channels go last
+        super(ChanType, self).__init__("byte", 1)
 
 
 #############################################################
@@ -146,10 +154,10 @@ class Variable(object):
             raise RuntimeError, "Invalid type `%s' for `%s'" % (self._type, self._name)
 
     def decl(self):
-        """Generates C-code for variable declaration
+        """Generates C-code (sequence of str) for variable declaration
         """
         bitspec = self._type.c_bitsize() and " : %d" % self._type.c_bitsize() or ""
-        lenspec = self._arrsize and "[%d]" % self._arrsize or ""
+        lenspec = self._arrsize and "[%s]" % self._arrsize or ""
         # TODO: fold bit arrays
         return "%s %s %s" % (self._type.c_type(), self._name, lenspec or bitspec)
 
@@ -217,20 +225,20 @@ class Channel(Variable):
     """Channels variable holds a pointer (of type ChanType) to state area
     with channel data.
 
-    Channel data: [size(1 byte), entry #1(all values w/o align), entry #2...]
+    Channel data: [len(1 byte), max len(1 byte), entry #1(all values w/o align), entry #2...]
     Channels of size zero are not yet supported.
     """
-    
-    def __init__(self, name, size, typelist):
+
+    def __init__(self, name, max_len, typelist):
         """
-        
+
         Arguments:
-        - `size`: (int) size, positive
+        - `max_len`: (int) max length, positive
         - `typelist`: list of Type objects
         """
-        super(Channel, self).__init__(name, ChanType())
-        self._size = size
+        self._max_len = max_len
         self._typelist = typelist
+        super(Channel, self).__init__(name, ChanType(), self._chan_c_size())
 
     def check_type(self):
         """Used for type validation
@@ -238,18 +246,62 @@ class Channel(Variable):
         if not type(self._type) is ChanType:
             raise RuntimeError, "Invalid type `%s' for `%s'" % (self._type, self._name)
 
-    def init(self):
-        """Generates  C-code to initialize variable
+    def check_args(self, arg_list):
+        """Checks list of send/recv arguments (VarRef or Expression objects)
+        to match declaration
         """
-        if self._initval is None:
-            return None
+        if len(arg_list) != len(self._typelist):
+            raise RuntimeError, "Invalid number of arguments, %d expected" % len(self._typelist)
+
+    def _chan_c_size(self):
+        """C-code (str) which evaluates to full size of channel contents
+        """
+        chan_size_tpl = "(sizeof(struct Channel) + $entries*$entry_size)"
+        return Template(chan_size_tpl).substitute(entries=self._max_len,
+                                                  entry_size=self._entry_c_size())
+
+    def _entry_c_size(self):
+        """C-code (str) which
+        """
+        return self._field_offset(len(self._typelist))
+
+    def _field_offset(self, field_idx):
+        """C-code (str) which evaluates to offset of N-th field in channel entry
+        """
+        if field_idx == 0:
+            return "0"
         else:
-            return "%s = %s" % (self.ref(), self._initval)
+            return "(" + " + ".join([t.c_size() for t in self._typelist[0:field_idx]]) + ")"
+
+    def field_ref(self, entry_idx, field_idx):
+        """C-code (str) wich references M-th field of N-th channel entry
+
+        Does not check channel current and max length
+        """
+        field_ref_tpl = "CHAN_FIELD($chan, $type, $entry_size, $entry_idx, $field_offset)"
+        return Template(field_ref_tpl).substitute(chan=self.ref(),
+                                                  type=self._typelist[field_idx].c_type(),
+                                                  entry_size=self._entry_c_size(),
+                                                  entry_idx=entry_idx,
+                                                  field_offset=self._field_offset(field_idx))
+
+    def init(self):
+        init_tpl = "CHAN_LEN($chan) = 0, CHAN_MAXLEN($chan) = $max_len"
+        return Template(init_tpl).substitute(chan=self.ref(), max_len=self._max_len)
 
     def printf_format(self):
         """Generates string to be used as printf-format specifier
         """
-        return NotImplemented
+        printf_fmt_tpl = "$skip<%d of %d> [$fields_fmt]"
+        skip = " "*(10 - len(self._name))
+        entry_fmt = "{" + "; ".join([t.printf_format() for t in self._typelist]) + "}"
+        fields_fmt = ", ".join([entry_fmt]*self._max_len)
+        return Template(printf_fmt_tpl).substitute(skip=skip, fields_fmt=fields_fmt)
 
     def printf_ref(self):
-        return NotImplemented
+        printf_ref_tpl = "(int)CHAN_LEN($chan), (int)CHAN_MAXLEN($chan), $fields"
+        return Template(printf_ref_tpl).substitute(chan=self.ref(),
+                                                   fields=", ".join([self.field_ref(e, f)
+                                                                     for e in range(self._max_len)
+                                                                     for f in range(len(self._typelist))]))
+
