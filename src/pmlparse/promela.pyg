@@ -165,7 +165,7 @@ step ->
 		return [codegen.cur_proc.add_stmt(k) for k in listify(kids[0])]
 	| stmt K_UNLESS stmt:
 		raise NotImplementedError(kids[0])
-	| decl_list
+	| decl
 	| K_EXCL varref_list:
 		raise NotImplementedError(kids[0])
 	;
