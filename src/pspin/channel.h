@@ -27,7 +27,7 @@ struct Channel {
 /**
  * Retrieves current channel length
  */
-#define CHAN_LEN(chan)						\
+#define CHAN_LEN(chan)							\
 	((struct Channel *)(chan))->len
 
 /**
@@ -43,16 +43,6 @@ struct Channel {
 #define CHAN_NEMPTY(chan) (CHAN_LEN(chan) > 0)
 #define CHAN_FULL(chan)   (CHAN_LEN(chan) == CHAN_MAXLEN(chan))
 #define CHAN_NFULL(chan)  (CHAN_LEN(chan) < CHAN_MAXLEN(chan))
-
-/**
- * Size occupied by channel length/max length
- */
-#define CHAN_LEN_SIZE (sizeof(CHAN_LEN(NULL)))
-
-/**
- * Typename that stores channel length/max length
- */
-#define CHAN_LEN_TYPE __typeof__(CHAN_LEN(NULL))
 
 /*
  * Channel operations:
