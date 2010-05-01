@@ -15,6 +15,8 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "channel.h"
+
 /**
  * General process structure
  */
