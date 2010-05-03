@@ -143,30 +143,30 @@ static struct State *copy_state_add_process(const struct State *state, int proct
  */
 enum TransitionResult 
 do_transition(int pid, int dest_ip,
-			  struct State *state, struct Process *current, 
-			  struct State **next_state)
+              struct State *state, struct Process *current, 
+              struct State **next_state)
 {
 	int current_offset, aborted = TransitionPassed;
 
 #define RECORD_STEP(msg)									\
 	state_dprintf(" PASSED\n");								\
-	state_dprintf("Performing step: <<< %s >>>\n", msg);	
+	state_dprintf("Performing step: <<< %s >>>\n", msg);
 	/** @attention Check NULL pointer returned by copy_state
 	 */
-#define NEW_STATE()											\
-	*next_state = copy_state(state);						\
-	current_offset = PROC_OFFSET(current, state);			\
-	state = *next_state;									\
+#define NEW_STATE()										\
+	*next_state = copy_state(state);					\
+	current_offset = PROC_OFFSET(current, state);		\
+	state = *next_state;								\
 	current = PROC_BY_OFFSET(state, current_offset);
 #define NEW_STATE_NEW_PROC(proctype)						\
 	*next_state = copy_state_add_process(state, proctype);	\
 	current_offset = PROC_OFFSET(current, state);			\
 	state = *next_state;									\
-	current = PROC_BY_OFFSET(state, current_offset);	
-#define ASSERT(expr, repr)									\
-	if (!(expr)) {											\
-		iprintf(  "ASSERTION VIOLATED: %s\n", repr);			\
-		aborted = TransitionCausedAbort;					\
+	current = PROC_BY_OFFSET(state, current_
+#define ASSERT(expr, repr)								\
+	if (!(expr)) {										\
+		iprintf(  "ASSERTION VIOLATED: %s\n", repr);	\
+		aborted = TransitionCausedAbort;				\
 	}
 #define PRINTF(fmt, args...)					\
 	state_dprintf("*** " fmt, ##args);
@@ -177,12 +177,12 @@ do_transition(int pid, int dest_ip,
 #include STATEGEN_FILE
 #undef  TRANSITIONS
 
- passed:
+  passed:
 	PROCIP(current) = dest_ip;
 	if (STATEATOMIC(state) >= 0)
 		state_dprintf("ATOMIC now\n");
 	return aborted;
- blocked:
+  blocked:
 	state_dprintf(" BLOCKED\n");
 	return TransitionBlocked;
 }
@@ -209,13 +209,13 @@ check_endstate(struct State *state)
 			if (valid_endstates[PROCTYPE(current)][i] == PROCIP(current))
 				goto next_proc;
 		goto invalid;
-	next_proc:
+	  next_proc:
 		continue;
 	}
 
 	return 0;
 
- invalid:
+  invalid:
 	iprintf("INVALID END STATE\n");
 	return -1;
 }

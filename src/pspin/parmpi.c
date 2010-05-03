@@ -138,15 +138,15 @@ static void trace_summary()
 	iprintf("Parallel run summary:\n");
 
 	iprintf("\tTransitions taken: %d (%.1f/sec)\n",
-			trans_count, trans_count/run_time);
+	        trans_count, trans_count/run_time);
 	iprintf("\tMessages passed:   %d (%.2f%% trans), control: %d (%.2f%% all)\n",
-			state_msg_count, state_msg_count*100.f/trans_count,
-			ctrl_msg_count, ctrl_msg_count*100.f/(ctrl_msg_count + state_msg_count));
+	        state_msg_count, state_msg_count*100.f/trans_count,
+	        ctrl_msg_count, ctrl_msg_count*100.f/(ctrl_msg_count + state_msg_count));
 	iprintf("\tStates:            %d (%.1f/sec)\n",
-			state_count, state_count/run_time);
+	        state_count, state_count/run_time);
 	iprintf("\tBFS queue len:     %d (%.2f%% states, %.2f%% trans)\n",
-			max_bfs_len, 
-			max_bfs_len*100.f/state_count, max_bfs_len*100.f/trans_count);
+	        max_bfs_len, 
+	        max_bfs_len*100.f/state_count, max_bfs_len*100.f/trans_count);
 
 	state_hash_stats();
 }
@@ -491,7 +491,7 @@ static struct State *get_state(void)
 		last_buf_no = mpi_async_deque_buf(&recvq, 1);
 		if (last_buf_no != -1) {
 			switch (process_msg(MPI_ASYNC_BUF(&recvq, last_buf_no, union Message), 
-								MPI_ASYNC_STATUS(&recvq, last_buf_no), &state)) {
+			                    MPI_ASYNC_STATUS(&recvq, last_buf_no), &state)) {
 			case NewState:	return state;
 			case Terminate:	return NULL;
 			default:		continue;
@@ -518,7 +518,7 @@ static struct State *get_state(void)
 	for (;;) {
 		last_buf_no = mpi_async_deque_buf(&recvq, 0);
 		switch (process_msg(MPI_ASYNC_BUF(&recvq, last_buf_no, union Message), 
-							MPI_ASYNC_STATUS(&recvq, last_buf_no), &state)) {
+		                    MPI_ASYNC_STATUS(&recvq, last_buf_no), &state)) {
 		case NewState:	return state;
 		case Terminate:	return NULL;
 		default:		break;
@@ -575,7 +575,7 @@ static void dfs(void)
 		FOREACH_PROCESS(cur_state, ++pid) {
 			state_dprintf("Transitions for process %d", pid);
 			if (STATEATOMIC(cur_state) >= 0 && 
-				STATEATOMIC(cur_state) != pid) {
+			    STATEATOMIC(cur_state) != pid) {
 				state_dprintf(" SKIPPED, in ATOMIC context\n");
 				continue;
 			} else
@@ -628,9 +628,9 @@ static void dfs(void)
 		 */
 		put_state();
 #endif
-}
+	}
 
- aborted:
+  aborted:
 	state_dprintf("---------------------------------\n");
 	trace_summary();
 
