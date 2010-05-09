@@ -1,8 +1,8 @@
-mtype = {Wakeme, Running};
+#undef PROPOSED_FIX
 
-bit lk, sleep_q;
-bit r_lock, r_want;
-mtype State = Running;
+bit lk, sleep_q
+bit r_lock, r_want
+bit State = 1
 
 active proctype client()
 {
@@ -12,9 +12,9 @@ sleep:
 	do									/* while r.lock is set */
 	 :: (r_lock == 1) ->				/* r.lock == 1 */
 		r_want = 1;						/* set the want flag */
-		State = Wakeme;					/* remember State */
+		State = 0;					/* remember State */
 		lk = 0;							/* freelock(&lk) */
-		(State == Running);				/* wait for wakeup */
+		(State == 1);				/* wait for wakeup */
 	 :: else ->							/* r.lock == 0 */
 		break
 	od;
@@ -41,8 +41,8 @@ wakeup:									/* wakeup routine */
 		(lk == 0);						/* waitlock(&lk) */
 #endif
 		if
-		 :: (State == Wakeme) ->		/* the client process is asleep */
-			State = Running;			/* wake-up the client process */
+		 :: (State == 0) ->		/* the client process is asleep */
+			State = 1;			/* wake-up the client process */
 		 :: else -> skip
 		fi;
 		sleep_q = 0						/* release spinlock on sleep queue */

@@ -49,7 +49,7 @@ active proctype node_##number()													\
 
 #define MYNUMBER(pid) (pid+1)
 
-#define N 4							/* nr of processes */
+#define N 6							/* nr of processes */
 #define L N							/* size of buffer (>= 2*N) */
 
 byte nr_leaders = 0					/* count the number of process that
@@ -59,8 +59,8 @@ CHAN(0)
 CHAN(1)
 CHAN(2)
 CHAN(3)
-/* CHAN(4) */
-/* CHAN(5) */
+CHAN(4)
+CHAN(5)
 /* CHAN(6) */
 /* CHAN(7) */
 /* CHAN(8) */
@@ -69,9 +69,9 @@ CHAN(3)
 PROC(0,1)
 PROC(1,2)
 PROC(2,3)
-PROC(3,0)
-/* PROC(4,0) */
-/* PROC(5,6) */
+PROC(3,4)
+PROC(4,5)
+PROC(5,0)
 /* PROC(6,7) */
 /* PROC(7,0) */
 /* PROC(8,9) */

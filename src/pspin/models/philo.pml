@@ -1,3 +1,5 @@
+#define N 6
+
 byte fork[N]
 byte nr_eat
 

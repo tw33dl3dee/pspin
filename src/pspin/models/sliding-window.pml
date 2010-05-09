@@ -16,7 +16,7 @@ active [2] proctype p5()				/* starts two copies of proctype p5 */
 	do
 	 :: nbuf < MaxSeq ->				/* outgoing messages */
 		nbuf++;
-		out!NextFrame,(FrameExp + MaxSeq) % (MaxSeq + 1);
+		out!NextFrame,((FrameExp + MaxSeq) % (MaxSeq + 1));
 		inc(NextFrame)
 		
 	 :: q[_pid]?r,s ->					/* incoming messages */
