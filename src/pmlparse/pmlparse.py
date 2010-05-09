@@ -5,27 +5,28 @@ import pyggy_priv as pyggy
 import sys
 from pprint import pprint
 from codegen import Codegen
+from subprocess import Popen, PIPE
 
+
+def pp_file(fname):
+    return Popen(["cpp", fname] + pp_opt, stdout=PIPE).stdout
 
 def print_errpos(fname, lineno, charno, spaces_per_tab):
-    with open(fname, "r") as src:
+    with pp_file(fname) as src:
         print >>sys.stderr, src.readlines()[lineno - 1].replace("\t", ' ' * spaces_per_tab).rstrip()
     print >>sys.stderr, ' ' * (charno - 2), '^'
 
 
 fname = sys.argv[1]
+out_fname = sys.argv[2]
+pp_opt = sys.argv[3:]
+
 l,ltab = pyggy.getlexer("promela.pyl")
 p,ptab = pyggy.getparser("promela.pyg")
-l.setinput(fname)
+l.setinput(pp_file(fname))
 p.setlexer(l)
 
 l.SPACES_PER_TAB = 4
-
-# while 1:
-#     x = l.token()
-#     print x, l.value
-#     if x is None:
-#         break
 
 try:
     tree = p.parse()
@@ -43,4 +44,4 @@ else:
         print_errpos(fname, e.lineno(l), e.charno(l), l.SPACES_PER_TAB)
         sys.exit(2)
     else:
-        code.write_file(sys.argv[2])
+        code.write_file(out_fname)
