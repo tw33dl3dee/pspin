@@ -5,6 +5,7 @@ from __future__ import with_statement
 from process import Process
 from variable import *
 from string import Template
+from expression import ConstExpr
 
 
 class Codegen(object):
@@ -220,4 +221,4 @@ $init;
         """Settles Codegen object, must be called after all proctypes and declarations
         """
         self.add_var(Variable('_svsize', SimpleType('short')))
-        self.add_var(Variable('_atomic', SimpleType('pid'), initval=-1))
+        self.add_var(Variable('_atomic', SimpleType('pid'), initval=ConstExpr(-1)))

@@ -56,12 +56,13 @@ static struct State *alloc_state(size_t svsize, int zero)
  * 
  * @param current Newly allocated process structure
  * @param proctype Proctype (is saved to `current')
+ * @param pid Pid of new process
  */
-static void init_process(struct Process *current, int proctype)
+static void init_process(struct Process *current, int proctype, int pid)
 {
 	PROCTYPE(current) = proctype;
 	PROCIP(current) = 0;
-	
+
 #define PROCSTATE_INIT
 #include STATEGEN_FILE
 #undef  PROCSTATE_INIT
@@ -85,10 +86,11 @@ struct State *create_init_state(void)
 #include STATEGEN_FILE
 #undef  STATE_INIT
 
+	int pid = 0;
 	proc = FIRST_PROC(state);
 	for (int ptype = 0; ptype < NPROCTYPE; ++ptype)
-		for (int i = 0; i < procactive[ptype]; ++i) {
-			init_process(proc, ptype);
+		for (int i = 0; i < procactive[ptype]; ++i, ++pid) {
+			init_process(proc, ptype, pid);
 			proc = PROC_BY_OFFSET(proc, procsizes[ptype]);
 		}
 
@@ -122,7 +124,10 @@ static struct State *copy_state_add_process(const struct State *state, int proct
 	struct State *new_state = alloc_state(STATESIZE(state) + procsizes[proctype], 0);
 	if (new_state != NULL) {
 		memcpy(new_state, state, STATESIZE(state));
-		init_process(PROC_BY_OFFSET(new_state, STATESIZE(state)), proctype);
+		/** 
+		 * @bug 0 is passed instead of pid
+		 */
+		init_process(PROC_BY_OFFSET(new_state, STATESIZE(state)), proctype, 0);
 	}
 	return new_state;
 }
@@ -151,21 +156,26 @@ do_transition(int pid, int dest_ip,
 #define RECORD_STEP(msg)									\
 	state_dprintf(" PASSED\n");								\
 	state_dprintf("Performing step: <<< %s >>>\n", msg);
-	/** @attention Check NULL pointer returned by copy_state
-	 */
+#define CHECK_ALLOC(ptr)								\
+	if (ptr == NULL) {									\
+	    iprintf("OUT OF MEMORY\n");						\
+		return TransitionCausedAbort;					\
+	}
 #define NEW_STATE()										\
 	*next_state = copy_state(state);					\
 	current_offset = PROC_OFFSET(current, state);		\
 	state = *next_state;								\
+	CHECK_ALLOC(state);									\
 	current = PROC_BY_OFFSET(state, current_offset);
 #define NEW_STATE_NEW_PROC(proctype)						\
 	*next_state = copy_state_add_process(state, proctype);	\
 	current_offset = PROC_OFFSET(current, state);			\
 	state = *next_state;									\
-	current = PROC_BY_OFFSET(state, current_
+	CHECK_ALLOC(state);										\
+	current = PROC_BY_OFFSET(state, current__offset);
 #define ASSERT(expr, repr)								\
 	if (!(expr)) {										\
-		iprintf(  "ASSERTION VIOLATED: %s\n", repr);	\
+		iprintf("ASSERTION VIOLATED: %s\n", repr);		\
 		aborted = TransitionCausedAbort;				\
 	}
 #define PRINTF(fmt, args...)					\
