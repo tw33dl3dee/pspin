@@ -18,9 +18,13 @@
 #if __WORDSIZE == 32
 
 /**
+ * Hash seed type
+ */
+typedef uint32_t hash_seed_t;
+/**
  * Type used for ordinary hash lookups
  */
-typedef uint32_t state_hash_t;
+typedef uint64_t state_hash_t;
 /**
  * Type used by hashcompact implementation for "big" hash stored
  * in hashtable instead of full states
@@ -30,19 +34,19 @@ typedef uint64_t big_state_hash_t;
 /*
  * Format codes for printf() 
  */
-#define HASH_FMT     "%u"
+#define HASH_FMT     "%llu"
 #define BIG_HASH_FMT "%llu"
 
 /*
  * Maximum possible hash value
  */
-#define HASH_MAX UINT32_MAX
+#define HASH_MAX UINT64_MAX
 
 /*
  * On 32-bit platform, hashtables use 32-bit hash for lookups
  * and 64-bit for hashcompact method
  */
-#define murmur_hash     murmur_hash32
+#define murmur_hash     murmur_hash64_32
 #define murmur_hash_big murmur_hash64_32
 
 /** 
@@ -54,25 +58,24 @@ typedef uint64_t big_state_hash_t;
  * 
  * @return Hash value
  */
-static inline state_hash_t murmur_hash32(const void *key, size_t len, 
-										 state_hash_t seed)
+static inline uint32_t murmur_hash32(const void *key, size_t len, uint32_t seed)
 {
 	/* 'm' and 'r' are mixing constants generated offline.
 	 * They're not really 'magic', they just happen to work well.
 	 */
-	const state_hash_t m = 0x5bd1e995;
+	const uint32_t m = 0x5bd1e995;
 	const int r = 24;
 
 	/* Initialize the hash to a 'random' value
 	 */
-	state_hash_t h = seed ^ len;
+	uint32_t h = seed ^ len;
 
 	/* Mix 4 bytes at a time into the hash
 	 */
 	const unsigned char *data = key;
 
 	while (len >= 4) {
-		state_hash_t k = *(state_hash_t *)data;
+		uint32_t k = *(uint32_t *)data;
 
 		k *= m;
 		k ^= k >> r;
@@ -112,31 +115,30 @@ static inline state_hash_t murmur_hash32(const void *key, size_t len,
  * 
  * @return Hash value
  */
-static inline big_state_hash_t murmur_hash64_32(const void *key, size_t len,
-												state_hash_t seed)
+static inline uint64_t murmur_hash64_32(const void *key, size_t len, uint32_t seed)
 {
-	const state_hash_t m = 0x5bd1e995;
+	const uint32_t m = 0x5bd1e995;
 	const int r = 24;
 
-	state_hash_t h1 = seed ^ len;
-	state_hash_t h2 = 0;
+	uint32_t h1 = seed ^ len;
+	uint32_t h2 = 0;
 
-	const state_hash_t * data = (const state_hash_t *)key;
+	const uint32_t * data = (const uint32_t *)key;
 
 	while (len >= 8) {
-		state_hash_t k1 = *data++;
+		uint32_t k1 = *data++;
 		k1 *= m; k1 ^= k1 >> r; k1 *= m;
 		h1 *= m; h1 ^= k1;
 		len -= 4;
 
-		state_hash_t k2 = *data++;
+		uint32_t k2 = *data++;
 		k2 *= m; k2 ^= k2 >> r; k2 *= m;
 		h2 *= m; h2 ^= k2;
 		len -= 4;
 	}
 
 	if (len >= 4) {
-		state_hash_t k1 = *data++;
+		uint32_t k1 = *data++;
 		k1 *= m; k1 ^= k1 >> r; k1 *= m;
 		h1 *= m; h1 ^= k1;
 		len -= 4;
@@ -153,7 +155,7 @@ static inline big_state_hash_t murmur_hash64_32(const void *key, size_t len,
 	h1 ^= h2 >> 17; h1 *= m;
 	h2 ^= h1 >> 19; h2 *= m;
 
-	big_state_hash_t h = h1;
+	uint64_t h = h1;
 
 	h = (h << 32) | h2;
 
@@ -162,6 +164,10 @@ static inline big_state_hash_t murmur_hash64_32(const void *key, size_t len,
 
 #elif __WORDSIZE == 64
 
+/**
+ * Hash seed type
+ */
+typedef uint64_t hash_seed_t;
 /**
  * Type used for ordinary hash lookups
  */
@@ -199,19 +205,18 @@ typedef uint64_t big_state_hash_t;
  * 
  * @return Hash value
  */
-static inline state_hash_t murmur_hash64(const void *key, size_t len,
-										 state_hash_t seed)
+static inline uint64_t murmur_hash64(const void *key, size_t len, uint64_t seed)
 {
-	const state_hash_t m = 0xc6a4a7935bd1e995;
+	const uint64_t m = 0xc6a4a7935bd1e995;
 	const int r = 47;
 
-	state_hash_t h = seed ^ (len * m);
+	uint64_t h = seed ^ (len * m);
 
-	const state_hash_t * data = (const state_hash_t *)key;
-	const state_hash_t * end = data + (len/8);
+	const uint64_t * data = (const uint64_t *)key;
+	const uint64_t * end = data + (len/8);
 
 	while (data != end) {
-		state_hash_t k = *data++;
+		uint64_t k = *data++;
 
 		k *= m;
 		k ^= k >> r;
@@ -224,13 +229,13 @@ static inline state_hash_t murmur_hash64(const void *key, size_t len,
 	const unsigned char * data2 = (const unsigned char*)data;
 
 	switch (len & 7) {
-	case 7: h ^= (state_hash_t)data2[6] << 48;
-	case 6: h ^= (state_hash_t)data2[5] << 40;
-	case 5: h ^= (state_hash_t)data2[4] << 32;
-	case 4: h ^= (state_hash_t)data2[3] << 24;
-	case 3: h ^= (state_hash_t)data2[2] << 16;
-	case 2: h ^= (state_hash_t)data2[1] << 8;
-	case 1: h ^= (state_hash_t)data2[0]; h *= m;
+	case 7: h ^= (uint64_t)data2[6] << 48;
+	case 6: h ^= (uint64_t)data2[5] << 40;
+	case 5: h ^= (uint64_t)data2[4] << 32;
+	case 4: h ^= (uint64_t)data2[3] << 24;
+	case 3: h ^= (uint64_t)data2[2] << 16;
+	case 2: h ^= (uint64_t)data2[1] << 8;
+	case 1: h ^= (uint64_t)data2[0]; h *= m;
 	}
 
 	h ^= h >> r;

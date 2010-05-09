@@ -241,7 +241,7 @@ void dump_state(struct State *state)
 #include STATEGEN_FILE
 #undef  STATE_DUMP
 
-	dump_dprintf("-\tHASH:      " HASH_FMT "\n", STATE_TABLE_HASH(state, 0));
+	dump_dprintf("-\tHASH:      " HASH_FMT "\n", STATE_HASH(state, 0));
 
 	int pid = 0;
 	FOREACH_PROCESS(state, ++pid) {

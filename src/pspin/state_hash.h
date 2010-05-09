@@ -24,7 +24,7 @@
  * @return Hash value
  */
 #define HASH(data, len, num)											\
-	murmur_hash(data, len, ((state_hash_t)1<<(num+1))+((state_hash_t)(-1)>>(num+1)))
+	murmur_hash(data, len, ((hash_seed_t)1<<(num+1))+((hash_seed_t)(-1)>>(num+1)))
 
 /** 
  * @brief N-th hash value of state
@@ -53,6 +53,21 @@
 #define BIT_TEST(bits, number)  ((bits)[(number)/CHAR_BIT] &   (1 << (number)%CHAR_BIT))
 #define BIT_SET(bits, number)   ((bits)[(number)/CHAR_BIT] |=  (1 << (number)%CHAR_BIT))
 #define BIT_RESET(bits, number) ((bits)[(number)/CHAR_BIT] &= ~(1 << (number)%CHAR_BIT))
+
+/*
+ * Arithmetic 
+ */
+#define ROUNDUP(x, n) (x + ((x)%(n)?1:0))
+#define ROUNDDOWN(x, n) ((x) - (x)%(n))
+
+/*
+ * Size of hashtable (entries) 
+ */
+#if defined(FULLSTATE)
+#	define HASHTABLE_LENGTH ((state_hash_t)HASHTABLE_SIZE/sizeof(struct State *))
+#elif defined(BITSTATE)
+#	define HASHTABLE_LENGTH ((state_hash_t)HASHTABLE_SIZE*CHAR_BIT)
+#endif
 
 /**
  * Action to perform when adding new state to hash

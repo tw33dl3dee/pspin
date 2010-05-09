@@ -35,7 +35,7 @@ extern void *bfs_current;
 	({																	\
 		statespace = calloc(1, BFS_QUEUE_SIZE);							\
 		if (statespace == NULL) {										\
-			printf("FAILED TO ALLOC %d BYTES QUEUE SPACE\n", BFS_QUEUE_SIZE); \
+			printf("FAILED TO ALLOC %ld BYTES QUEUE SPACE\n", BFS_QUEUE_SIZE); \
 			return;														\
 		}																\
 		if (state_hash_init() < 0)										\
