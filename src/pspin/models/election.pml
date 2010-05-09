@@ -14,7 +14,7 @@ proctype node(chan in, out; byte mynumber)
 	bit Active = 1, know_winner = 0;
 	byte nr, maximum = mynumber, neighbourR;
 
-	printf("MSC: percentd\n," mynumber);
+	printf("MSC: %d\n," mynumber);
 	out!one(mynumber);					/* send msg of type one, with par mynumber */
 end:
 	do
@@ -70,7 +70,7 @@ init {
 		proc = 1;
 		do
 		 :: proc <= N ->
-			run node (q[proc-1], q[procpercentN], (N+I-proc)percentN+1);
+			run node (q[proc-1], q[proc%N], (N+I-proc)%N+1);
 			proc++
 		 :: proc > N ->
 			break

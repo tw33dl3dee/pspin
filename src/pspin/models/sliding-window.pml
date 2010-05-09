@@ -22,7 +22,7 @@ active [2] proctype p5()				/* starts two copies of proctype p5 */
 	 :: q[_pid]?r,s ->					/* incoming messages */
 		if
 		 :: r == FrameExp ->
-			printf("MSC: accept percentd\n," r);
+			printf("MSC: accept %d\n," r);
 			inc(FrameExp)
 		 :: else /* ignore message */
 		fi;
