@@ -1,6 +1,6 @@
-#define N 5					/* nr of processes */
+#define N 8					/* nr of processes */
 #define I 3					/* node given the smallest number */
-#define L 10				/* size of buffer (>= 2*N) */
+#define L 16				/* size of buffer (>= 2*N) */
 
 mtype = {one, two, winner}; /* three symbolic msg names */
 
@@ -14,7 +14,6 @@ proctype node(chan in, out; byte mynumber)
 	bit Active = 1, know_winner = 0;
 	byte nr, maximum = mynumber, neighbourR;
 
-	printf("MSC: %d\n," mynumber);
 	out!one(mynumber);					/* send msg of type one, with par mynumber */
 end:
 	do
@@ -48,12 +47,10 @@ end:
 		fi
 	 :: in?winner,nr ->
 		if
-		 :: nr != mynumber ->
-			printf("MSC: LOST\n");
+		 :: nr != mynumber -> skip
 		 :: else ->
-			printf("MSC: LEADER\n");
 			nr_leaders++;
-			assert(nrleaders == 1)
+			assert(nr_leaders == 1)
 		fi;
 		if
 		 :: know_winner
