@@ -146,6 +146,8 @@ static void bfs(void)
 #ifdef ENDSTATE
 					++transitions_possible;
 #endif
+					state_dprintf("TRANSITION: " HASH_FMT " => " HASH_FMT "\n",
+					              STATE_HASH(cur_state, 0), STATE_HASH(next_state, 0));
 
 					state_dprintf("New state:\n");
 #ifdef STATE_DEBUG

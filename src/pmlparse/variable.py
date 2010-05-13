@@ -117,7 +117,7 @@ class Variable(object):
         - `name`: variable name
         - `vartype`: Type object
         - `arrsize`: size of array (None if variable is not an array)
-        - `initval`: initial value (or None)
+        - `initval`: initial value (Expression or None)
         """
         self._name = name
         self._arrsize = arrsize
@@ -167,7 +167,7 @@ class Variable(object):
         if self._initval is None:
             return None
         else:
-            return "%s = %s" % (self.ref(), self._initval)
+            return "%s = %s" % (self.ref(), self._initval.code())
 
     def ref(self):
         """Generates C-expression that references variable

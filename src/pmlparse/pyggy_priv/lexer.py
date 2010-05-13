@@ -102,11 +102,14 @@ The subclass must provide nextch() and PUSHBACK() methods.
 		if fname == '-' :
 			self.input = sys.stdin
 			self.bufsize = 1
+		elif type(fname) is file :
+			self.input = fname
+			self.bufsize = 1024
 		else :
 			self.input = file(fname)
 			self.bufsize = 1024
 		self.readbuf()
-		
+
 	def readbuf(self) :
 		"fill up the self.buf buffer."
 		if self.input :

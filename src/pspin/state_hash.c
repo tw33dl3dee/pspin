@@ -17,10 +17,6 @@
  * Hash usage statistics
  */
 /**
- * Bytes used for storing hashtable
- */
-static size_t hashtable_size;
-/**
  * Total hash entries used
  */
 static int used_hash_entries;
@@ -57,7 +53,7 @@ static size_t max_bfs_state_size;
 void state_hash_stats(void)
 {
 	iprintf("\tState hash:\n");
-	iprintf("\t\tEntries:       %d\n", HASHTABLE_LENGTH);
+	iprintf("\t\tEntries:       " HASH_FMT "\n", HASHTABLE_LENGTH);
 	iprintf("\t\tUsed:          %d (%.1f%%)\n", 
 			used_hash_entries, used_hash_entries*100.f/HASHTABLE_LENGTH);
 	iprintf("\t\tCollisions:    %d (%.1f%%)\n", 
@@ -71,7 +67,7 @@ void state_hash_stats(void)
 	iprintf("\t\tAvg:           %.1f\n", total_state_size*1.0f/used_hash_entries);
 
 	iprintf("\tMemory usage:\n");
-	iprintf("\t\tHashtable:     %.1f MiB\n", hashtable_size*1.f/MiB);
+	iprintf("\t\tHashtable:     %.1f MiB\n", HASHTABLE_SIZE*1.f/MiB);
 #ifdef FULLSTATE
 	iprintf("\t\tVisited:       %.1f MiB\n", total_state_size*1.f/MiB);
 #else
@@ -101,10 +97,9 @@ static struct State **state_hashtable;
  */
 int state_hash_init()
 {
-	hashtable_size = sizeof(struct State *)*HASHTABLE_LENGTH;
 	state_hashtable = calloc(sizeof(struct State *), HASHTABLE_LENGTH);
 	if (state_hashtable == NULL) {
-		printf("FAILED TO ALLOC %d BYTES HASHTABLE\n", hashtable_size);
+		printf("FAILED TO ALLOC %d BYTES HASHTABLE\n", HASHTABLE_SIZE);
 		return -1;
 	}
 	return 0;
@@ -212,10 +207,9 @@ static unsigned char *state_hashtable;
  */
 int state_hash_init()
 {
-	hashtable_size = CHAR_BIT*HASHTABLE_LENGTH;
-	state_hashtable = calloc(1, hashtable_size);
+	state_hashtable = calloc(1, HASHTABLE_SIZE);
 	if (state_hashtable == NULL) {
-		printf("FAILED TO ALLOC %d BYTES HASHTABLE\n", hashtable_size);
+		printf("FAILED TO ALLOC %ld BYTES HASHTABLE\n", HASHTABLE_SIZE);
 		return -1;
 	}
 	return 0;
@@ -282,7 +276,7 @@ int state_hash_add(struct State *state, enum HashAddAction add_action)
 		max_state_size = (max_state_size > STATESIZE(state)) ? max_state_size : STATESIZE(state);
 
 		hash_dprintf(" - ADDED");
-		++used_hash_entries;
+		used_hash_entries += BITSTATE_HASH_COUNT;
 	}
 	else 
 		/*

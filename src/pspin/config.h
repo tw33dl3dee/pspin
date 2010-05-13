@@ -13,7 +13,7 @@
 /*
  * Size constants
  */
-#define kiB 1024
+#define kiB 1024L
 #define MiB (kiB*kiB)
 #define GiB (MiB*kiB)
 
@@ -36,7 +36,7 @@
 /**
  * If defined, endstate validness is checked
  */
-#define ENDSTATE
+#undef ENDSTATE
 
 /*
  * Node partitioning function selection
@@ -57,7 +57,7 @@
 /**
  * Use bitstate hashing
  */
-#undef BITSTATE
+#define BITSTATE
 /**
  * Use hashcompact hashing
  */
@@ -65,18 +65,16 @@
 /**
  * Use full state hashing
  */
-#define FULLSTATE
+#undef FULLSTATE
 
 /*
  * Hashtable and hashing function options 
  */
 
 /**
- * Size of hashtable (entries)
- * 
- * This is better a prime.
+ * Size of hashtable (bytes)
  */
-#define HASHTABLE_LENGTH (1*MiB + 0)
+#define HASHTABLE_SIZE (1024*MiB)
 
 /**
  * When reading states from network queue, push them immediately to local queue
@@ -94,7 +92,7 @@
 /**
  * Size of memory which is allocated to store states, both visited and in-queue (in bytes).
  */
-#	define STATESPACE_SIZE (128*MiB)
+#	define STATESPACE_SIZE (1024*MiB)
 /*
  * Force moving states from network to local queue 
  */
@@ -107,7 +105,7 @@
  * When bitstate or hashcompact hashing is used, BFS is a separate state queue.
  * With fullstate hashing, visited states and BFS are stored continously, so this is unused.
  */
-#	define BFS_QUEUE_SIZE  1*MiB
+#	define BFS_QUEUE_SIZE  128*MiB
 #endif
 
 #ifdef BITSTATE 
