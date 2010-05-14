@@ -166,35 +166,35 @@ $p$ не зависит от перехода $\alpha$, порядок выпо�
 переходов не важен, следовательно, генерацию состояния $s_2$ можно
 предотвратить (на рис. \ref{fig:partial-order-reduction} справа).
 
-% \begin{figure}[ht]
-%   \begin{array}{p{0.4\textwidth}p{0.2\textwidth}p{0.2\textwidth}}
-%   \begin{tikzpicture}[->,>=stealth',auto,node distance=4cm,semithick]
-%     \tikzstyle{every state}=[fill=none,draw=black,text=black]
-%     \node[state]     (A)                    {$s_0:~~p~$};
-%     \node[state]     (B) [below right of=A] {$s_1:~~p~$};
-%     \node[state]     (C) [below left  of=A] {$s_2:~\neg p$};
-%     \node[state]     (D) [below right of=C] {$s_3:~\neg p$};
+\begin{figure}[ht]
+  \begin{array}{p{0.4\textwidth}p{0.2\textwidth}p{0.2\textwidth}}
+  \begin{tikzpicture}[->,>=stealth',auto,node distance=4cm,semithick]
+    \tikzstyle{every state}=[fill=none,draw=black,text=black]
+    \node[state]     (A)                    {$s_0:~~p~$};
+    \node[state]     (B) [below right of=A] {$s_1:~~p~$};
+    \node[state]     (C) [below left  of=A] {$s_2:~\neg p$};
+    \node[state]     (D) [below right of=C] {$s_3:~\neg p$};
     
-%     \path (A) edge node {$\alpha$} (B)
-%               edge node {$\beta$}  (C)
-%           (B) edge node {$\beta$}  (D)
-%           (C) edge node {$\alpha$} (D);
-%   \end{tikzpicture}
-%   & 
-%   &
-%   \begin{tikzpicture}[->,>=stealth',auto,node distance=4cm,semithick]
-%     \tikzstyle{every state}=[fill=none,draw=black,text=black]
-%     \node[state]          (A)                    {$s_0:~p~$};
-%     \node[state]          (B) [below right of=A] {$s_1:~p~$};
-%     \node[state]          (D) [below left  of=B] {$s_3:~\neg p$};
+    \path (A) edge node {$\alpha$} (B)
+              edge node {$\beta$}  (C)
+          (B) edge node {$\beta$}  (D)
+          (C) edge node {$\alpha$} (D);
+  \end{tikzpicture}
+  & 
+  &
+  \begin{tikzpicture}[->,>=stealth',auto,node distance=4cm,semithick]
+    \tikzstyle{every state}=[fill=none,draw=black,text=black]
+    \node[state]          (A)                    {$s_0:~p~$};
+    \node[state]          (B) [below right of=A] {$s_1:~p~$};
+    \node[state]          (D) [below left  of=B] {$s_3:~\neg p$};
     
-%     \path (A) edge node {$\alpha$} (B)
-%           (B) edge node {$\beta$}  (D);
-%   \end{tikzpicture}
-%   \end{array}
-%   \caption{Демонстрация сокращения частных порядков}
-%   \label{fig:partial-order-reduction}
-% \end{figure}
+    \path (A) edge node {$\alpha$} (B)
+          (B) edge node {$\beta$}  (D);
+  \end{tikzpicture}
+  \end{array}
+  \caption{Демонстрация сокращения частных порядков}
+  \label{fig:partial-order-reduction}
+\end{figure}
 
 Сокращение частных порядков возможно далеко не для любых пар
 переходов, допустимых в данном состоянии:
