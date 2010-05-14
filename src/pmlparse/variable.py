@@ -116,13 +116,16 @@ class Variable(object):
         Arguments:
         - `name`: variable name
         - `vartype`: Type object
-        - `arrsize`: size of array (None if variable is not an array)
+        - `arrsize`: size of array (None if variable is not an array,
+                                    otherwise must be an Expression that can be evaluated an generation time)
         - `initval`: initial value (Expression or None)
         """
         self._name = name
         self._arrsize = arrsize
         self._initval = initval
         self._type = vartype
+        if arrsize and not arrsize.const:
+            raise RuntimeError, "Array size must be constant"
         if vartype:
             self.check_type()
         self.parent = None  # parent ref()able object object
@@ -157,7 +160,7 @@ class Variable(object):
         """Generates C-code (sequence of str) for variable declaration
         """
         bitspec = self._type.c_bitsize() and " : %d" % self._type.c_bitsize() or ""
-        lenspec = self._arrsize and "[%s]" % self._arrsize or ""
+        lenspec = self._arrsize and "[%s]" % self._arrsize.code() or ""
         # TODO: fold bit arrays
         return "%s %s %s" % (self._type.c_type(), self._name, lenspec or bitspec)
 
@@ -182,14 +185,14 @@ class Variable(object):
         """
         skip = " "*(10 - len(self._name))
         if self._arrsize:
-            return skip + "[%s]" % (", ".join([self._type.printf_format()]*self._arrsize))
+            return skip + "[%s]" % (", ".join([self._type.printf_format()]*self._arrsize.eval()))
         else:
             return skip + self._type.printf_format()
 
     def printf_ref(self):
         if self._arrsize:
             return ",".join(["(%s)%s[%d]" % (self._type.printf_type(), self.ref(), i)
-                             for i in range(self._arrsize)])
+                             for i in range(self._arrsize.eval())])
         else:
             return "(%s)%s" % (self._type.printf_type(), self.ref())
 

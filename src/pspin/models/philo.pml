@@ -1,40 +1,59 @@
-#define N 6
+/*
+ * Configuration
+ * ***************** */
+#define PHILO_LR   0
+#define PHILO_RL   0
+#define PHILO_RETR 3
+/* ***************** */
+
+#define N (PHILO_LR + PHILO_RL + PHILO_RETR)
+
+#define LFORK fork[_pid]
+#define RFORK fork[(_pid + 1)%N]
+
+#define ATE eaten_acc = eaten_acc + 1 - eaten[_pid]; eaten[_pid] = 1
 
 byte fork[N]
 byte nr_eat
+byte eaten[N]
+byte eaten_acc
 
-active [N] proctype Philosopher() {
+active [PHILO_LR] proctype PhiloLR() {
 Think:
-	atomic { fork[_pid] == 0 -> fork[_pid] = 1 };
+	atomic { LFORK == 0 -> LFORK = 1 };
 One:
-	atomic { fork[(_pid + 1)%N] == 0 -> fork[(_pid + 1)%N] = 1; nr_eat++ };
+	atomic { RFORK == 0 -> RFORK = 1; nr_eat++; ATE };
 Eat:
-	atomic { nr_eat--; fork[(_pid + 1)%N] = 0 };
-	fork[_pid] = 0;
+	atomic { nr_eat--; RFORK = 0 };
+	LFORK = 0;
 	goto Think;
 }
 
-proctype Phil_another() {
+active [PHILO_RL] proctype PhiloRL() {
 Think:
-	atomic { fork[(_pid + 1)%N] == 0 -> fork[(_pid + 1)%N] = 1 };
+	atomic { RFORK == 0 -> RFORK = 1 };
 One:
-	atomic { fork[_pid] == 0 -> fork[_pid] = 1; nr_eat++ };
+	atomic { LFORK == 0 -> LFORK = 1; nr_eat++; ATE };
 Eat:
-	atomic { nr_eat--; fork[_pid] = 0 };
-	fork[(_pid + 1)%N] = 0;
+	atomic { nr_eat--; LFORK = 0 };
+	RFORK = 0;
 	goto Think;
 }
 
-proctype Phil_restart() {
+active [PHILO_RETR] proctype PhiloRetr() {
 Think:
-	atomic { fork[_pid] == 0 -> fork[_pid] = 1; };
+	atomic { LFORK == 0 -> LFORK = 1; };
 One:
 	if
-	 :: atomic { fork[(_pid + 1)%N] == 0 -> fork[(_pid + 1)%N] = 1; nr_eat++ }
-	 :: atomic { fork[(_pid + 1)%N] != 0 -> fork[_pid] = 0 }; goto Think
+	 :: atomic { RFORK == 0 -> RFORK = 1; nr_eat++; ATE }
+	 :: atomic { RFORK != 0 -> LFORK = 0 }; goto Think
 	fi;
 Eat:
-	atomic { nr_eat--; fork[(_pid + 1)%N] = 0; };
-	fork[_pid] = 0;
+	atomic { nr_eat--; RFORK = 0; };
+	LFORK = 0;
 	goto Think
+}
+
+active proctype Checker() {
+	eaten_acc = N;
 }

@@ -2,6 +2,9 @@
 #
 
 class Expr(object):
+    def __init__(self):
+        self._is_const = False
+
     def __str__(self):
         """Returns human-readable expression representation
         """
@@ -11,6 +14,21 @@ class Expr(object):
         """Returns C expression which evaluates current expression value
         """
         raise NotImplementedError
+
+    @property
+    def const(self):
+        """True if can be evaluated at generation time
+        """
+        return self._is_const
+
+    def eval(self):
+        """Evaluates expression value (only when const = True)
+        Otherwise returns None
+        """
+        if self.const:
+            return eval(self.code())
+        else:
+            return None
 
 
 class ConstExpr(Expr):
@@ -24,6 +42,7 @@ class ConstExpr(Expr):
         - `value`: expression value (int)
         """
         Expr.__init__(self)
+        self._is_const = True
         self._value = value
 
     def code(self):
@@ -145,6 +164,7 @@ class TernaryExpr(Expr):
         - `right`: right Expr object
         """
         Expr.__init__(self)
+        self._is_const = left.const and right.const and mid.const
         self._left = left
         self._op1 = op1
         self._mid = mid
@@ -171,6 +191,7 @@ class BinaryExpr(Expr):
         - `right`: right Expr object
         """
         Expr.__init__(self)
+        self._is_const = left.const and right.const
         self._left = left
         self._op = op
         self._right = right
@@ -194,6 +215,7 @@ class UnaryExpr(Expr):
         - `right`: operand Expr object
         """
         Expr.__init__(self)
+        self._is_const = right.const
         self._op = op
         self._right = right
 

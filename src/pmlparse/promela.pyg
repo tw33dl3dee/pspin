@@ -178,7 +178,7 @@ varref_list ->
 	;
 
 ivar ->
-	name P_LSQBRACE const P_RSQBRACE:
+	name P_LSQBRACE expr P_RSQBRACE:
 		return Variable(kids[0], None, kids[2], None)
 	| name ch_init:
 		return Channel(kids[0], *kids[1])
