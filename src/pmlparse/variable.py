@@ -3,6 +3,7 @@
 
 from utils import property3
 from string import Template
+from expression import ConstExpr
 
 
 class Type(object):
@@ -241,7 +242,10 @@ class Channel(Variable):
         """
         self._max_len = max_len
         self._typelist = typelist
-        super(Channel, self).__init__(name, ChanType(), self._chan_c_size())
+        # Dirty hack: chan_c_size is actually a string with C expression,
+        #   so it cannot be evauluated as ConstExpr
+        # But since we overload print_*, it's eval() is never called
+        super(Channel, self).__init__(name, ChanType(), ConstExpr(self._chan_c_size()))
 
     def check_type(self):
         """Used for type validation
