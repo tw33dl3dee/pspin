@@ -40,6 +40,10 @@ struct mpi_queue {
 	 * Total number of buffers
 	 */
 	int ntotal;
+	/**
+	 * Time spent waiting for buffers
+	 */
+	double wait_time;
 };
 
 /** 

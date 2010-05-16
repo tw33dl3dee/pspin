@@ -32,6 +32,7 @@ void mpi_async_init(struct mpi_queue *queue, int queuelen, int bufsize)
 		queue->req[i] = MPI_REQUEST_NULL;
 	queue->nfree = queuelen;
 	queue->ntotal = queuelen;
+	queue->wait_time = 0;
 }
 
 /** 
@@ -67,7 +68,9 @@ int mpi_async_get_buf(struct mpi_queue *queue, int nowait)
 	}
 	else if (!nowait) {
 		int firstidx, idx, flag = 1;
+		double start_time = MPI_Wtime();
 		MPI_Waitany(queue->ntotal, queue->req, &idx, MPI_STATUS_IGNORE);
+		queue->wait_time += (MPI_Wtime() - start_time);
 		firstidx = idx;
 		assert(idx != MPI_UNDEFINED);
 		for (flag = 1; flag && idx != MPI_UNDEFINED; 
@@ -137,8 +140,11 @@ int mpi_async_deque_buf(struct mpi_queue *queue, int nowait)
 		if (!flag)
 			return -1;
 	}
-	else
+	else {
+		double start_time = MPI_Wtime();
 		MPI_Waitany(queue->ntotal, queue->req, &idx, &status);
+		queue->wait_time += (MPI_Wtime() - start_time);
+	}
 	
 	/* Should be at least one recv operation in progress
 	 */

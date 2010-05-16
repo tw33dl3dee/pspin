@@ -133,10 +133,19 @@ static void trace_ctrl_send(int node_idx)
  */
 static void trace_summary()
 {
-	float run_time = MPI_Wtime() - start_time;
+	float total_time = MPI_Wtime() - start_time;
+	float wait_time = recvq.wait_time + sendq.wait_time;
+	float run_time = total_time - wait_time;
 
 	iprintf("Parallel run summary:\n", 0);
 
+	iprintf("\tTime:\n", 0);
+	iprintf("\t\tTotal:         %.3f sec\n", 
+	        total_time);
+	iprintf("\t\tRun:           %.3f sec (%.1f%% total)\n", 
+	        run_time, run_time*100./total_time);
+	iprintf("\t\tIdle           %.3f sec (%.3f recv, %.3f send)\n",
+	        wait_time, recvq.wait_time, sendq.wait_time);
 	iprintf("\tTransitions taken: %.0f (%.1f/sec)\n",
 	        (double)trans_count, trans_count/run_time);
 	iprintf("\tMessages passed:   %.0f (%.2f%% trans), control: %.0f (%.2f%% all)\n",
