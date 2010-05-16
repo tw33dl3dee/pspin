@@ -19,15 +19,15 @@
 /**
  * Total hash entries used
  */
-static int used_hash_entries;
+static uint64_t used_hash_entries;
 /**
  * Number of hash collisions (on first store attempt)
  */
-static int hash_collisions;
+static uint64_t hash_collisions;
 /**
  * Average number of subsequent collisions
  */
-static int hash_collision_shifts;
+static uint64_t hash_collision_shifts;
 /**
  * Minimal state size stored
  */
@@ -39,7 +39,7 @@ static size_t max_state_size;
 /**
  * Average state size
  */
-static size_t total_state_size;
+static uint64_t total_state_size;
 #ifndef FULLSTATE
 /**
  * Maximum size occupied by states on BFS queue
@@ -54,25 +54,47 @@ void state_hash_stats(void)
 {
 	iprintf("\tState hash:\n");
 	iprintf("\t\tEntries:       " HASH_FMT "\n", HASHTABLE_LENGTH);
-	iprintf("\t\tUsed:          %d (%.1f%%)\n", 
-			used_hash_entries, used_hash_entries*100.f/HASHTABLE_LENGTH);
-	iprintf("\t\tCollisions:    %d (%.1f%%)\n", 
-			hash_collisions, hash_collisions*100.f/used_hash_entries);
+	iprintf("\t\tUsed:          %.0f (%.1f%%)\n", 
+			(double)used_hash_entries, used_hash_entries*100./HASHTABLE_LENGTH);
+	iprintf("\t\tCollisions:    %.0f (%.1f%%)\n", 
+			(double)hash_collisions, hash_collisions*100./used_hash_entries);
 	iprintf("\t\tAvg col. len.: %.1f\n", 
-			hash_collision_shifts*1.f/hash_collisions);
+			hash_collision_shifts*1./hash_collisions);
 
 	iprintf("\tState size:\n");
 	iprintf("\t\tMin:           %zd\n", min_state_size);
 	iprintf("\t\tMax:           %zd\n", max_state_size);
-	iprintf("\t\tAvg:           %.1f\n", total_state_size*1.0f/used_hash_entries);
+	iprintf("\t\tAvg:           %.1f\n", total_state_size*1./used_hash_entries);
 
 	iprintf("\tMemory usage:\n");
-	iprintf("\t\tHashtable:     %.1f MiB\n", HASHTABLE_SIZE*1.f/MiB);
+	iprintf("\t\tHashtable:     %.1f MiB\n", HASHTABLE_SIZE*1./MiB);
 #ifdef FULLSTATE
-	iprintf("\t\tVisited:       %.1f MiB\n", total_state_size*1.f/MiB);
+	iprintf("\t\tVisited:       %.1f MiB\n", total_state_size*1./MiB);
 #else
-	iprintf("\t\tBFS queue:     %.1f MiB\n", max_bfs_state_size*1.f/MiB);
+	iprintf("\t\tBFS queue:     %.1f MiB\n", max_bfs_state_size*1./MiB);
 #endif
+}
+
+/** 
+ * @brief Prints intermediate hash statistics
+ */
+void state_hash_inter_stats(void)
+{
+	iprintf(" (hash use %.1f%%, collisions %.1f%%, "
+#ifdef FULLSTATE
+	        "visited: %.1f MiB"
+#else
+	        "BFS: %.1f MiB"
+#endif
+	        ")",
+	        used_hash_entries*100./HASHTABLE_LENGTH,
+	        hash_collisions*100./used_hash_entries,
+#ifdef FULLSTATE
+	        total_state_size*1./MiB
+#else
+	        max_bfs_state_size*1./MiB
+#endif
+			);
 }
 
 #if defined(FULLSTATE)
@@ -271,7 +293,7 @@ int state_hash_add(struct State *state, enum HashAddAction add_action)
 			break;
 		}
 
-		total_state_size += STATESIZE(state);
+		total_state_size += BITSTATE_HASH_COUNT*STATESIZE(state);
 		min_state_size = (min_state_size < STATESIZE(state)) ? min_state_size : STATESIZE(state);
 		max_state_size = (max_state_size > STATESIZE(state)) ? max_state_size : STATESIZE(state);
 

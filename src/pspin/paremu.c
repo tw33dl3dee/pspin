@@ -22,13 +22,51 @@
 #include "bfs.h"
 #include "debug.h"
 
-static int cur_node_idx;
-static int states_per_node[NODECOUNT];
-static int state_count;
-static int trans_count;
-static int xnode_count;
-static int max_bfs_len;
+/**
+ * Print intermediate stats every that states
+ */
+#define STAT_THRESHOLD (10*1000*1000)
 
+/**
+ * Currently emulated node index.
+ */
+static int cur_node_idx;
+/**
+ * States stored per each node.
+ */
+static uint64_t states_per_node[NODECOUNT];
+/**
+ * Number of states locally stored/processed.
+ */
+static uint64_t state_count;
+/**
+ * Number of transitions locally performed.
+ */
+static uint64_t trans_count;
+/**
+ * Number of remote calls made.
+ */
+static uint64_t xnode_count;
+/**
+ * Maximum BFS queue length in use.
+ */
+static size_t max_bfs_len;
+/**
+ * Start time of run.
+ */
+static time_t start_time;
+
+/** 
+ * @brief Record the start time.
+ */
+static void trace_start()
+{
+	start_time = time(NULL);
+}
+
+/** 
+ * @brief Record beginning of new state exploration.
+ */
 static void trace_state_begin(struct State *state)
 {
 	cur_node_idx = STATE_NODE_IDX(state, NODECOUNT);
@@ -36,6 +74,9 @@ static void trace_state_begin(struct State *state)
 	state_count++;
 }
 
+/** 
+ * @brief Record performed transition and, possibly, remote call
+ */
 static void trace_state_new(struct State *state)
 {
 	int node_idx = STATE_NODE_IDX(state, NODECOUNT);
@@ -48,38 +89,54 @@ static void trace_state_new(struct State *state)
 	trans_count++;
 }
 
+/** 
+ * @brief Output summary of recorded statistic
+ */
 static void trace_summary()
 {
-	float run_time = clock()*1.f/CLOCKS_PER_SEC;
+	double run_time = difftime(time(NULL), start_time);
 
 	iprintf("Emulation summary:\n");
 
-	iprintf("\tTransitions taken: %d (%.1f/sec)\n"
-			"\tMessages passed:   %d (%.2f%% trans)\n",
-			trans_count, trans_count/run_time,
-			xnode_count, xnode_count*100.f/trans_count);
+	iprintf("\tTransitions taken: %.0f (%.1f/sec)\n"
+			"\tMessages passed:   %.0f (%.2f%% trans)\n",
+			(double)trans_count, trans_count/run_time,
+			(double)xnode_count, xnode_count*100./trans_count);
 
 	iprintf("\tStates:\n"
-			"\t\tTotal:   %d (%.1f/sec)\n",
-			state_count, state_count/run_time);
+			"\t\tTotal:   %.0f (%.1f/sec)\n",
+			(double)state_count, state_count/run_time);
 	
-	int states_max = 0, states_min = states_per_node[0];
+	uint64_t states_max = 0, states_min = states_per_node[0];
 	for (int i = 0; i < NODECOUNT; ++i) {
 		if (states_min > states_per_node[i])
 			states_min = states_per_node[i];
 		if (states_max < states_per_node[i])
 			states_max = states_per_node[i];
-		iprintf("\t\tNode %2d: %d (%.1f%%)\n",
-				i, states_per_node[i], states_per_node[i]*100.f/state_count);
+		iprintf("\t\tNode %2d: %.0f (%.1f%%)\n",
+				i, (double)states_per_node[i], states_per_node[i]*100./state_count);
 	}
 	iprintf("\t\tMin/max: %.2f\n", 
-			states_min*1.f/states_max);
+			states_min*1./states_max);
 
-	iprintf("\tBFS queue len:     %d (%.2f%% states, %.2f%% trans)\n",
+	iprintf("\tBFS queue len:     %zd (%.2f%% states, %.2f%% trans)\n",
 			max_bfs_len, 
-			max_bfs_len*100.f/state_count, max_bfs_len*100.f/trans_count);
+			max_bfs_len*100./state_count, max_bfs_len*100./trans_count);
 
 	state_hash_stats();
+}
+
+/** 
+ * @brief Output intermediate statistic
+ */
+static void trace_inter_stat()
+{
+	double run_time = difftime(time(NULL), start_time);
+	
+	iprintf("[%.0f] States: %.0f, trans: %.0f ", 
+	        run_time, (double)state_count, (double)trans_count);
+	state_hash_inter_stats();
+	iprintf("\n");
 }
 
 /** 
@@ -106,6 +163,8 @@ static void bfs(void)
 	transitions_t transitions;
 
 	BFS_INIT();
+
+	trace_start();
 
 	state_dprintf("Initial state:");
 	init_state = create_init_state();
@@ -173,6 +232,9 @@ static void bfs(void)
 				goto aborted;
 		}
 #endif
+
+		if (state_count%STAT_THRESHOLD == 0)
+			trace_inter_stat();
 	}
 
  aborted:

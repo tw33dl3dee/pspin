@@ -81,6 +81,7 @@ enum HashAddAction {
 extern int state_hash_add(struct State *state, enum HashAddAction add_action);
 extern int state_hash_init();
 extern void state_hash_stats(void);
+extern void state_hash_inter_stats(void);
 
 /*
  * Node partitioning function selection.

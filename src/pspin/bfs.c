@@ -17,7 +17,7 @@
 void *statespace = NULL;
 void *bfs_top = NULL;
 void *bfs_ceil = NULL;
-int bfs_len = 0;
+size_t bfs_len = 0;
 
 #ifdef FULLSTATE
 void *bfs_bottom = NULL;

@@ -22,7 +22,7 @@ extern void *statespace;
 /**
  * Number of states currently in BFS queue.
  */
-extern int bfs_len;
+extern size_t bfs_len;
 /**
  * Pointer to the beginning of free space after BFS queue.
  */

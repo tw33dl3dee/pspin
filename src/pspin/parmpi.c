@@ -60,23 +60,23 @@ static struct mpi_queue sendq, recvq;
 /**
  * Number of states locally stored/processed.
  */
-static int state_count;
+static uint64_t state_count;
 /**
  * Number of transitions locally performed.
  */
-static int trans_count;
+static uint64_t trans_count;
 /**
  * Number of remote calls carrying new states made.
  */
-static int state_msg_count;
+static uint64_t state_msg_count;
 /**
  * Number of remote calls with control data made.
  */
-static int ctrl_msg_count;
+static uint64_t ctrl_msg_count;
 /**
  * Maximum BFS queue length in use.
  */
-static int max_bfs_len;
+static size_t max_bfs_len;
 /**
  * Start time of run.
  */
@@ -137,16 +137,16 @@ static void trace_summary()
 
 	iprintf("Parallel run summary:\n");
 
-	iprintf("\tTransitions taken: %d (%.1f/sec)\n",
-	        trans_count, trans_count/run_time);
-	iprintf("\tMessages passed:   %d (%.2f%% trans), control: %d (%.2f%% all)\n",
-	        state_msg_count, state_msg_count*100.f/trans_count,
-	        ctrl_msg_count, ctrl_msg_count*100.f/(ctrl_msg_count + state_msg_count));
-	iprintf("\tStates:            %d (%.1f/sec)\n",
-	        state_count, state_count/run_time);
-	iprintf("\tBFS queue len:     %d (%.2f%% states, %.2f%% trans)\n",
+	iprintf("\tTransitions taken: %.0f (%.1f/sec)\n",
+	        (double)trans_count, trans_count/run_time);
+	iprintf("\tMessages passed:   %.0f (%.2f%% trans), control: %.0f (%.2f%% all)\n",
+	        (double)state_msg_count, state_msg_count*100./trans_count,
+	        (double)ctrl_msg_count, ctrl_msg_count*100./(ctrl_msg_count + state_msg_count));
+	iprintf("\tStates:            %.0f (%.1f/sec)\n",
+	        (double)state_count, state_count/run_time);
+	iprintf("\tBFS queue len:     %zd (%.2f%% states, %.2f%% trans)\n",
 	        max_bfs_len, 
-	        max_bfs_len*100.f/state_count, max_bfs_len*100.f/trans_count);
+	        max_bfs_len*100./state_count, max_bfs_len*100./trans_count);
 
 	state_hash_stats();
 }
