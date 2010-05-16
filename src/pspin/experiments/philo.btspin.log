@@ -1,0 +1,56 @@
+8:
+
+State-vector 60 byte, depth reached 19212, errors: 0
+  8958373 states, stored
+ 62714577 states, matched
+ 71672950 transitions (= stored+matched)
+        0 atomic steps
+hash factor: 119.859 (best if > 100.)
+bits set per state: 3 (-k3)
+Stats on memory usage (in Megabytes):
+  546.776	equivalent memory usage for states (stored*(State-vector + overhead))
+  128.000	memory used for hash array (-w30)
+   26.703	memory used for DFS stack (-m1000000)
+  154.996	total actual memory usage
+pan: elapsed time 27.8 seconds
+pan: rate 322011.97 states/second
+
+
+9: 
+
+
+State-vector 68 byte, depth reached 63414, errors: 0
+ 52745188 states, stored
+4.1837229e+08 states, matched
+4.7111748e+08 transitions (= stored+matched)
+        0 atomic steps
+hash factor: 162.857 (best if > 100.)
+bits set per state: 3 (-k3)
+Stats on memory usage (in Megabytes):
+ 3621.725	equivalent memory usage for states (stored*(State-vector + overhead))
+ 1024.000	memory used for hash array (-w33)
+   26.703	memory used for DFS stack (-m1000000)
+ 1051.289	total actual memory usage
+pan: elapsed time 212 seconds
+pan: rate 248563.56 states/second
+
+10:
+
+State-vector 72 byte, depth reached 202037, errors: 0
+3.0808776e+08 states, stored
+2.730844e+09 states, matched
+3.0389317e+09 transitions (= stored+matched)
+        0 atomic steps
+hash factor: 27.8815 (best if > 100.)
+bits set per state: 3 (-k3)
+Stats on memory usage (in Megabytes):
+22329.970	equivalent memory usage for states (stored*(State-vector + overhead))
+ 1024.000	memory used for hash array (-w33)
+   26.703	memory used for DFS stack (-m1000000)
+    1.372	other (proc and chan stacks)
+ 1052.168	total actual memory usage
+pan: elapsed time 1.45e+03 seconds
+pan: rate 211929.15 states/second
+
+11:
+

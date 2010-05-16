@@ -1,0 +1,22 @@
+MODEL       PSPIN                           SPIN        SPIN+BH
+
+philo 3:    58k (58113)                                 
+philo 4:    1M (1081971)                                
+philo 5:    18M (18598509)                  41k         
+philo 6:    302M (302024291)                250k        
+philo 7:    3G (3111057424) (72% 1G)        1.5M        
+philo 8:    ??                              9M          
+philo 9:    ??                              ??          52M
+philo 10:   ??                              ??          300M
+
+peterson 3: 145k (145475)                               
+peterson 4: 60M (60087036) (BFS 135M)       136k        
+peterson 5: 117M (117799507) (BFS 650M)     6.5M        
+peterson 6: ??                              ??          
+
+election 4: 610k (610374)                               
+election 5: 22M (22705866)                              
+election 6: 1.5G (1455024393) (33% 1G)      62k         
+election 7: ??                              383k        
+election 8: ??                              2.3M        
+election 9: ??                              ??          
