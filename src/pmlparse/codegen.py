@@ -113,7 +113,7 @@ struct State {
         fields = [v.decl() for v in sorted(sorted(self._vars.values()),
                                            key=lambda v: v.type.c_align(),
                                            reverse=True)]
-        fields.append("char _procs[0]")
+        fields.append("char _procs[1]")
         return Template(state_tpl).substitute(fields = ";\n\t".join(fields))
 
     def state_ref(self):
