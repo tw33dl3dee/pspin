@@ -135,7 +135,7 @@ static void trace_summary()
 {
 	float run_time = MPI_Wtime() - start_time;
 
-	iprintf("Parallel run summary:\n");
+	iprintf("Parallel run summary:\n", 0);
 
 	iprintf("\tTransitions taken: %.0f (%.1f/sec)\n",
 	        (double)trans_count, trans_count/run_time);

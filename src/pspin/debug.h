@@ -63,7 +63,10 @@ void mpi_printf_ob(int do_buffering);
 #	define dprintf_ob (void)
 #	ifdef MPI
 extern int node_id;
-#		define iprintf(fmt, args...) printf("[%d] " fmt, node_id, ## args)
+/*
+ * God-damned xlc v6 compatibility
+ */
+#		define iprintf(fmt, ...) printf("[%d] " fmt, node_id, __VA_ARGS__)
 #	else
 #		define iprintf printf
 #	endif
