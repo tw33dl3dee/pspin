@@ -1,76 +1,130 @@
-#define N 8					/* nr of processes */
-#define I 3					/* node given the smallest number */
-#define L 16				/* size of buffer (>= 2*N) */
+/*
+ * Configuration
+ * ******************/
+#define N 9							/* nr of processes */
+#define L N							/* size of buffer (>= 2*N) */
+/* ******************/
 
-mtype = {one, two, winner}; /* three symbolic msg names */
+#define ONE 101
+#define TWO 102
+#define WINNER 200
 
-chan q[N] = [L] of {mtype, byte};	/* asynchronous channel */
+#define CHAN(number)												\
+chan q_##number = [L] of {byte, byte}
 
-byte nr_leaders = 0;				/* count the number of process that
+#define PROC(number, prev)														\
+active proctype node_##number()													\
+{																				\
+	bit Active = 1, know_winner = 0;											\
+	byte nr, maximum = MYNUMBER(_pid), neighbr, msg;							\
+																				\
+	q_##number!ONE(MYNUMBER(_pid));												\
+																				\
+	do																			\
+	 :: q_##prev?msg,nr ->														\
+		if																		\
+		 :: msg == ONE && Active && nr != maximum ->							\
+			q_##number!TWO(nr);													\
+			neighbr = nr														\
+		 :: msg == ONE && Active && nr == maximum ->							\
+			know_winner = 1;													\
+			q_##number!WINNER,nr;												\
+		 :: msg == ONE && !Active ->											\
+			q_##number!ONE(nr)													\
+		 :: msg == TWO && Active && neighbr > nr && neighbr > maximum ->		\
+			maximum = neighbr;													\
+			q_##number!ONE(neighbr)												\
+		 :: msg == TWO && Active && !(neighbr > nr && neighbr > maximum) ->		\
+			Active = 0															\
+		 :: msg == TWO && !Active ->											\
+			q_##number!TWO(nr)													\
+		 :: msg == WINNER ->													\
+			if																	\
+			 :: nr != MYNUMBER(_pid) -> skip									\
+			 :: else ->															\
+				nr_leaders++;													\
+				assert(nr_leaders == 1)											\
+			fi;																	\
+			if																	\
+			 :: know_winner														\
+			 :: else -> q_##number!WINNER,nr									\
+			fi;																	\
+			break																\
+		fi																		\
+	od																			\
+}
+
+#define MYNUMBER(pid) (pid+1)
+
+byte nr_leaders = 0					/* count the number of process that
 									 *	think they are leader of the ring */
 
-proctype node(chan in, out; byte mynumber)
-{
-	bit Active = 1, know_winner = 0;
-	byte nr, maximum = mynumber, neighbourR;
+CHAN(0)
+CHAN(1)
+#if N > 2
+CHAN(2)
+#endif
+#if N > 3
+CHAN(3)
+#endif
+#if N > 4
+CHAN(4)
+#endif
+#if N > 5
+CHAN(5)
+#endif
+#if N > 6
+CHAN(6)
+#endif
+#if N > 7
+CHAN(7)
+#endif
+#if N > 8
+CHAN(8)
+#endif
+#if N > 9
+CHAN(9)
+#endif
 
-	out!one(mynumber);					/* send msg of type one, with par mynumber */
-end:
-	do
-	 :: in?one(nr) ->					/* receive msg of type one, with par nr */
-		if
-		 :: Active ->
-			if
-			 :: nr != maximum ->
-				out!two(nr);
-				neighbourR = nr
-			 :: else ->					/* max is greatest number */
-				assert(nr == N);
-				know_winner = 1;
-				out!winner,nr;
-			fi
-		 :: else ->
-			out!one(nr)
-		fi
-	 :: in?two(nr) ->
-		if
-		 :: Active ->
-			if
-			 :: neighbourR > nr && neighbourR > maximum ->
-				maximum = neighbourR;
-				out!one(neighbourR)
-			 :: else ->
-				Active = 0
-			fi
-		 :: else ->
-			out!two(nr)
-		fi
-	 :: in?winner,nr ->
-		if
-		 :: nr != mynumber -> skip
-		 :: else ->
-			nr_leaders++;
-			assert(nr_leaders == 1)
-		fi;
-		if
-		 :: know_winner
-		 :: else -> out!winner,nr
-		fi;
-		break
-	od
-}
-
-init {
-	byte proc;
-	atomic {
-		/* atomically activate N copies of proc template node */
-		proc = 1;
-		do
-		 :: proc <= N ->
-			run node (q[proc-1], q[proc%N], (N+I-proc)%N+1);
-			proc++
-		 :: proc > N ->
-			break
-		od
-	}
-}
+PROC(0,1)
+#if N > 2
+PROC(1,2)
+#if N > 3
+PROC(2,3)
+#if N > 4
+PROC(3,4)
+#if N > 5
+PROC(4,5)
+#if N > 6
+PROC(5,6)
+#if N > 7
+PROC(6,7)
+#if N > 8
+PROC(7,8)
+#if N > 9
+PROC(8,9)
+PROC(9,0)
+#else
+PROC(8,0)
+#endif
+#else
+PROC(7,0)
+#endif
+#else
+PROC(6,0)
+#endif
+#else
+PROC(5,0)
+#endif
+#else
+PROC(4,0)
+#endif
+#else
+PROC(3,0)
+#endif
+#else
+PROC(2,0)
+#endif
+#else
+PROC(1,0)
+#endif
