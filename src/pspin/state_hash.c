@@ -121,7 +121,7 @@ int state_hash_init()
 {
 	state_hashtable = calloc(sizeof(struct State *), HASHTABLE_LENGTH);
 	if (state_hashtable == NULL) {
-		printf("FAILED TO ALLOC %d BYTES HASHTABLE\n", HASHTABLE_SIZE);
+		printf("FAILED TO ALLOC %ld BYTES HASHTABLE\n", HASHTABLE_SIZE);
 		return -1;
 	}
 	return 0;
