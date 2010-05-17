@@ -3,7 +3,7 @@
  * @author Ivan Korotkov <twee@tweedle-dee.org>
  * @date   Sat Mar 13 23:52:18 2010
  * 
- * @brief  MPI mpi_async queueing facilities.
+ * @brief  Работа с асинхронной очередью MPI.
  * 
  */
 
@@ -16,11 +16,11 @@
 #include "debug.h"
 
 /** 
- * @brief Initializes async MPI queue for reception or delivery
+ * @brief Инициализирует асинхронную очередь
  * 
- * @param queue Queue to initialize
- * @param queuelen Maximum queue lenth
- * @param bufsize Maximum size of data buffer that will be used
+ * @param queue Указатель на очередь
+ * @param queuelen Максимальная длина очереди
+ * @param bufsize Максимальный размер буфера данных в операциях с очередью
  */
 void mpi_async_init(struct mpi_queue *queue, int queuelen, int bufsize)
 {
@@ -36,11 +36,11 @@ void mpi_async_init(struct mpi_queue *queue, int queuelen, int bufsize)
 }
 
 /** 
- * @brief Initializes async MPI queue for sending messages
+ * @brief Инициализирует асинхронную очередь отправки
  * 
- * @param queue Queue to initialize
- * @param queuelen Maximum queue length
- * @param bufsize Maximum size of data buffer that will be used
+ * @param queue Указатель на очередь
+ * @param queuelen Максимальная длина очереди
+ * @param bufsize Максимальный размер буфера данных в операциях с очередью
  */
 void mpi_async_send_start(struct mpi_queue *queue, int queuelen, int bufsize)
 {
@@ -48,12 +48,12 @@ void mpi_async_send_start(struct mpi_queue *queue, int queuelen, int bufsize)
 }
 
 /** 
- * @brief Takes unused buffer from sending queue
+ * @brief Выбирает следующий свободный буфер для отправки.
  * 
- * @param queue Async queue (must be initialized)
- * @param nowait Return immediately, never wait
+ * @param queue Асинхронная очередь
+ * @param nowait Если != 0, не ожидать в случае отсутсвия свободных буферов.
  * 
- * @return Buffer index (or -1 if no buffers available and nowait != 0)
+ * @return Индекс буфера либо -1 в случае отсутствия свободных буферов при nowait != 0
  * @sa MPI_ASYNC_BUF
  */
 int mpi_async_get_buf(struct mpi_queue *queue, int nowait)
@@ -87,16 +87,16 @@ int mpi_async_get_buf(struct mpi_queue *queue, int nowait)
 }
 
 /** 
- * @brief Queues previously taken buffer for delivery
+ * @brief Возвращает буфер в очередь и начинает асинхронную отправку.
  * 
- * @param queue Async queue (must be initialized)
- * @param bufno Buffer index (as returned by mpi_async_get_buf())
- * @param dest MPI destination
- * @param tag MPI tag
- * @param count Element count
- * @param type Element MPI type
+ * @param queue Асинхронная очередь
+ * @param bufno Индекс буфера (возвращенный прежде mpi_async_get_buf())
+ * @param dest MPI-назначние
+ * @param tag MPI-метка
+ * @param count Число элементов в буфере
+ * @param type Тип элементов (MPI-тип)
  * 
- * @return Error status
+ * @return Код ошибки MPI
  * @sa MPI_Send
  */
 int mpi_async_queue_buf(struct mpi_queue *queue, int bufno, 
@@ -108,11 +108,11 @@ int mpi_async_queue_buf(struct mpi_queue *queue, int bufno,
 }
 
 /** 
- * @brief Initializes async MPI queue for receiving messages
+ * @brief Инициализирует асинхронную очередь для приема
  * 
- * @param queue Queue to initialize
- * @param queuelen Maximum queue length
- * @param bufsize Maximum size of data buffer that will be used
+ * @param queue Указатель на очередь
+ * @param queuelen Максимальная длина очереди
+ * @param bufsize Максимальный размер буфера данных в операциях с очередью
  */
 void mpi_async_recv_start(struct mpi_queue *queue, int queuelen, int bufsize)
 {
@@ -120,13 +120,12 @@ void mpi_async_recv_start(struct mpi_queue *queue, int queuelen, int bufsize)
 }
 
 /** 
- * @brief Deques buffer (waits for any receive operation to complete)
+ * @brief Выбирает из очереди следующий принятый буфер (может ожидать доставки)
  * 
- * @param queue Async queue (must be initialized)
- * @param nowait Return immediately, never wait
+ * @param queue Асинхронная очередь
+ * @param nowait Не ожидать, если принятых буферов нет
  * 
- * @return Buffer index (or -1, if no receive operations have been completed
- *                       and nowait != 0)
+ * @return Индекс буфера либо -1, если nowait != 0 и принятых буферов нет.
  *
  * @sa MPI_ASYNC_BUF
  */
@@ -158,16 +157,16 @@ int mpi_async_deque_buf(struct mpi_queue *queue, int nowait)
 }
 
 /** 
- * @brief Puts buffer into receive queue (starting async receive on it)
+ * @brief Возвращает буфер в очередь приема (начиная асинхронный прием следующего сообщения)
  * 
- * @param queue Async queue (must be initialized)
- * @param bufno Buffer index (0 .. queue length - 1)
- * @param dest MPI source
- * @param tag MPI tag
- * @param count Element count
- * @param type Element MPI type
+ * @param queue Асинхронная очередь
+ * @param bufno Индекс буфер (ранее возвращенный mpi_async_deque_buf())
+ * @param dest MPI-источник
+ * @param tag MPI-метка
+ * @param count Число элементов в буфере
+ * @param type Тип элементов (MPI-тип)
  * 
- * @return Error status
+ * @return Код ошибки MPI
  * @sa MPI_Recv
  */
 int mpi_async_put_buf(struct mpi_queue *queue, int bufno, 
@@ -180,9 +179,9 @@ int mpi_async_put_buf(struct mpi_queue *queue, int bufno,
 }
 
 /** 
- * @brief Cancels all async operations on queue and frees it's memory
+ * @brief Отменяет все незаконченные операции с очередью и освобождает ресурсы.
  * 
- * @param queue Async queue (must be initialized)
+ * @param queue Асинхронная очередь
  */
 void mpi_async_stop(struct mpi_queue *queue)
 {

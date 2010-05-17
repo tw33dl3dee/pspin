@@ -3,10 +3,10 @@
  * @author Ivan Korotkov <twee@tweedle-dee.org>
  * @date   Wed Mar 10 21:28:13 2010
  * 
- * @brief  BFS (breadth-first search) queue operations.
+ * @brief  Работа с очередью поиска в ширину.
  * 
- * This file is solely for global data definitions, all operations
- * are defined as macros in appropriate header files.
+ * Файл содержит только объявления глобальных переменных, 
+ * функционал вынесен в заголовочные файлы.
  */
 
 #include <stdlib.h>

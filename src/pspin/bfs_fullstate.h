@@ -3,16 +3,16 @@
  * @author Ivan Korotkov <twee@tweedle-dee.org>
  * @date   Tue Apr 20 00:43:49 2010
  * 
- * @brief  BFS queue operations for fullstate search.
+ * @brief  Работа с очередью поиска в ширину при полном хранении состояний.
  *
- * Statespace stores both visited states and BFS queue.
+ * Хранятся как посещенные состояния, так и находящиеся в очереди.
  * 
- * New states are pushed at BFS top. As they are processed and become visited, 
- * BFS bottom is advanced.
+ * Новые состояния заталкиваются в очередь с верхухшки. По мере того, как они
+ * обрабатываются, указатель на начало очереди сдвигается.
  * 
- * visited states  ... | ... BFS queue ...  | ... free space <- BFS ceil
- *                     V                    V
- *                 BFS bottom            BFS top
+ * посещенные состояния  ... | ... очередь поиска ...  | ... незанятое пространство <- BFS ceil
+ *                           V                         V
+ *                       BFS bottom                 BFS top
  *
  */
 
@@ -20,14 +20,14 @@
 #define _BFS_FULLSTATE_H_
 
 /**
- * Pointer to the first queued (not visited yet) state.
+ * Указатель на начало очереди.
  */
 extern void *bfs_bottom;
 
 /** 
- * @brief Initializes statespace and BFS queue
+ * @brief Инициализация пространства состояний и очереди.
  *
- * On error, returns from current function.
+ * В случае ощибки, возвращает управление из текущей функции.
  */
 #define BFS_INIT()														\
 	({																	\
@@ -43,23 +43,23 @@ extern void *bfs_bottom;
 	})
 
 /** 
- * @brief Allocates new state on BFS queue
+ * @brief Выделяеет новое состояние в очереди.
  * 
- * After allocation a state, it's either fixated by BFS_ADD()
- * or thrown away (and it's memory reused) by subsequent BFS_ALLOC().
+ * После выделения, состояние либо фиксируется (вызовом BFS_ADD())
+ * либо затирается (и его память используется вторично) следующим вызовом BFS_ALLOC().
  * 
- * @param size Size of new state
+ * @param size Размер состояния
  * 
- * @return Pointer to allocated state
+ * @return Указатель на новое состояние
  */
 #define BFS_ALLOC(size)							\
 	((bfs_top + size > bfs_ceil) ? NULL : bfs_top)
 
 /** 
- * @brief Advances BFS top by the size of state on top of it
+ * @brief Продвигает указатель на верх очереди на размер состояния наверху.
  * 
- * @param state State on top of BFS. It's memory must have been first
- *              first allocated by BFS_ALLOC().
+ * @param state Состояние на верхушке очереди. Должно быть предварительно
+ *              выделено вызовом BFS_ALLOC().
  */
 #define BFS_ADD(state)							\
 	({											\
@@ -68,9 +68,9 @@ extern void *bfs_bottom;
 	})
 
 /** 
- * @brief Dequeues state from BFS
+ * @brief Выбирает следующее состояние из очереди.
  * 
- * @return Pointer to state that was next in BFS queue (NULL if queue is empty)
+ * @return Указатель на следующее состояние (NULL, если очередь пуста)
  */
 #define BFS_TAKE()								\
 	(BFS_CUR_LEN() ?							\
@@ -83,7 +83,7 @@ extern void *bfs_bottom;
 	 : NULL)
 
 /** 
- * @brief BFS queue length (number of states queued)
+ * @brief Текущая длина очереди (количество состояний в ней)
  */
 #define BFS_CUR_LEN()							\
 	bfs_len

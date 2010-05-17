@@ -3,7 +3,7 @@
  * @author Ivan Korotkov <twee@tweedle-dee.org>
  * @date   Thu Mar 25 07:51:49 2010
  * 
- * @brief  MPI tags used for communication.
+ * @brief  MPI-метки пересылаемых сообщений.
  * 
  */
 
@@ -11,11 +11,11 @@
 #define _MPI_TAGS_H_
 
 enum MPI_Tags {
-	TagState = 1,				///< message contains new state
-	TagMsgCount,				///< message is regular termination checker with current message count
-	TagTerminate,				///< message is command to terminate
+	TagState = 1,				///< сообщение с новым состоянием
+	TagMsgCount,				///< сообщение с счетчиком прочих сообщений (для проверки завершения)
+	TagTerminate,				///< команда завершения
 #ifdef DEBUG
-	TagDebugLog,				///< message is debug message
+	TagDebugLog,				///< сообщения с отладочным выводом
 #endif
 };
 

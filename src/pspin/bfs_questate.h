@@ -3,18 +3,18 @@
  * @author Ivan Korotkov <twee@tweedle-dee.org>
  * @date   Sat Apr 24 14:55:06 2010
  * 
- * @brief  BFS queue operations for bitstate/hashcompact search.
+ * @brief  Работа с очередью поиска в ширину при битовом хэшировании.
  * 
- * Only states on queue are stored, after adding to hash the memory is reused.
+ * Хранятся лишь состояния в очереди, после Их обработки и добавлениия в хэш память используется повторно.
  * 
- * New states are pushed at BFS top. Before being processed a state is copied
- * to the end of free space area, overwriting previous content, and top is decremented.
+ * Новые состояния добавляются к верхушке очереди. Перед обработкой состояние переносится
+ * в конец свободного пространства, перезаписывая предыдущее, и указатель на верхушку сдвигается вниз.
  * 
- * BFS queue ...  | ... free space ... | current state <- BFS ceil
- *                V                    V
- *            BFS top               BFS current
+ * очередь ...  | ... свободное пространство ... | текущее состояние <- BFS ceil
+ *             V                                V
+ *          BFS top                          BFS current
  *
- * After each state, it's size is stored again (so that reverse queue works as stack).
+ * После каждого состояния в очереди хранится его размер (чтобы с ней можно было работать, как со стеком).
  * 
  */
 
@@ -22,14 +22,14 @@
 #define _BFS_QUESTATE_H_
 
 /**
- * Pointer to current state at the end of free area
+ * Указатель на текущее состояние в конце свободной области.
  */
 extern void *bfs_current;
 
 /** 
- * @brief Initializes statespace and BFS queue
+ * @brief Инициализация пространства состояний и очереди.
  *
- * On error, returns from current function.
+ * В случае ощибки, возвращает управление из текущей функции.
  */
 #define BFS_INIT()														\
 	({																	\
@@ -45,25 +45,23 @@ extern void *bfs_current;
 	})
 
 /** 
- * @brief Allocates new state on BFS queue
+ * @brief Выделяеет новое состояние в очереди.
  * 
- * After allocation a state, it's either fixated by BFS_ADD()
- * or thrown away (and it's memory reused) by subsequent BFS_ALLOC().
- *
- * @param size Size of new state
+ * После выделения, состояние либо фиксируется (вызовом BFS_ADD())
+ * либо затирается (и его память используется вторично) следующим вызовом BFS_ALLOC().
  * 
- * @return Pointer to allocated state
+ * @param size Размер состояния
+ * 
+ * @return Указатель на новое состояние
  */
 #define BFS_ALLOC(size)													\
 	((bfs_top + size + STATESIZE_SIZE > bfs_current) ? NULL : bfs_top)
 
 /** 
- * @brief Advances BFS top by the size of state on top of it
+ * @brief Продвигает указатель на верх очереди на размер состояния наверху.
  * 
- * @param state State on top of BFS. It's memory must have been first
- *              first allocated by BFS_ALLOC().
- * 
- * @return 
+ * @param state Состояние на верхушке очереди. Должно быть предварительно
+ *              выделено вызовом BFS_ALLOC().
  */
 #define BFS_ADD(state)									\
 	({													\
@@ -75,9 +73,9 @@ extern void *bfs_current;
 	})
 
 /** 
- * @brief Dequeues state from BFS
+ * @brief Выбирает следующее состояние из очереди.
  * 
- * @return Pointer to state that was next in BFS queue (NULL if queue is empty)
+ * @return Указатель на следующее состояние (NULL, если очередь пуста)
  */
 #define BFS_TAKE()										\
 	(BFS_CUR_LEN() ?									\
@@ -92,13 +90,13 @@ extern void *bfs_current;
 	 : NULL)
 
 /** 
- * @brief BFS queue length (number of states queued)
+ * @brief Текущая длина очереди (количество состояний в ней)
  */
 #define BFS_CUR_LEN()							\
 	bfs_len
 
 /** 
- * @brief BFS queue size (space occupied by queues states, in bytes)
+ * @brief Текущий размер очереди (суммарный размер состояний в ней в байтах)
  */
 #define BFS_CUR_SIZE()									\
 	((bfs_top - statespace) + (bfs_ceil - bfs_current))

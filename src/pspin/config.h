@@ -3,7 +3,7 @@
  * @author Ivan Korotkov <twee@tweedle-dee.org>
  * @date   Mon Apr 19 20:12:43 2010
  * 
- * @brief  Compile-time configuration options.
+ * @brief  Конфигурая времени компиляции
  * 
  */
 
@@ -11,113 +11,114 @@
 #define _PSPIN_CONFIG_H
 
 /*
- * Size constants
+ * Константы размера
  */
 #define kiB 1024L
 #define MiB (kiB*kiB)
 #define GiB (MiB*kiB)
 
 /*
- * Emulation-specific options 
+ * Параметры эмуляции
  */
 #ifdef EMULATION
 /**
- * Number of nodes that are emulated by statistic gatherer
+ * Число имитируемых узлов
  */
 #	define NODECOUNT 4
 #endif
 
 /*
- * MPI-specific options 
+ * Параметры MPI
  */
 #ifdef MPI
 #endif
 
 /**
- * If defined, endstate validness is checked
+ * Проверять IP конечных (тупиковых) состояний
  */
 #undef ENDSTATE
 
 /*
- * Node partitioning function selection
+ * Выбор функции распределения между узлами
  */
 
 /**
- * Use whole state hash as partitioning function
+ * Использовать целиковый хэш состояния
  */
 #define STATE_PARTITION_HASH
 /**
- * Use first process hash as partitioning function
+ * Использовать хэш локального состояния первого процесса
  */
 #undef  STATE_PARTITION_FIRST_PROC
 
 /* 
- * Hashing scheme selection
+ * Выбор алгоритма хэширования
  */
 /**
- * Use bitstate hashing
+ * Битовое хэширование
  */
 #define BITSTATE
 /**
- * Use hashcompact hashing
+ * Двухуровневое хэширование (hashcompact)
  */
 #undef HASHCOMPACT
 /**
- * Use full state hashing
+ * Полное хэширование с открытой адресацией
  */
 #undef FULLSTATE
 
 /*
- * Hashtable and hashing function options 
+ * Параметры хэш-таблицы а алгоритма хэширования
  */
 
 /**
- * Size of hashtable (bytes)
+ * Размер хэш-таблицы (в байтах)
  */
 #define HASHTABLE_SIZE (1024*MiB)
 
 /**
- * When reading states from network queue, push them immediately to local queue
- * before processing (reduces network queue stalls).
+ * При считывании состояний из сетевой очереди, немедленно копировать из в локальную
+ * ПЕРЕД обработкой (уменьшает сетевые задержки, увеличивает расход памяти).
  * 
- * Not recommended for bistate and hashcompact hashing because stores
- * many full states consuming much memory.
+ * Не рекомендуется для битового хэширования, поскольку может сильно увеличить
+ * требуемый объем памяти для очереди поиска.
  * 
- * In fullstate this option is forced because otherwise pointers
- * in hash table would become invalid.
+ * При полном хранении состояний эта опция является обязательной (игнорируется),
+ * в противном случае указатели в хэш-таблице становятся неверными.
  */
 #define NETWORK_TO_LOCAL_QUEUE
 
 #ifdef FULLSTATE
 /**
- * Size of memory which is allocated to store states, both visited and in-queue (in bytes).
+ * Размер памяти, выделяемой под пространство состояний (посещенных и в очереди)
  */
 #	define STATESPACE_SIZE (1024*MiB)
 /*
- * Force moving states from network to local queue 
+ * При полном хэшировании состояния всегда копируются из сетевой очереди в локальную
  */
 #undef  NETWORK_TO_LOCAL_QUEUE
 #define NETWORK_TO_LOCAL_QUEUE
 #else
 /**
- * Size of BFS queue (bytes)
+ * Размер памяти, выделяемой под очередь поиска (в байтах)
  *
- * When bitstate or hashcompact hashing is used, BFS is a separate state queue.
- * With fullstate hashing, visited states and BFS are stored continously, so this is unused.
+ * При битовом или вторичном хэшировании, состояния в очереди поиска хранятся отдельно.
+ * При полном хэшировании параметр не используется, поскольку состояния в очереди хранятся 
+ * вместе с посещенными (используется STATESPACE_SIZE).
  */
 #	define BFS_QUEUE_SIZE  128*MiB
 #endif
 
 #ifdef BITSTATE 
 /**
- * Number of hash functions to use for bit-hashing
+ * Количество хэш-функций для битового хэширования
  */
 #	define BITSTATE_HASH_COUNT 2
 #endif
 
 #ifdef HASHCOMPACT
 /**
- * Size of stored hashes for hashcompact method (bits)
+ * Размер вторичного хэша (hashcompact)
  */
 #	define HASHCOMPACT_BITS 64
 #endif

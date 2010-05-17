@@ -3,7 +3,7 @@
  * @author Ivan Korotkov <twee@tweedle-dee.org>
  * @date   Sat Mar 13 23:51:50 2010
  * 
- * @brief  MPI async queueing facilities.
+ * @brief  Работа с асинхронной очередью MPI.
  * 
  */
 
@@ -13,74 +13,62 @@
 #include <mpi.h>
 
 /**
- * MPI async queue
+ * Описатель асинхронной очереди
  */
 struct mpi_queue {
 	/**
-	 * Request array
+	 * Массив MPI-дескрипторов запрсов
 	 */
 	MPI_Request *req;
 	/**
-	 * Status array
+	 * Массив MPI-статусов запрсов
 	 */
 	MPI_Status *status;
 	/**
-	 * Buffers used for requests
+	 * Буфера для хранения запросов
 	 */
 	void *buf;
 	/**
-	 * Size of each buffer in bytes
+	 * Размер кажого буфера в байтах
 	 */
 	int bufsize;
 	/**
-	 * Number of unused (not bound by recv/send operation) buffers
+	 * Чисто неиспользованных буферов (не участвующих в асинхронных MPI-операциях)
 	 */
 	int nfree;
 	/**
-	 * Total number of buffers
+	 * Общее число буферов
 	 */
 	int ntotal;
 	/**
-	 * Time spent waiting for buffers
+	 * Суммарное время ожидания завершения операций
 	 */
 	double wait_time;
 };
 
 /** 
- * @brief Converts buffer number to buffer address
+ * @brief Преобразует индекс буфера в указатель на данные
  * 
- * @param queue MPI queue
- * @param bufno Buffer number
- * @param type  Buffer datatype
+ * @param queue Асинхронная очередь
+ * @param bufno Индекс буфераа
+ * @param type  Тип данных в буфере
  * 
- * @return Pointer to buffer (type *)
+ * @return Указатель на буфер (типа type *)
  */
 #define MPI_ASYNC_BUF(queue, bufno, type)				\
 	(type *)((queue)->buf + (queue)->bufsize*(bufno))
 
 /** 
- * @brief Converts buffer number to it's MPI_Status record address
+ * @brief Преобразует индекс буфера в указатель на его MPI-статус
  * 
- * @param queue MPI queue
- * @param bufno Buffer number 
+ * @param queue Асинхронная очередь
+ * @param bufno Индекс буфераа
  * 
- * @return Pointer to MPI_Status structure (undefined unless buffer number was returned 
- *                                          by deque_buf and not reclaimed by put_buf yet).
+ * @return Указатель на MPI_Status (определен только тогда, когда буфер был возвращен вызовом by deque_buf
+ *                                 и еще не освобожден вызовом put_buf).
  */
 #define MPI_ASYNC_STATUS(queue, bufno)			\
 	&((queue)->status[bufno])
-
-/** 
- * @brief Checks if address is an async buffer or not
- * 
- * @param queue MPI queue
- * @param buf (Possible) buffer address
- * 
- * @return True if address points to an async buffer
- */
-#define MPI_IS_ASYNC_BUF(queue, buf)									\
-	((queue)->buf <= (buf) &&											\
-	 (buf)        <  (queue)->buf + (queue)->bufsize*(queue)->ntotal)
 
 void mpi_async_init(struct mpi_queue *queue, int queuelen, int bufsize);
 void mpi_async_send_start(struct mpi_queue *queue, int queuelen, int bufsize);

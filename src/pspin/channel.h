@@ -3,7 +3,7 @@
  * @author Ivan Korotkov <twee@tweedle-dee.org>
  * @date   Sat May  1 23:03:35 2010
  * 
- * @brief  Channel operations and structures.
+ * @brief  Структуры и операции с каналами.
  *
  */
 
@@ -11,33 +11,33 @@
 #define _CHANNEL_H_
 
 /**
- * General channel structure
+ * Общая структура описателя канала.
  */
 struct Channel {
 	/**
-	 * Current length
+	 * Текущая длина (кол-во записей в канале)
 	 */
 	unsigned char len;
 	/**
-	 * Max length
+	 * Максимальная длина
 	 */
 	unsigned char max_len;
 };
 
 /**
- * Retrieves current channel length
+ * Текущая длина канала
  */
 #define CHAN_LEN(chan)							\
 	((struct Channel *)(chan))->len
 
 /**
- * Retrieves max channel length
+ * Максимальная длина канала
  */
 #define CHAN_MAXLEN(chan)						\
 	((struct Channel *)(chan))->max_len
 
 /*
- * Channel querying macros
+ * Макросы для запроса свойств канала
  */
 #define CHAN_EMPTY(chan)  (CHAN_LEN(chan) == 0)
 #define CHAN_NEMPTY(chan) (CHAN_LEN(chan) > 0)
@@ -45,22 +45,22 @@ struct Channel {
 #define CHAN_NFULL(chan)  (CHAN_LEN(chan) < CHAN_MAXLEN(chan))
 
 /*
- * Channel operations:
+ * Операции с каналом:
  * 
- * SEND and RECV increase/decrease current length.
- * The do NOT check current length against max.
+ * SEND и RECV увеличивают/уменьшают длину канала.
+ * Сравнение с максимальной длиной НЕ проводится.
  */
 #define CHAN_SEND(chan) ++CHAN_LEN(chan)
 #define CHAN_RECV(chan) --CHAN_LEN(chan)
 
 /** 
- * @brief Access field of a channel entry.
+ * @brief Доступ к полю некоторой записи канала.
  * 
- * @param chan Channel
- * @param type Field type
- * @param entry_size Size of channel entry
- * @param entry_idx Index of entry referenced
- * @param field_offset Offset of field referenced
+ * @param chan Канал
+ * @param type Тип поля
+ * @param entry_size Размер записи канала
+ * @param entry_idx Номер требуемой записи
+ * @param field_offset Смещение требуемого поля
  */
 #define CHAN_FIELD(chan, type, entry_size, entry_idx, field_offset)		\
 	*(type *)&chan[sizeof(struct Channel) + (entry_size)*(entry_idx) + (field_offset)]

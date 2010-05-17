@@ -3,7 +3,7 @@
  * @author Ivan Korotkov <twee@tweedle-dee.org>
  * @date   Thu Mar 25 07:53:53 2010
  * 
- * @brief  MPI debug logger process and utils.
+ * @brief  Отладочное журналирование для MPI.
  * 
  */
 
@@ -19,7 +19,7 @@
 #ifdef DEBUG
 
 /**
- * Length of debug output buffer
+ * Размер буфера печати
  */
 #define DEBUG_MAX_LEN 4096
 
@@ -27,28 +27,28 @@ extern int node_id;
 extern int node_count;
 
 /**
- * Node number which is receives debugging messages
+ * Номер узла, на котором запущена служба журналирования
  */
 int debug_node;
 
 /**
- * If 0, don't buffer any output -- send it as soon as newline is printed.
- * Otherwise, defer actual sending to debug node
+ * Если 0, вывод не буферизуется -- отправляет сразу после вывода перевода строки.
+ * В противном случае посылка откладывается.
  */
 static int debug_buffer_output;
 /**
- * Current position in debug ouput buffer to append to
+ * Текущая позиция выводв в буфере.
  */
 static int debug_output_pos;
 /**
- * Buffer with debug output of current node
+ * Буфер с отладочным выводом текущего узла
  */
 static char debug_output[DEBUG_MAX_LEN];
 
 /** 
- * @brief Debug logging daemon
+ * @brief Служба журналирования
  *
- * Receives debug messages and prints them.
+ * Принимает сообщения с отладочным выводом и выводит их
  */
 void debug_logger() 
 {
@@ -81,7 +81,7 @@ void debug_logger()
 }
 
 /** 
- * @brief Sends current contents of debug output buffer to debug logging node.
+ * @brief Отправляет текущее содержимое буфера вывода узлу журналирования
  */
 static void flush_output()
 {
@@ -90,7 +90,7 @@ static void flush_output()
 }
 
 /** 
- * @brief printf-like MPI debug printer.
+ * @brief Вывод на печать в стиле printf.
  */
 void dprintf(const char *format, ...)
 {
@@ -109,10 +109,10 @@ void dprintf(const char *format, ...)
 }
 
 /** 
- * @brief Turns output buffering on and off.
+ * @brief Включает и выключает буферизацию вывода.
  * 
- * @param do_buffering If 0, turns buffering off and sends current buffer content.
- *                     Otherwise, turns it on.
+ * @param do_buffering Если 0, отключает буферизацию и отправляет текущее содержимое.
+ *                     В противном случае включает буферизацию.
  */
 void dprintf_ob(int do_buffering)
 {

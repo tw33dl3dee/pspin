@@ -3,7 +3,7 @@
  * @author Ivan Korotkov <twee@tweedle-dee.org>
  * @date   Sat Feb 20 23:13:22 2010
  * 
- * @brief  BFS (breadth-first search) queue operations.
+ * @brief  Работа с очередью поиска в ширину.
  * 
  */
 
@@ -16,19 +16,19 @@
 #include "state_hash.h"
 
 /**
- * Memory for storing states.
+ * Область памяти для хранения состояний.
  */
 extern void *statespace;
 /**
- * Number of states currently in BFS queue.
+ * Число состояний в очереди в данный момент.
  */
 extern size_t bfs_len;
 /**
- * Pointer to the beginning of free space after BFS queue.
+ * Указатель на начало незанятого пространства..
  */
 extern void *bfs_top;
 /**
- * Pointer to the end of free space.
+ * Указатель на конец незанятого пространства.
  */
 extern void *bfs_ceil;
 

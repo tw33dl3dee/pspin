@@ -3,25 +3,24 @@
  * @author Ivan Korotkov <twee@tweedle-dee.org>
  * @date   Sun Mar 21 17:08:48 2010
  * 
- * @brief  Debug logging macros.
+ * @brief  Макросы для отладочного журналирования.
  *
- * To turn on debug logging for specific parts of program, define one or more of
- * the following macros:
+ * Для влючения журналирования отдельных частей программы нужно определить 
+ * один или несколько из следующим макросов:
  * 
- *  - [MPI_DEBUG]   - debug MPI
- *  - [STATE_DEBUG] - debug statespace generation
- *  - [HASH_DEBUG]  - debug hashtable operations
+ *  - [MPI_DEBUG]   - операции MPI
+ *  - [STATE_DEBUG] - генерация состояний
+ *  - [HASH_DEBUG]  - работа с хэш-таблицей
  *
- * Logging must be globally enabled by defining DEBUG macro.
- * If DEBUG is not defined, logging is turned off in whole program.
+ * Журналирование также должно быть разрешено глобально макросом DEBUG.
  *
- * Also, for MPI programs, MPI macro needs to be defined.
+ * Для MPI-версии должен быть определен макрос MPI.
  * 
  */
 
 /*
- * Each of the following macros, when defined, defines also generic DEBUG macro 
- * and accompaniying Xxx_dprintf() macro.
+ * Каждый из следующих макросов, если определен, определяет соответствующие  
+ * макросы Xxx_dprintf() для отладочного журналирования.
  */
 
 #ifdef MPI_DEBUG
