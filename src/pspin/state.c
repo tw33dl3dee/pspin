@@ -158,7 +158,7 @@ do_transition(int pid, int dest_ip,
 	state_dprintf("Performing step: <<< %s >>>\n", msg);
 #define CHECK_ALLOC(ptr)								\
 	if (ptr == NULL) {									\
-	    iprintf("OUT OF MEMORY\n", 0);					\
+	    iprintf("OUT OF MEMORY\n");						\
 		return TransitionCausedAbort;					\
 	}
 #define NEW_STATE()										\
@@ -178,8 +178,8 @@ do_transition(int pid, int dest_ip,
 		iprintf("ASSERTION VIOLATED: %s\n", repr);		\
 		aborted = TransitionCausedAbort;				\
 	}
-#define PRINTF(fmt, ...)						\
-	state_dprintf("*** " fmt, __VA_ARGS__);
+#define PRINTF(fmt, args...)					\
+	state_dprintf("*** " fmt, ##args);
 #define BEGIN_ATOMIC() STATEATOMIC(state) = pid
 #define END_ATOMIC()   STATEATOMIC(state) = -1
 
@@ -226,7 +226,7 @@ check_endstate(struct State *state)
 	return 0;
 
   invalid:
-	iprintf("INVALID END STATE\n", 0);
+	iprintf("INVALID END STATE\n");
 	return -1;
 }
 

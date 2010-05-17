@@ -44,7 +44,7 @@ void mpi_async_init(struct mpi_queue *queue, int queuelen, int bufsize)
  */
 void mpi_async_send_start(struct mpi_queue *queue, int queuelen, int bufsize)
 {
-	mpi_async_init(queue, queuelen, bufsize);
+	return mpi_async_init(queue, queuelen, bufsize);
 }
 
 /** 
@@ -116,7 +116,7 @@ int mpi_async_queue_buf(struct mpi_queue *queue, int bufno,
  */
 void mpi_async_recv_start(struct mpi_queue *queue, int queuelen, int bufsize)
 {
-	mpi_async_init(queue, queuelen, bufsize);
+	return mpi_async_init(queue, queuelen, bufsize);
 }
 
 /** 

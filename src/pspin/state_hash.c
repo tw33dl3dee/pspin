@@ -52,7 +52,7 @@ static size_t max_bfs_state_size;
  */
 void state_hash_stats(void)
 {
-	iprintf("\tState hash:\n", 0);
+	iprintf("\tState hash:\n");
 	iprintf("\t\tEntries:       " HASH_FMT "\n", HASHTABLE_LENGTH);
 	iprintf("\t\tUsed:          %.0f (%.1f%%)\n", 
 			(double)used_hash_entries, used_hash_entries*100./HASHTABLE_LENGTH);
@@ -61,18 +61,40 @@ void state_hash_stats(void)
 	iprintf("\t\tAvg col. len.: %.1f\n", 
 			hash_collision_shifts*1./hash_collisions);
 
-	iprintf("\tState size:\n", 0);
+	iprintf("\tState size:\n");
 	iprintf("\t\tMin:           %zd\n", min_state_size);
 	iprintf("\t\tMax:           %zd\n", max_state_size);
 	iprintf("\t\tAvg:           %.1f\n", total_state_size*1./used_hash_entries);
 
-	iprintf("\tMemory usage:\n", 0);
+	iprintf("\tMemory usage:\n");
 	iprintf("\t\tHashtable:     %.1f MiB\n", HASHTABLE_SIZE*1./MiB);
 #ifdef FULLSTATE
 	iprintf("\t\tVisited:       %.1f MiB\n", total_state_size*1./MiB);
 #else
 	iprintf("\t\tBFS queue:     %.1f MiB\n", max_bfs_state_size*1./MiB);
 #endif
+}
+
+/** 
+ * @brief Prints intermediate hash statistics
+ */
+void state_hash_inter_stats(void)
+{
+	iprintf(" (hash use %.1f%%, collisions %.1f%%, "
+#ifdef FULLSTATE
+	        "visited: %.1f MiB"
+#else
+	        "BFS: %.1f MiB"
+#endif
+	        ")",
+	        used_hash_entries*100./HASHTABLE_LENGTH,
+	        hash_collisions*100./used_hash_entries,
+#ifdef FULLSTATE
+	        total_state_size*1./MiB
+#else
+	        max_bfs_state_size*1./MiB
+#endif
+			);
 }
 
 #if defined(FULLSTATE)
@@ -89,17 +111,6 @@ void state_hash_stats(void)
  */
 static struct State **state_hashtable;
 
-
-/** 
- * @brief Prints intermediate hash statistics
- */
-void state_hash_inter_stats(void)
-{
-	iprintf(" (hash use %.1f%%, collisions %.1f%%, visited: %.1f MiB)",
-	        used_hash_entries*100./HASHTABLE_LENGTH,
-	        hash_collisions*100./used_hash_entries,
-	        total_state_size*1./MiB);
-}
 
 /** 
  * @brief Initializes hash table, allocating memory for it.
@@ -210,18 +221,6 @@ int state_hash_add(struct State *state, enum HashAddAction add_action)
  * Bitstate hash table
  */
 static unsigned char *state_hashtable;
-
-
-/** 
- * @brief Prints intermediate hash statistics
- */
-void state_hash_inter_stats(void)
-{
-	iprintf(" (hash use %.1f%%, collisions %.1f%%, BFS: %.1f MiB)",
-	        used_hash_entries*100./HASHTABLE_LENGTH,
-	        hash_collisions*100./used_hash_entries,
-	        max_bfs_state_size*1./MiB);
-}
 
 /** 
  * @brief Initializes hash table, allocating memory for it.

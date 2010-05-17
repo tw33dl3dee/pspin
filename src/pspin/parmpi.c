@@ -137,9 +137,9 @@ static void trace_summary()
 	float wait_time = recvq.wait_time + sendq.wait_time;
 	float run_time = total_time - wait_time;
 
-	iprintf("Parallel run summary:\n", 0);
+	iprintf("Parallel run summary:\n");
 
-	iprintf("\tTime:\n", 0);
+	iprintf("\tTime:\n");
 	iprintf("\t\tTotal:         %.3f sec\n", 
 	        total_time);
 	iprintf("\t\tRun:           %.3f sec (%.1f%% total)\n", 
