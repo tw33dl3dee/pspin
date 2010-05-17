@@ -1,0 +1,14 @@
+all: emu pspin
+
+SRC = state.c state_hash.c bfs.c 
+EMU_SRC = paremu.c
+MPI_SRC = parmpi.c mpi_async.c mpi_debug.c
+HDR =  state.h state_hash.h bfs.h mpi_async.h config.h
+
+CFLAGS= -DMPI_DEBUG -DSTATE_DEBUG -DHASH_DEBUG -UDEBUG -O3 -DSTATEGEN_FILE=\"stategen.c\" -DNODECOUNT=4 -std=c99
+
+pspin: $(SRC) $(MPI_SRC) $(HDR) Makefile.simple
+	mpicc -DMPI $(CFLAGS) -o $@ $(SRC) $(MPI_SRC)
+
+emu: $(SRC) $(EMU_SRC) $(HDR) Makefile.simple
+	gcc -DEMULATION $(CFLAGS) -o $@ $(SRC) $(EMU_SRC)
