@@ -158,6 +158,9 @@ static void trace_summary()
 	        max_bfs_len*100./state_count, max_bfs_len*100./trans_count);
 
 	state_hash_stats();
+
+	iprintf("BRIEF S%.0f T%.0f M%.0f R%.3f I%.3f\n",
+	        (double)state_count, (double)trans_count, (double)state_msg_count, run_time, wait_time);
 }
 
 /**
