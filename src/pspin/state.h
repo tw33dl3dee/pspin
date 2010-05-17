@@ -32,7 +32,7 @@ struct Process {
 	/**
 	 * Other data (process-specific)
 	 */
-	char data[1];
+	char data[0];
 };
 
 #define STATE_DECL
