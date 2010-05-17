@@ -101,6 +101,14 @@ extern void state_hash_inter_stats(void);
 		struct Process *proc = FIRST_PROC(state);	\
 		HASH(proc, PROCSIZE(proc), 1)%(node_count);	\
 	})
+#elif defined(STATE_PARTITION_FIRST_PROC_NOIP)
+#	define STATE_NODE_IDX(state, node_count)			\
+	({													\
+		struct Process *proc = FIRST_PROC(state);		\
+		HASH(&proc->data,								\
+		     PROCSIZE(proc) - sizeof(struct Process),	\
+		     1)%(node_count);							\
+	})
 #endif
 
 #endif /* _HASH_H_ */

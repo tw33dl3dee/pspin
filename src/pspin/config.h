@@ -45,11 +45,15 @@
 /**
  * Использовать целиковый хэш состояния
  */
-#define STATE_PARTITION_HASH
+#undef STATE_PARTITION_HASH
 /**
  * Использовать хэш локального состояния первого процесса
  */
-#undef  STATE_PARTITION_FIRST_PROC
+#undef STATE_PARTITION_FIRST_PROC
+/**
+ * Использовать хэш локального состояния первого процесса без его IP
+ */
+#define STATE_PARTITION_FIRST_PROC_NOIP
 
 /* 
  * Выбор алгоритма хэширования
