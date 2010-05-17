@@ -3,8 +3,7 @@
  * @author Ivan Korotkov <twee@tweedle-dee.org>
  * @date   Thu Feb 25 13:18:12 2010
  * 
- * @brief  Sequential statespace driver with parallel execution emulation.
- * 
+ * @brief  Последовательная эмуляция параллельного выполнения.
  * 
  */
 
@@ -23,41 +22,41 @@
 #include "debug.h"
 
 /**
- * Print intermediate stats every that states
+ * Через сколько состояний печатать промежуточную статистику.
  */
 #define STAT_THRESHOLD (10*1000*1000)
 
 /**
- * Currently emulated node index.
+ * Индекс "текущего" эмулируемого узла.
  */
 static int cur_node_idx;
 /**
- * States stored per each node.
+ * Количество состояний на каждом узле.
  */
 static uint64_t states_per_node[NODECOUNT];
 /**
- * Number of states locally stored/processed.
+ * Суммарное число всех состояний.
  */
 static uint64_t state_count;
 /**
- * Number of transitions locally performed.
+ * Суммарное число внутренних переходов.
  */
 static uint64_t trans_count;
 /**
- * Number of remote calls made.
+ * Суммарное число удаленных вызовов.
  */
 static uint64_t xnode_count;
 /**
- * Maximum BFS queue length in use.
+ * Максимальная длина очереди за время работы.
  */
 static size_t max_bfs_len;
 /**
- * Start time of run.
+ * Время запуска.
  */
 static time_t start_time;
 
 /** 
- * @brief Record the start time.
+ * @brief Запись времени начала работы.
  */
 static void trace_start()
 {
@@ -65,7 +64,7 @@ static void trace_start()
 }
 
 /** 
- * @brief Record beginning of new state exploration.
+ * @brief Запись выборки нового сосотяния из очереди.
  */
 static void trace_state_begin(struct State *state)
 {
@@ -75,7 +74,7 @@ static void trace_state_begin(struct State *state)
 }
 
 /** 
- * @brief Record performed transition and, possibly, remote call
+ * @brief Запись внутреннего перехода (И, возможно, удаленного вызова).
  */
 static void trace_state_new(struct State *state)
 {
@@ -90,7 +89,7 @@ static void trace_state_new(struct State *state)
 }
 
 /** 
- * @brief Output summary of recorded statistic
+ * @brief Вывод результатов сбора статистики
  */
 static void trace_summary()
 {
@@ -127,7 +126,7 @@ static void trace_summary()
 }
 
 /** 
- * @brief Output intermediate statistic
+ * @brief Вывод промежуточных результатов сбора статистики
  */
 static void trace_inter_stat()
 {

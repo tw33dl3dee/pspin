@@ -3,9 +3,9 @@
  * @author Ivan Korotkov <twee@tweedle-dee.org>
  * @date   Sat Apr 24 19:13:59 2010
  * 
- * @brief  MurmurHash 2.0 implementation.
+ * @brief  Хэш-функция MurmurHash 2.0.
  * 
- * Original author: Austin Appleby <aappleby@gmail.com>
+ * Реализация: Austin Appleby <aappleby@gmail.com>
  * 
  */
 
@@ -18,45 +18,43 @@
 #if __WORDSIZE == 32
 
 /**
- * Hash seed type
+ * Тип, используемый для инициализатора хэш-функции
  */
 typedef uint32_t hash_seed_t;
 /**
- * Type used for ordinary hash lookups
+ * Тип, используемый для хэшей состояний.
  */
 typedef uint64_t state_hash_t;
 /**
- * Type used by hashcompact implementation for "big" hash stored
- * in hashtable instead of full states
+ * Тип, используемый для вторичного хэша (hashcompact)
  */
 typedef uint64_t big_state_hash_t;
 
 /*
- * Format codes for printf() 
+ * Коды форматирования для printf()
  */
 #define HASH_FMT     "%llu"
 #define BIG_HASH_FMT "%llu"
 
 /*
- * Maximum possible hash value
+ * Максимальное значения хэша
  */
 #define HASH_MAX UINT64_MAX
 
 /*
- * On 32-bit platform, hashtables use 32-bit hash for lookups
- * and 64-bit for hashcompact method
+ * На 32-битных платформах используется 64-битный хэш (необходимо для битового хэширования)
  */
 #define murmur_hash     murmur_hash64_32
 #define murmur_hash_big murmur_hash64_32
 
 /** 
- * @brief Murmur hash, 32-bit.
+ * @brief Murmur hash, 32-битный.
  * 
- * @param key Data to hash
- * @param len Data size
- * @param seed "Random" seed
+ * @param key Указатель на данные
+ * @param len Размер данных 
+ * @param seed Начальое значение (произвольлное)
  * 
- * @return Hash value
+ * @return Значениие хэш-функции
  */
 static inline uint32_t murmur_hash32(const void *key, size_t len, uint32_t seed)
 {
@@ -107,13 +105,13 @@ static inline uint32_t murmur_hash32(const void *key, size_t len, uint32_t seed)
 }
 
 /** 
- * @brief Murmur hash, 64-bit for 32-bit plarform
+ * @brief Murmur hash, 64-битный для 32-битных платформ.
  * 
- * @param key Data to hash
- * @param len Data size
- * @param seed "Random" seed
+ * @param key Указатель на данные
+ * @param len Размер данных 
+ * @param seed Начальое значение (произвольлное)
  * 
- * @return Hash value
+ * @return Значениие хэш-функции
  */
 static inline uint64_t murmur_hash64_32(const void *key, size_t len, uint32_t seed)
 {
@@ -165,45 +163,43 @@ static inline uint64_t murmur_hash64_32(const void *key, size_t len, uint32_t se
 #elif __WORDSIZE == 64
 
 /**
- * Hash seed type
+ * Тип, используемый для инициализатора хэш-функции
  */
 typedef uint64_t hash_seed_t;
 /**
- * Type used for ordinary hash lookups
+ * Тип, используемый для хэшей состояний.
  */
 typedef uint64_t state_hash_t;
 /**
- * Type used by hashcompact implementation for "big" hash stored
- * in hashtable instead of full states
+ * Тип, используемый для вторичного хэша (hashcompact)
  */
 typedef uint64_t big_state_hash_t;
 
 /*
- * Format codes for printf() 
+ * Коды форматирования для printf()
  */
 #define HASH_FMT     "%lu"
 #define BIG_HASH_FMT "%lu"
 
 /*
- * Maximum possible hash value
+ * Максимальное значения хэша
  */
 #define HASH_MAX UINT64_MAX
 
 /*
- * On 64-bit platform, both hashtable lookups and hashcompact method
- * use 64-bit hashes
+ * На 64-битных платформах используется 64-битный хэш
  */
 #define murmur_hash     murmur_hash64
 #define murmur_hash_big murmur_hash64
 
 /** 
- * @brief Murmur hash, 64-bit for 64-bit plarform
+ * @brief Murmur hash, 64-битный для 64-битных платформ.
  * 
- * @param key Data to hash
- * @param len Data size
- * @param seed "Random" seed
+ * @param key Указатель на данные
+ * @param len Размер данных 
+ * @param seed Начальое значение (произвольлное)
  * 
- * @return Hash value
+ * @return Значениие хэш-функции
  */
 static inline uint64_t murmur_hash64(const void *key, size_t len, uint64_t seed)
 {
