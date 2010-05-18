@@ -1,0 +1,7 @@
+#!/bin/sh
+
+OUT_FILE_LIST='pspin.std*'
+HOST=$1
+REMOTE_PATH=$2
+
+scp $HOST:$REMOTE_PATH/$OUT_FILE_LIST ./
