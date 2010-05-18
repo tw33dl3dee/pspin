@@ -4,9 +4,9 @@ set(STATEGEN_FILE ${CMAKE_CURRENT_BINARY_DIR}/stategen.c)
 set(PROMELA_FILE  ${CMAKE_CURRENT_SOURCE_DIR}/${PROMELA_MODEL})
 set(PMLPARSE_DIR  ${CMAKE_CURRENT_SOURCE_DIR}/../pmlparse)
 
-set(PSPIN_SRC state.c state.h state_hash.c state_hash.h bfs.c bfs.h)
+set(PSPIN_SRC state.c state.h state_hash.c state_hash.h murmur_hash.h bfs.c bfs.h bfs_fullstate.h bfs_questate.h config.h channel.h debug.h)
 set(PAREMU_SRC paremu.c)
-set(PARMPI_SRC parmpi.c mpi_async.c mpi_async.h mpi_debug.c)
+set(PARMPI_SRC parmpi.c mpi_async.c mpi_async.h mpi_debug.c mpi_tags.h)
 
 set(REMOTE_RUN_SCRIPT tools/run-mpi-job.sh)
 set(REMOTE_INPUT ${STATEGEN_FILE} ${PSPIN_SRC} ${PARMPI_SRC} Makefile.bare pspin.job ${REMOTE_RUN_SCRIPT})
@@ -52,6 +52,7 @@ add_custom_target(mpisubmit
 )
 
 add_custom_target(mpidownload
+  COMMAND rm -f ${REMOTE_OUTPUT}
   COMMAND scp ${MPI_HOST}:${MPI_HOST_REMOTE_PATH}/${REMOTE_OUTPUT} ./
   COMMAND tools/process-results.sh
   COMMENT "Downloading results..."

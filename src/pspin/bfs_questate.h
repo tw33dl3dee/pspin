@@ -11,8 +11,8 @@
  * в конец свободного пространства, перезаписывая предыдущее, и указатель на верхушку сдвигается вниз.
  * 
  * очередь ...  | ... свободное пространство ... | текущее состояние <- BFS ceil
- *             V                                V
- *          BFS top                          BFS current
+ *              V                                V
+ *           BFS top                          BFS current
  *
  * После каждого состояния в очереди хранится его размер (чтобы с ней можно было работать, как со стеком).
  * 
@@ -35,7 +35,7 @@ extern void *bfs_current;
 	({																	\
 		statespace = calloc(1, BFS_QUEUE_SIZE);							\
 		if (statespace == NULL) {										\
-			printf("FAILED TO ALLOC %ld BYTES QUEUE SPACE\n", BFS_QUEUE_SIZE); \
+			eprintf("==FAILED TO ALLOC %ld BYTES QUEUE SPACE\n", BFS_QUEUE_SIZE); \
 			return;														\
 		}																\
 		if (state_hash_init() < 0)										\

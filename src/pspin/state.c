@@ -158,7 +158,7 @@ do_transition(int pid, int dest_ip,
 	state_dprintf("Performing step: <<< %s >>>\n", msg);
 #define CHECK_ALLOC(ptr)								\
 	if (ptr == NULL) {									\
-	    iprintf("OUT OF MEMORY\n");						\
+	    eprintf("==OUT OF MEMORY\n");					\
 		return TransitionCausedAbort;					\
 	}
 #define NEW_STATE()										\
@@ -175,7 +175,8 @@ do_transition(int pid, int dest_ip,
 	current = PROC_BY_OFFSET(state, current__offset);
 #define ASSERT(expr, repr)								\
 	if (!(expr)) {										\
-		iprintf("ASSERTION VIOLATED: %s\n", repr);		\
+		eprintf("==ASSERTION VIOLATED: %s\n", repr);	\
+		edump_state(state);								\
 		aborted = TransitionCausedAbort;				\
 	}
 #define PRINTF(fmt, args...)					\
@@ -226,7 +227,8 @@ check_endstate(struct State *state)
 	return 0;
 
   invalid:
-	iprintf("INVALID END STATE\n");
+	eprintf("==INVALID END STATE\n");
+	edump_state(state);
 	return -1;
 }
 
@@ -249,6 +251,26 @@ void dump_state(struct State *state)
 #define PROCSTATE_DUMP
 #include STATEGEN_FILE
 #undef  PROCSTATE_DUMP
+	}
+}
+
+/** 
+ * @brief Dumps global and per-process state variables to error stream
+ * 
+ * @param state State to dump
+ */
+void edump_state(struct State *state) 
+{
+#define STATE_EDUMP
+#include STATEGEN_FILE
+#undef  STATE_EDUMP
+
+	int pid = 0;
+	FOREACH_PROCESS(state, ++pid) {
+		eprintf("\t-Process %d:\n", pid);
+#define PROCSTATE_EDUMP
+#include STATEGEN_FILE
+#undef  PROCSTATE_EDUMP
 	}
 }
 

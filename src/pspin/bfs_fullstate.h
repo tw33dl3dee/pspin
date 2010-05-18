@@ -33,7 +33,7 @@ extern void *bfs_bottom;
 	({																	\
 		statespace = calloc(1, STATESPACE_SIZE);						\
 		if (statespace == NULL) {										\
-			printf("FAILED TO ALLOC %ld BYTES STATESPACE\n", STATESPACE_SIZE); \
+			eprintf("==FAILED TO ALLOC %ld BYTES STATESPACE\n", STATESPACE_SIZE); \
 			return;														\
 		}																\
 		if (state_hash_init() < 0)										\

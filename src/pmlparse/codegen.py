@@ -24,10 +24,12 @@ class Codegen(object):
         """
         with file(fname, "w") as f:
             self.write_block(f, 'STATE_DECL', self.state_decl())
-            self.write_block(f, 'STATE_DUMP', self.state_dump())
+            self.write_block(f, 'STATE_DUMP', self.state_dump(False))
+            self.write_block(f, 'STATE_EDUMP', self.state_dump(True))
             self.write_block(f, 'STATE_INIT', self.state_init())
             self.write_block(f, 'PROC_DECL', self.proc_decl())
-            self.write_block(f, 'PROCSTATE_DUMP', self.procstate_dump())
+            self.write_block(f, 'PROCSTATE_DUMP', self.procstate_dump(False))
+            self.write_block(f, 'PROCSTATE_EDUMP', self.procstate_dump(True))
             self.write_block(f, 'PROCSTATE_INIT', self.procstate_init())
             self.write_block(f, 'VALID_ENDSTATES', self.valid_endstates())
             self.write_block(f, 'TRANSITIONS_INIT', self.transitions_init())
@@ -163,15 +165,19 @@ static int procactive[] = { $procactive }"""
         lines += ["default:\n\tassert(0)", "}"]
         return ";\n".join(lines)
 
-    def state_dump(self):
+    def state_dump(self, errstream):
         """Returns C-code (str) that dumps current global state variables
+
+        :arg errstream: if True, dump to error stream
         """
-        print_var_tpl = 'dump_dprintf("-\\t$varname:$format\\n", $varref)'
+        dump_func = errstream and "eprintf" or "dump_dprintf"
+        print_var_tpl = '$dump_func("-\\t$varname:$format\\n", $varref)'
         lines = []
         for v in self._vars.values():
             lines.append(Template(print_var_tpl).substitute(format=v.printf_format(),
                                                             varref=v.printf_ref(),
-                                                            varname=str(v)))
+                                                            varname=str(v),
+                                                            dump_func=dump_func))
         return ";\n".join(lines)
 
     def state_init(self):
@@ -184,8 +190,10 @@ static int procactive[] = { $procactive }"""
                 lines.append(init)
         return ";\n".join(lines)
 
-    def procstate_dump(self):
+    def procstate_dump(self, errstream):
         """Returns C-code (str) that dumps state variables of given proctype
+
+        :arg errstream: if True, dump to error stream
         """
         lines = ["switch (current->_proctype) {"]
         case_tpl = """case $proctype: {
@@ -193,7 +201,7 @@ $dump;
     }
     break"""
         for (i, p) in enumerate(self._procs):
-             lines.append(Template(case_tpl).substitute(proctype=i, dump=p.state_dump()))
+             lines.append(Template(case_tpl).substitute(proctype=i, dump=p.state_dump(errstream)))
         lines += ["default:\n\tassert(0)", "}"]
         return ";\n".join(lines)
 

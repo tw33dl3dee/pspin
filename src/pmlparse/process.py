@@ -183,15 +183,19 @@ class Process(object):
                 lines.append(Template(init_var_tpl).substitute(init=init))
         return ";\n".join(lines)
 
-    def state_dump(self):
+    def state_dump(self, errstream):
         """Returns C-code (str) that dumps current proctype's variables
+        
+        :arg errstream: if True, dump to error stream
         """
-        print_var_tpl = '\t\tdump_dprintf("\\t-\\t$varname: $format\\n", $varref)'
+        dump_func = errstream and "eprintf" or "dump_dprintf"
+        print_var_tpl = '\t\t$dump_func("\\t-\\t$varname: $format\\n", $varref)'
         lines = []
         for v in sorted(self._vars.values()):
             lines.append(Template(print_var_tpl).substitute(format=v.printf_format(),
                                                             varref=v.printf_ref(),
-                                                            varname=str(v)))
+                                                            varname=str(v),
+                                                            dump_func=dump_func))
         return ";\n".join(lines)
 
     def valid_endstate_ips(self):

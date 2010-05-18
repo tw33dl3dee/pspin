@@ -52,18 +52,29 @@ void mpi_printf_ob(int do_buffering);
 #		define dprintf mpi_printf
 #		define iprintf mpi_printf
 #		define dprintf_ob mpi_printf_ob
+#		define eprintf mpi_printf
 #	else
 #		define dprintf printf
 #		define iprintf printf
 #		define dprintf_ob (void)
+#		define eprintf printf
 #	endif
 #else
 #	define dprintf (void)
 #	define dprintf_ob (void)
 #	ifdef MPI
 extern int node_id;
+/*
+ * Печать информационных сообщений
+ */
 #		define iprintf(fmt, args...) printf("[%d] " fmt, node_id, ## args)
+/*
+ * Печать ошибок (программы и верификации) 
+ */
+#		define eprintf(fmt, args...) fprintf(stderr, "[%d] " fmt, node_id, ## args)
 #	else
 #		define iprintf printf
+#		define eprintf(fmt, args...) fprintf(stderr, fmt, ## args)
 #	endif
 #endif
+
