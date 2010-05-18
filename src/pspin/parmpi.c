@@ -26,6 +26,11 @@
 #include "debug.h"
 
 /**
+ * Через сколько состояний печатать промежуточную статистику.
+ */
+#define STAT_THRESHOLD (10*1000*1000)
+
+/**
  * Total number of nodes, except logger (if present).
  */
 int node_count;
@@ -161,6 +166,19 @@ static void trace_summary()
 
 	iprintf("BRIEF S%.0f T%.0f M%.0f R%.3f I%.3f\n",
 	        (double)state_count, (double)trans_count, (double)state_msg_count, run_time, wait_time);
+}
+
+/** 
+ * @brief Вывод промежуточных результатов сбора статистики
+ */
+static void trace_inter_stat()
+{
+	double total_time = MPI_Wtime() - start_time;
+	
+	iprintf("Time: %.0f, states: %.0f, trans: %.0f ", 
+	        total_time, (double)state_count, (double)trans_count);
+	state_hash_inter_stats();
+	iprintf("\n");
 }
 
 /**
@@ -640,6 +658,9 @@ static void dfs(void)
 		 */
 		put_state();
 #endif
+
+		if (state_count%STAT_THRESHOLD == 0)
+			trace_inter_stat();
 	}
 
   aborted:
