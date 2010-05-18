@@ -45,15 +45,20 @@
 /**
  * Использовать целиковый хэш состояния
  */
-#define STATE_PARTITION_HASH
+#undef STATE_PARTITION_HASH
 /**
- * Использовать хэш локального состояния первого процесса
+ * Использовать хэш локального состояния первых N процессов
  */
-#undef STATE_PARTITION_FIRST_PROC
+#define STATE_PARTITION_PROC
 /**
- * Использовать хэш локального состояния первого процесса без его IP
+ * Использовать хэш локального состояния первых N процессов без их IP
  */
-#undef STATE_PARTITION_FIRST_PROC_NOIP
+#undef STATE_PARTITION_PROC_NOIP
+
+/**
+ * При распределении по первым N процессам, содержит N
+ */
+#define PARTITION_PROC_COUNT 1
 
 /* 
  * Выбор алгоритма хэширования

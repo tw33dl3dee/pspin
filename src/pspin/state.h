@@ -89,6 +89,16 @@ struct Process {
 			 current = PROC_BY_OFFSET(current, PROCSIZE(current)))
 
 /**
+ * Enumerates up to `process_count` processes (referred to as `current') inside `state'.
+ * Requires `counter` variable to be predeclared as "int" and initialized with 0.
+ */
+#define FOREACH_N_PROCESSES(state, process_count, counter)				\
+	for (struct Process *current = FIRST_PROC(state);					\
+		 counter < process_count;										\
+		 ++counter,														\
+			 current = PROC_BY_OFFSET(current, PROCSIZE(current)))
+
+/**
  * Enumerates all transitions (by `src_ip' and `dest_ip') for process
  * specified by `current'.
  */

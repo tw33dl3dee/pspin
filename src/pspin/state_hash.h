@@ -13,28 +13,31 @@
 #include "murmur_hash.h"
 
 /** 
- * @brief N-th hash function
- * 
- * Macro invokes N-th hash functions (for multihash purposes)
+ * @brief Primary hash function
  * 
  * @param key Data to hash
  * @param len Data size
- * @param num Hash function number (0..)
+ * @param seed Hash seed
  * 
  * @return Hash value
  */
-#define HASH(data, len, num)											\
-	murmur_hash(data, len, ((hash_seed_t)1<<(num+1))+((hash_seed_t)(-1)>>(num+1)))
+#define HASH(data, len, seed)					\
+	murmur_hash(data, len, seed)
 
 /** 
- * @brief N-th hash value of state
+ * @brief Seed used for hash function number num
+ */
+#define SEED(num) ((hash_seed_t)1<<((num)+1))+((hash_seed_t)(-1)>>((num)+1))
+
+/** 
+ * @brief Hash value of state
  * 
  * @param state State to hash
- * @param num Hash function number (0..)
+ * @param seed Hash seed
  * 
  * @return State hash value
  */
-#define STATE_HASH(state, num) HASH(state, STATESIZE(state), num)
+#define STATE_HASH(state, seed) HASH(state, STATESIZE(state), seed)
 
 /** 
  * @brief N-th hash value of state, mapped to 0..HASHTABLE_LENGTH-1
@@ -44,8 +47,7 @@
  * 
  * @return State hash value in 0..HASHTABLE_LENGTH-1 range
  */
-#define STATE_TABLE_HASH(state, num) (STATE_HASH(state, num) % HASHTABLE_LENGTH)
-//#define STATE_TABLE_HASH(state, num) (state_hash_t)(STATE_HASH(state, num)*1./HASH_MAX*(HASHTABLE_LENGTH - 1))
+#define STATE_TABLE_HASH(state, num) (STATE_HASH(state, SEED(num)) % HASHTABLE_LENGTH)
 
 /*
  * Bit functions 
@@ -83,6 +85,11 @@ extern int state_hash_init();
 extern void state_hash_stats(void);
 extern void state_hash_inter_stats(void);
 
+/**
+ * Initial hash seed used for hash-based partitioning
+ */
+#define PARTITION_HASH_SEED 0xA567B123
+
 /*
  * Node partitioning function selection.
  * Function that evaluates to node number which given state is stored on
@@ -91,23 +98,32 @@ extern void state_hash_inter_stats(void);
 /*
  * Use full state hash as partitioning function
  */
-#	define STATE_NODE_IDX(state, node_count) (STATE_HASH(state, 1)%(node_count))
-#elif defined(STATE_PARTITION_FIRST_PROC)
+#	define STATE_NODE_IDX(state, node_count) (STATE_HASH(state, PARTITION_HASH_SEED)%(node_count))
+#elif defined(STATE_PARTITION_PROC)
 /*
- * Use partial state hash (first process data hash) as partitioning function
+ * Use partial state hash (first N processes data hash) as partitioning function
  */
-#	define STATE_NODE_IDX(state, node_count)		\
-	({												\
-		struct Process *proc = FIRST_PROC(state);	\
-		HASH(proc, PROCSIZE(proc), 1)%(node_count);	\
+#	define STATE_NODE_IDX(state, node_count)					\
+	({															\
+		state_hash_t seed = PARTITION_HASH_SEED;				\
+		int pid = 0;											\
+		FOREACH_N_PROCESSES(state, PARTITION_PROC_COUNT, pid)	\
+		    seed = HASH(current, PROCSIZE(current), seed);		\
+		seed%(node_count);										\
 	})
-#elif defined(STATE_PARTITION_FIRST_PROC_NOIP)
-#	define STATE_NODE_IDX(state, node_count)			\
-	({													\
-		struct Process *proc = FIRST_PROC(state);		\
-		HASH(&proc->data,								\
-		     PROCSIZE(proc) - sizeof(struct Process),	\
-		     1)%(node_count);							\
+#elif defined(STATE_PARTITION_PROC_NOIP)
+/** 
+ * Same without processes' IPs
+ */
+#	define STATE_NODE_IDX(state, node_count)							\
+	({																	\
+		state_hash_t seed = PARTITION_HASH_SEED;						\
+		int pid = 0;													\
+		FOREACH_N_PROCESSES(state, PARTITION_PROC_COUNT, pid)			\
+		    seed = HASH(&current->data,									\
+		                PROCSIZE(pprocroc) - sizeof(struct Process),	\
+		                seed);                                          \
+		seed%(node_count);												\
 	})
 #endif
 
