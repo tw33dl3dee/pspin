@@ -1,0 +1,96 @@
+[0] MPI node (0 of 4) starting...
+[0] Parallel run summary:
+[0] 	Time:
+[0] 		Total:         0.244 sec
+[0] 		Run:           0.047 sec (19.4% total)
+[0] 		Idle           0.197 sec (0.133 recv, 0.064 send)
+[0] 	Transitions taken: 12603 (265899.5/sec)
+[0] 	Messages passed:   4322 (34.29% trans), control: 4 (0.09% all)
+[0] 	States:            4321 (91164.9/sec)
+[0] 	BFS queue len:     210 (4.86% states, 1.67% trans)
+[0] 	State hash:
+[0] 		Entries:       67108864
+[0] 		Used:          4321 (0.0%)
+[0] 		Collisions:    0 (0.0%)
+[0] 		Avg col. len.: nan
+[0] 	State size:
+[0] 		Min:           22
+[0] 		Max:           22
+[0] 		Avg:           22.0
+[0] 	Memory usage:
+[0] 		Hashtable:     512.0 MiB
+[0] 		Visited:       0.1 MiB
+[0] BRIEF S4321 T12603 M4322 R0.047 I0.197
+[0] MPI node (0 of 4) stopped
+[1] MPI node (1 of 4) starting...
+[1] Parallel run summary:
+[1] 	Time:
+[1] 		Total:         0.248 sec
+[1] 		Run:           0.064 sec (25.9% total)
+[1] 		Idle           0.184 sec (0.085 recv, 0.098 send)
+[1] 	Transitions taken: 18840 (293868.6/sec)
+[1] 	Messages passed:   5621 (29.84% trans), control: 4 (0.07% all)
+[1] 	States:            6460 (100763.9/sec)
+[1] 	BFS queue len:     451 (6.98% states, 2.39% trans)
+[1] 	State hash:
+[1] 		Entries:       67108864
+[1] 		Used:          6460 (0.0%)
+[1] 		Collisions:    3 (0.0%)
+[1] 		Avg col. len.: 1.0
+[1] 	State size:
+[1] 		Min:           22
+[1] 		Max:           22
+[1] 		Avg:           22.0
+[1] 	Memory usage:
+[1] 		Hashtable:     512.0 MiB
+[1] 		Visited:       0.1 MiB
+[1] BRIEF S6460 T18840 M5621 R0.064 I0.184
+[1] MPI node (1 of 4) stopped
+[2] MPI node (2 of 4) starting...
+[2] Parallel run summary:
+[2] 	Time:
+[2] 		Total:         0.248 sec
+[2] 		Run:           0.048 sec (19.6% total)
+[2] 		Idle           0.199 sec (0.139 recv, 0.060 send)
+[2] 	Transitions taken: 15003 (309677.8/sec)
+[2] 	Messages passed:   3841 (25.60% trans), control: 4 (0.10% all)
+[2] 	States:            5161 (106528.5/sec)
+[2] 	BFS queue len:     1276 (24.72% states, 8.50% trans)
+[2] 	State hash:
+[2] 		Entries:       67108864
+[2] 		Used:          5161 (0.0%)
+[2] 		Collisions:    0 (0.0%)
+[2] 		Avg col. len.: nan
+[2] 	State size:
+[2] 		Min:           22
+[2] 		Max:           22
+[2] 		Avg:           22.0
+[2] 	Memory usage:
+[2] 		Hashtable:     512.0 MiB
+[2] 		Visited:       0.1 MiB
+[2] BRIEF S5161 T15003 M3841 R0.048 I0.199
+[2] MPI node (2 of 4) stopped
+[3] MPI node (3 of 4) starting...
+[3] Parallel run summary:
+[3] 	Time:
+[3] 		Total:         0.248 sec
+[3] 		Run:           0.056 sec (22.8% total)
+[3] 		Idle           0.191 sec (0.142 recv, 0.049 send)
+[3] 	Transitions taken: 15600 (276349.0/sec)
+[3] 	Messages passed:   4321 (27.70% trans), control: 4 (0.09% all)
+[3] 	States:            5640 (99910.8/sec)
+[3] 	BFS queue len:     607 (10.76% states, 3.89% trans)
+[3] 	State hash:
+[3] 		Entries:       67108864
+[3] 		Used:          5640 (0.0%)
+[3] 		Collisions:    0 (0.0%)
+[3] 		Avg col. len.: nan
+[3] 	State size:
+[3] 		Min:           22
+[3] 		Max:           22
+[3] 		Avg:           22.0
+[3] 	Memory usage:
+[3] 		Hashtable:     512.0 MiB
+[3] 		Visited:       0.1 MiB
+[3] BRIEF S5640 T15600 M4321 R0.056 I0.191
+[3] MPI node (3 of 4) stopped
