@@ -8,6 +8,13 @@ set(PSPIN_SRC state.c state.h state_hash.c state_hash.h bfs.c bfs.h)
 set(PAREMU_SRC paremu.c)
 set(PARMPI_SRC parmpi.c mpi_async.c mpi_async.h mpi_debug.c)
 
+set(REMOTE_RUN_SCRIPT tools/run-mpi-job.sh)
+set(REMOTE_INPUT ${STATEGEN_FILE} ${PSPIN_SRC} ${PARMPI_SRC} Makefile.bare pspin.job ${REMOTE_RUN_SCRIPT})
+set(REMOTE_OUTPUT "pspin.std*")
+
+set(MPI_HOST mpi)
+set(MPI_HOST_REMOTE_PATH work/pspin)
+
 set(DEBUG_FLAGS STATE_DEBUG;HASH_DEBUG)
 set(MPI_DEBUG_FLAGS ${DEBUG_FLAGS};MPI_DEBUG)
 
@@ -27,11 +34,34 @@ add_custom_command(OUTPUT ${STATEGEN_FILE}
 )
 
 set(MPI_TEST_NODE_COUNT 4)
-add_custom_target(mpirun 
+add_custom_target(mpilocal
   COMMAND mpirun -n ${MPI_TEST_NODE_COUNT} ./pspin-mpi
   DEPENDS pspin-mpi
   COMMENT "Running ${MPI_TEST_NODE_COUNT} MPI nodes..."
 )
+
+add_custom_target(mpiupload
+  COMMAND scp ${REMOTE_INPUT} ${MPI_HOST}:${MPI_HOST_REMOTE_PATH}
+  DEPENDS ${REMOTE_INPUT}
+  COMMENT "Uploading files to job server..."
+)
+
+add_custom_target(mpisubmit
+  COMMAND ssh ${MPI_HOST} 'cd ${MPI_HOST_REMOTE_PATH} && ./run-mpi-job.sh'
+  COMMENT "Submitting job..."
+)
+
+add_custom_target(mpidownload
+  COMMAND scp ${MPI_HOST}:${MPI_HOST_REMOTE_PATH}/${REMOTE_OUTPUT} ./
+  COMMAND tools/process-results.sh
+  COMMENT "Downloading results..."
+)
+
+add_custom_target(mpirun)
+
+add_dependencies(mpirun mpidownload)
+add_dependencies(mpidownload mpisubmit)
+add_dependencies(mpisubmit mpiupload)
 
 include_directories(${MPI_INCLUDE_PATH})
 
