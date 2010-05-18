@@ -135,7 +135,6 @@ static void trace_inter_stat()
 	iprintf("[%.0f] States: %.0f, trans: %.0f ", 
 	        run_time, (double)state_count, (double)trans_count);
 	state_hash_inter_stats();
-	iprintf("\n");
 }
 
 /** 

@@ -28,7 +28,7 @@
 /**
  * Через сколько состояний печатать промежуточную статистику.
  */
-#define STAT_THRESHOLD (10*1000*1000)
+#define STAT_THRESHOLD (1*1000*1000)
 
 /**
  * Число узлов, за исключением узла журналирования.
@@ -175,10 +175,9 @@ static void trace_inter_stat()
 {
 	double total_time = MPI_Wtime() - start_time;
 	
-	iprintf("Time: %.0f, states: %.0f, trans: %.0f ", 
+	iprintf("PROGRESS time: %.0f, states: %.0f, trans: %.0f ", 
 	        total_time, (double)state_count, (double)trans_count);
 	state_hash_inter_stats();
-	iprintf("\n");
 }
 
 /**

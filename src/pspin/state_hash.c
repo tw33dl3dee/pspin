@@ -86,7 +86,7 @@ void state_hash_inter_stats(void)
 #else
 	        "BFS: %.1f MiB"
 #endif
-	        ")",
+	        ")\n",
 	        used_hash_entries*100./HASHTABLE_LENGTH,
 	        hash_collisions*100./used_hash_entries,
 #ifdef FULLSTATE
