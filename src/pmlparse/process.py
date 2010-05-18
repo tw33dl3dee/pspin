@@ -190,12 +190,32 @@ class Process(object):
         """
         dump_func = errstream and "eprintf" or "dump_dprintf"
         print_var_tpl = '\t\t$dump_func("\\t-\\t$varname: $format\\n", $varref)'
-        lines = []
+        print_ip_tpl = '\t\t$dump_func("\\t-\\t$varname: $format ", $varref)' 
+        print_stmt_tpl =  '\t\tswitch($ipvar) {'
+        print_1st_stmt_case_tpl = '\t\t\tcase $ip: $dump_func("{%s}\\n", "$step_str"); break'
+        print_stmt_case_tpl = '\t\t\tcase $ip: $dump_func("{%s} after {%s}\\n", "$step_str", "$prev_step_str"); break'
+        ip_var = self.lookup_var("_ip")
+        lines = [Template(print_ip_tpl).substitute(format=ip_var.printf_format(),
+                                                   varref=ip_var.printf_ref(),
+                                                   varname=str(ip_var),
+                                                   dump_func=dump_func)]
+        lines.append(Template(print_stmt_tpl).substitute(ipvar=ip_var.ref()))
+        for stmt in self._stmts:
+            if stmt.prev:
+                lines.append(Template(print_stmt_case_tpl).substitute(ip=stmt.ip, step_str=str(stmt),
+                                                                      prev_step_str=str(stmt.prev),
+                                                                      dump_func=dump_func))
+            else:
+                lines.append(Template(print_1st_stmt_case_tpl).substitute(ip=stmt.ip, step_str=str(stmt),
+                                                                          dump_func=dump_func))
+                
+        lines += ["\t\t\tdefault: assert(0)", "\t\t}"]
         for v in sorted(self._vars.values()):
-            lines.append(Template(print_var_tpl).substitute(format=v.printf_format(),
-                                                            varref=v.printf_ref(),
-                                                            varname=str(v),
-                                                            dump_func=dump_func))
+            if not v.name == "_ip":
+                lines.append(Template(print_var_tpl).substitute(format=v.printf_format(),
+                                                                varref=v.printf_ref(),
+                                                                varname=str(v),
+                                                                dump_func=dump_func))
         return ";\n".join(lines)
 
     def valid_endstate_ips(self):

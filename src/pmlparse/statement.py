@@ -432,7 +432,7 @@ class AtomicEndStmt(Stmt):
         return "END_ATOMIC()"
 
     def debug_repr(self):
-        return "-)-"
+        return "atomic end"
 
 
 class PrintStmt(Stmt):
@@ -496,7 +496,7 @@ class SendStmt(Stmt):
                                                   send_ops="; ".join(send_ops))
 
     def debug_repr(self):
-        return "SEND"
+        return "%s ! %s" % (self._chan.name, ", ".join([str(e) for e in self._arg_list]))
         
                             
 class RecvStmt(SendStmt):
@@ -522,4 +522,4 @@ class RecvStmt(SendStmt):
                                                   recv_ops="; ".join(recv_ops))
 
     def debug_repr(self):
-        return "RECV"
+        return "%s ? %s" % (self._chan.name, ", ".join([str(e) for e in self._arg_list]))

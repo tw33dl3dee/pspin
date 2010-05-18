@@ -24,16 +24,16 @@ class Codegen(object):
         """
         with file(fname, "w") as f:
             self.write_block(f, 'STATE_DECL', self.state_decl())
-            self.write_block(f, 'STATE_DUMP', self.state_dump(False))
-            self.write_block(f, 'STATE_EDUMP', self.state_dump(True))
-            self.write_block(f, 'STATE_INIT', self.state_init())
             self.write_block(f, 'PROC_DECL', self.proc_decl())
-            self.write_block(f, 'PROCSTATE_DUMP', self.procstate_dump(False))
-            self.write_block(f, 'PROCSTATE_EDUMP', self.procstate_dump(True))
+            self.write_block(f, 'STATE_INIT', self.state_init())
             self.write_block(f, 'PROCSTATE_INIT', self.procstate_init())
             self.write_block(f, 'VALID_ENDSTATES', self.valid_endstates())
-            self.write_block(f, 'TRANSITIONS_INIT', self.transitions_init())
             self.write_block(f, 'TRANSITIONS', self.transitions())
+            self.write_block(f, 'TRANSITIONS_INIT', self.transitions_init())
+            self.write_block(f, 'STATE_DUMP', self.state_dump(False))
+            self.write_block(f, 'STATE_EDUMP', self.state_dump(True))
+            self.write_block(f, 'PROCSTATE_DUMP', self.procstate_dump(False))
+            self.write_block(f, 'PROCSTATE_EDUMP', self.procstate_dump(True))
 
     def write_block(self, f, guard, code):
         """Writes block of code inside #ifdef/#endif guard

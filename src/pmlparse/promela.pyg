@@ -284,7 +284,7 @@ stmt ->
 	| K_DO options K_OD:
 		return DoStmt(kids[1])
 	| K_ATOMIC P_LBRACE sequence P_RBRACE:
-		return [AtomicStmt(kids[2]), AtomicEndStmt()]
+		return AtomicStmt(kids[2] + [codegen.cur_proc.add_stmt(AtomicEndStmt())])
 	| D_STEP P_LBRACE sequence P_RBRACE:
 		raise NotImplementedError(kids[0])
 	| P_LBRACE sequence P_RBRACE:
