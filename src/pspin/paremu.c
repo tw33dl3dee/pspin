@@ -74,7 +74,7 @@ static void trace_state_begin(struct State *state)
 }
 
 /** 
- * @brief Запись внутреннего перехода (И, возможно, удаленного вызова).
+ * @brief Запись внутреннего перехода (и, возможно, удаленного вызова).
  */
 static void trace_state_new(struct State *state)
 {
@@ -139,9 +139,9 @@ static void trace_inter_stat()
 }
 
 /** 
- * @brief Checks if state is already in hash table, adds it otherwise
+ * @brief Добавление состояния в хэш-таблицу, если оно там не присутствует.
  * 
- * @param state State structure
+ * @param state Структура состояния
  */
 static void queue_new_state(struct State *state)
 {
@@ -152,8 +152,7 @@ static void queue_new_state(struct State *state)
 }
 
 /** 
- * @brief Perform BFS search and build hash-table of all states
- * 
+ * @brief Поиск в ширину
  */
 static void bfs(void)
 {

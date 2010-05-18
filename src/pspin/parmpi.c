@@ -3,7 +3,7 @@
  * @author Ivan Korotkov <twee@tweedle-dee.org>
  * @date   Sun Mar 21 16:56:28 2010
  * 
- * @brief  Parallel statespace driver using MPI.
+ * @brief  Параллельная генерация состояний с использованием MPI.
  * 
  */
 
@@ -31,64 +31,64 @@
 #define STAT_THRESHOLD (10*1000*1000)
 
 /**
- * Total number of nodes, except logger (if present).
+ * Число узлов, за исключением узла журналирования.
  */
 int node_count;
 /**
- * Own number, 0-based.
+ * Номер текущего узла.
  */
 int node_id;
 
 /**
- * Maximum size of MPI message (must not be less than maximum possible state size 
- *                              or counter array size)
+ * Максимальный размер сообщения (не должен превышать максимально возможный размер состояния
+ *                                либо счетчика сообщений)
  */
 #define MAX_STATESIZE 1024
 /**
- * Length of async MPI queue
+ * Длина асинхронной MPI-очереди
  */
 #define MPI_QLEN      32
 
 /**
- * Number of last buffer dequeued from incoming queue.
+ * Индекс буфера, взятого последним из очереди приема.
  */
 static int last_buf_no = -1;
 /**
- * Incoming and outgoing queues.
+ * Очереди приема и отправки.
  */
 static struct mpi_queue sendq, recvq;
 
 /*
- * Tracer data.
+ * Статистика
  */
 
 /**
- * Number of states locally stored/processed.
+ * Число локально хранимых состояний.
  */
 static uint64_t state_count;
 /**
- * Number of transitions locally performed.
+ * Число выполненных переходов.
  */
 static uint64_t trans_count;
 /**
- * Number of remote calls carrying new states made.
+ * Число удаленных вызовов с новыми состояниями.
  */
 static uint64_t state_msg_count;
 /**
- * Number of remote calls with control data made.
+ * Число удаленных вызовов управляющего характера.
  */
 static uint64_t ctrl_msg_count;
 /**
- * Maximum BFS queue length in use.
+ * Максимальная длина очереди поиска.
  */
 static size_t max_bfs_len;
 /**
- * Start time of run.
+ * Время запуска.
  */
 static double start_time;
 
 /** 
- * @brief Record the start time.
+ * @brief Запись времени начала работы.
  */
 static void trace_start()
 {
@@ -96,7 +96,7 @@ static void trace_start()
 }
 
 /** 
- * @brief Record beginning of new state exploration.
+ * @brief Запись выборки нового сосотяния из очереди.
  */
 static void trace_state_begin(struct State *state)
 {
@@ -104,7 +104,7 @@ static void trace_state_begin(struct State *state)
 }
 
 /** 
- * @brief Record performed transition (no matter if state is already in hash or not).
+ * @brief Запись внутреннего перехода.
  */
 static void trace_state_new(struct State *state)
 {
@@ -114,9 +114,9 @@ static void trace_state_new(struct State *state)
 }
 
 /** 
- * @brief Record outgoing remote call (MPI message) carrying new state.
+ * @brief Запись удаленного вызова с новым состоянием.
  * 
- * @param node_idx Node to which the state is sent
+ * @param node_idx Номер узла-назначения
  */
 static void trace_state_send(struct State *state, int node_idx)
 {
@@ -124,9 +124,9 @@ static void trace_state_send(struct State *state, int node_idx)
 }
 
 /** 
- * @brief Record outgoing remote call with control data (message counters, etc)
+ * @brief Запись управляющего удаленного вызова.
  * 
- * @param node_idx Node to which the state is sent
+ * @param node_idx Номер узла-назначения
  */
 static void trace_ctrl_send(int node_idx)
 {
@@ -134,7 +134,7 @@ static void trace_ctrl_send(int node_idx)
 }
 
 /** 
- * @brief Output summary of recorded statistic
+ * @brief Вывод результатов сбора статистики
  */
 static void trace_summary()
 {
@@ -182,46 +182,44 @@ static void trace_inter_stat()
 }
 
 /**
- * Each node and token has color
+ * Каждый узел и передаваемое сообщение-счетчик имеют цвет
  */
 enum Color { Black = 0, White };
 
 struct MsgCount {
 	/**
-	 * Message counter.
-	 * Each node has it's local counter.
+	 * Счетчик сообщений.
 	 */
 	int count;
 	/**
-	 * Color, used in termination detection algorithm.
+	 * Цвет счетчика.
 	 */
 	enum Color color;
 };
 
 /**
- * Local message counter and node's color
+ * Счетчик и цвет текущего узла
  */
 static struct MsgCount msg_counter = { .color = White };
 /**
- * Passed message counter ("token") and it's color
- * Color is initialized to Black so that 0'th node doesn't 
- * detect termination immediately.
+ * Пересылаемый счетчик и его цвет.
+ * Цвет инициализируется черным, иначе нулевой узел посчитает работу завершенной в самом начале.
  */
 static struct MsgCount msg_accum   = { .color = Black };
 /**
- * If non-zero, node holds token
+ * Если не ноль, текущий узел является владельцем счетчика.
  */
 static int has_accum;
 
 /**
- * If non-negative, termination has been already detected by that node
+ * Узел, обнаруживший удаленное завершение (либо -1)
  */
 static int termination_detected_id = -1;
 
 /** 
- * @brief Record termination as been detected
+ * @brief Обнаружение удаленного завершения
  * 
- * @param node Node that detected termination
+ * @param node Номер узла, обнаружившего завершение
  */
 static void termination_detected(int node)
 {
@@ -231,7 +229,7 @@ static void termination_detected(int node)
 }
 
 /** 
- * @brief Broadcasts termination order to all other nodes, including logger
+ * @brief Рассылает всем остальным узлам уведомление о завершении
  */
 static void announce_termination()
 {
@@ -251,10 +249,9 @@ static void announce_termination()
 }
 
 /** 
- * @brief Initializes message counting data
+ * @brief Инициализация счетчиков сообщений
  *
- * Actually does nothing (it's already initialized), just marks
- * 0'th node as token holder.
+ * В сущности просто помечает нулевой узел как держателя счетчика.
  */
 static void init_msg_counter()
 {
@@ -263,11 +260,11 @@ static void init_msg_counter()
 }
 
 /** 
- * @brief Sends message counter to another node
+ * @brief Пересылает счетчик сообщений следующему узлу.
  * 
- * Current node must be the token holder.
+ * Текущий узел должен быть держателем счетчика.
  * 
- * @param target_node Target node number
+ * @param target_node Номер узла-назначения (обычно следующий узел)
  */
 static void send_msg_counter(int target_node)
 {
@@ -288,9 +285,10 @@ static void send_msg_counter(int target_node)
 }
 
 /** 
- * @brief Called when node is inactive, performs termination check and sends token forward.
+ * @brief Проверка завершение, вызывается при неактивности узла.
  * 
- * If node does not hold the token, does nothing.
+ * Если текущий узел не является держателем счетчика, ничего не делает.
+ * Если завершение не обнаружено, пересылает счетчик дальше.
  * 
  * @return -1 if termination detected, 0 otherwise.
  */
@@ -326,9 +324,9 @@ static int termination_check()
 }
 
 /** 
- * @brief Processes received token (message counter accumulator)
+ * @brief Обработка принятого счетчика сообщений
  * 
- * @param new_accum Accumulator data (counter and color)
+ * @param new_accum Принятый счетчик и его цвет
  */
 static void msg_count_accum(struct MsgCount *new_accum)
 {
@@ -337,7 +335,7 @@ static void msg_count_accum(struct MsgCount *new_accum)
 }
 
 /** 
- * @brief Updates message counter after sending message to another node.
+ * @brief Обновляет локальный счетчик сообщений после отправки
  */
 static void msg_count_sent()
 {
@@ -345,7 +343,7 @@ static void msg_count_sent()
 }
 
 /** 
- * @brief Updates message counter after receiving message from another node.
+ * @brief Обновляет локальный счетчик сообщений после приема
  */
 static void msg_count_recv()
 {
@@ -355,9 +353,9 @@ static void msg_count_recv()
 }
 
 /** 
- * @brief Checks if state is already in hash table, adds it otherwise.
+ * @brief Добавление состояния в хэш-таблицу, если оно там не присутствует.
  * 
- * @param state State structure
+ * @param state Структура состояния
  */
 static void queue_new_state(struct State *state)
 {
@@ -405,7 +403,7 @@ union Message {
 };
 
 /** 
- * @brief Reclaims last received message buffer.
+ * @brief Освобождает буфер, занятый последним принятым сообщением.
  */
 static void release_last_msg()
 {
