@@ -9,5 +9,5 @@ MODEL=$1
 STATES=$2
 
 #./set-model.sh models/$MODEL.pml
-make mpirun
+while ! make mpirun; do sleep 1; done
 mv pspin.stdout.log experiments/pspin.$MODEL.$STATES.log
