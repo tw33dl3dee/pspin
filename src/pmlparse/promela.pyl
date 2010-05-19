@@ -105,7 +105,7 @@ INITIAL:
 		return "K_VIS"		
 	
 	"{T_BUILTIN}":	return "T_BUILTIN"
-	"{T_CHANOP}":	return "T_CHANPOP"
+	"{T_CHANOP}":	return "T_CHANOP"
 	"{T_CONST}":
 		if self.value == "false":
 			self.value = 0
