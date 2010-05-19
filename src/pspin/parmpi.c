@@ -175,8 +175,10 @@ static void trace_inter_stat()
 {
 	double total_time = MPI_Wtime() - start_time;
 	
-	iprintf("PROGRESS time: %.0f, states: %.0f, trans: %.0f, queue: %.0f ", 
-	        total_time, (double)state_count, (double)trans_count, BFS_CUR_LEN());
+	iprintf("PROGRESS time: %.0f, states: %.0f, trans: %.0f, queue: %zd, MPI: <%.0f >%.0f ", 
+	        total_time, (double)state_count, (double)trans_count, BFS_CUR_LEN(),
+	        (double)(recvq.n_alloc - recvq.n_complete),
+	        (double)(sendq.n_alloc - sendq.n_complete));
 	state_hash_inter_stats();
 }
 
@@ -308,6 +310,7 @@ static int termination_check()
 		 */
 		if (msg_counter.color == White && msg_accum.color == White && msg_accum.count == 0) {
 			termination_detected(node_id);
+			eprintf("==VERIFICATION PASSED\n");
 			return -1;
 		}
 		/* Otherwise, node 0 may start a new probe. */
@@ -517,6 +520,7 @@ static struct State *get_state(void)
 	for (;;) {
 		last_buf_no = mpi_async_deque_buf(&recvq, 1);
 		if (last_buf_no != -1) {
+			mpi_dprintf("[DEQUE BUF %d]\n", last_buf_no);
 			switch (process_msg(MPI_ASYNC_BUF(&recvq, last_buf_no, union Message), 
 			                    MPI_ASYNC_STATUS(&recvq, last_buf_no), &state)) {
 			case NewState:	return state;
@@ -544,6 +548,7 @@ static struct State *get_state(void)
 	 */
 	for (;;) {
 		last_buf_no = mpi_async_deque_buf(&recvq, 0);
+		mpi_dprintf("[DEQUE BUF %d]\n", last_buf_no);
 		switch (process_msg(MPI_ASYNC_BUF(&recvq, last_buf_no, union Message), 
 		                    MPI_ASYNC_STATUS(&recvq, last_buf_no), &state)) {
 		case NewState:	return state;

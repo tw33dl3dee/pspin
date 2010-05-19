@@ -7,6 +7,8 @@
  * 
  */
 
+#undef NDEBUG
+
 #include <stdlib.h>
 #include <assert.h>
 #include <stdio.h>
@@ -25,7 +27,7 @@
 void mpi_async_init(struct mpi_queue *queue, int queuelen, int bufsize)
 {
 	queue->bufsize = bufsize;
-	queue->buf	  = malloc(queuelen * bufsize);
+	MPI_Alloc_mem(queuelen * bufsize, MPI_INFO_NULL, &queue->buf);
 	queue->req	  = malloc(queuelen * sizeof(MPI_Request));
 	queue->status = malloc(queuelen * sizeof(MPI_Status));
 	for (int i = 0; i < queuelen; ++i)
@@ -33,6 +35,7 @@ void mpi_async_init(struct mpi_queue *queue, int queuelen, int bufsize)
 	queue->nfree = queuelen;
 	queue->ntotal = queuelen;
 	queue->wait_time = 0;
+	queue->n_alloc = queue->n_complete = 0;
 }
 
 /** 
@@ -77,6 +80,7 @@ int mpi_async_get_buf(struct mpi_queue *queue, int nowait)
 			 MPI_Testany(queue->ntotal, queue->req, &idx, &flag, MPI_STATUS_IGNORE)) {
 			queue->req[idx] = MPI_REQUEST_NULL;
 			queue->nfree++;
+			queue->n_complete++;
 		}
 		queue->nfree--;
 		mpi_dprintf("[wait idx: %d, free buffers: %d] ", firstidx, queue->nfree);
@@ -102,6 +106,8 @@ int mpi_async_get_buf(struct mpi_queue *queue, int nowait)
 int mpi_async_queue_buf(struct mpi_queue *queue, int bufno, 
 						int count, MPI_Datatype type, int dest, int tag)
 {
+	queue->n_alloc++;
+	assert(queue->req[bufno] == MPI_REQUEST_NULL);
 	return MPI_Isend(MPI_ASYNC_BUF(queue, bufno, void), 
 					 count, type, dest, tag, 
 					 MPI_COMM_WORLD, queue->req + bufno);
@@ -152,7 +158,8 @@ int mpi_async_deque_buf(struct mpi_queue *queue, int nowait)
 	 */
 	assert(++queue->nfree);
 	queue->status[idx] = status;
-	queue->req[idx] = MPI_REQUEST_NULL;
+	queue->n_complete++;
+	assert(queue->req[idx] == MPI_REQUEST_NULL);
 	return idx;
 }
 
@@ -173,6 +180,8 @@ int mpi_async_put_buf(struct mpi_queue *queue, int bufno,
 					  int count, MPI_Datatype type, int src, int tag)
 {
 	assert(--queue->nfree >= 0);
+	assert(queue->req[bufno] == MPI_REQUEST_NULL);
+	queue->n_alloc++;
 	return MPI_Irecv(MPI_ASYNC_BUF(queue, bufno, void), 
 					 count, type, src, tag, 
 					 MPI_COMM_WORLD, queue->req + bufno);
@@ -190,6 +199,6 @@ void mpi_async_stop(struct mpi_queue *queue)
 			MPI_Cancel(&queue->req[i]);
 			MPI_Wait(&queue->req[i], MPI_STATUS_IGNORE);
 		}
-	free(queue->buf);
+	MPI_Free_mem(queue->buf);
 	free(queue->req);
 }
