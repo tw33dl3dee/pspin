@@ -11,13 +11,13 @@
 # @ class = small
 # @ group = iu7
 # @ input = /dev/null
-# @ output = pspin.stdout
-# @ error = pspin.stderr
+# @ output = pspin.$(jobid).stdout
+# @ error = pspin.$(jobid).stderr
 # @ initialdir = /gpfs/home/iu7/stud057/pspin
 # Syntax: notification = always|error|start|never|complete
 # @ notification = complete
 # Syntax: node = [min][,max]
-# @ node = 4
+# @ node = 16
 # @ tasks_per_node = 1
 # @ node_usage = not_shared
 # @ queue
