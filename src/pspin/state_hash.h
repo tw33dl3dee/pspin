@@ -121,7 +121,7 @@ extern void state_hash_inter_stats(void);
 		int pid = 0;													\
 		FOREACH_N_PROCESSES(state, PARTITION_PROC_COUNT, pid)			\
 		    seed = HASH(&current->data,									\
-		                PROCSIZE(pprocroc) - sizeof(struct Process),	\
+		                PROCSIZE(current) - sizeof(struct Process),		\
 		                seed);                                          \
 		seed%(node_count);												\
 	})
