@@ -4,7 +4,7 @@ mv pspin.*stderr pspin.stderr
 mv pspin.*stdout pspin.stdout 
 
 for FILE in pspin.stdout pspin.stderr; do
-	[ -e $FILE ] && cat $FILE | sort -k1,1 -s | grep -v PROGRESS > $FILE.log
+	[ -e $FILE ] && cat $FILE | sort -k1,2 -s | grep -v PROGRESS > $FILE.log
 	rm -f $FILE
 done
 
