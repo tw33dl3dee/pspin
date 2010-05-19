@@ -10,7 +10,7 @@ set(PARMPI_SRC parmpi.c mpi_async.c mpi_async.h mpi_debug.c mpi_tags.h)
 
 set(REMOTE_RUN_SCRIPT tools/run-mpi-job.sh)
 set(REMOTE_INPUT ${STATEGEN_FILE} ${PSPIN_SRC} ${PARMPI_SRC} Makefile.bare pspin.job ${REMOTE_RUN_SCRIPT})
-set(REMOTE_OUTPUT "pspin.std*")
+set(REMOTE_OUTPUT "pspin.*std*")
 
 set(MPI_HOST mpi)
 set(MPI_HOST_REMOTE_PATH work/pspin)
