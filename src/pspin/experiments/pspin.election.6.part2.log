@@ -1,20 +1,134 @@
-  1. no mpd is running on this host
-        172.22.11.11 (n1111.nodes)
-        172.22.11.12 (n1112.nodes)
-        172.22.11.13 (n1113.nodes)
-        172.22.12.12 (n1212.nodes)
-        172.22.12.13 (n1213.nodes)
-        172.22.12.8 (n1208.nodes)
-        172.22.21.1 (n2101.nodes)
-        172.22.21.10 (n2110.nodes)
-        172.22.21.12 (n2112.nodes)
-        172.22.21.13 (n2113.nodes)
-        172.22.21.2 (n2102.nodes)
-        172.22.21.6 (n2106.nodes)
-        172.22.22.1 (n2201.nodes)
-  2. an mpd is running but was started without a "console" (-n option)
-mpdallexit: cannot connect to local mpd (/tmp/mpd2.console_stud057); possible causes:
-mpdboot_n1110.nodes (handle_mpd_output 703): Failed to establish a socket connection with n1212.nodes:41810 : (111, 'Connection refused')
-mpdboot_n1110.nodes (handle_mpd_output 720): failed to connect to mpd on n1212.nodes
-mpiexec: unable to start all procs; may have invalid machine names
-    remaining specified hosts:
+[0] MPI node (0 of 32) starting...
+[11] MPI node (11 of 32) starting...
+[23] MPI node (23 of 32) starting...
+[1] MPI node (1 of 32) starting...
+[22] MPI node (22 of 32) starting...
+[21] MPI node (21 of 32) starting...
+[8] MPI node (8 of 32) starting...
+[2] MPI node (2 of 32) starting...
+[10] MPI node (10 of 32) starting...
+[13] MPI node (13 of 32) starting...
+[24] MPI node (24 of 32) starting...
+[5] MPI node (5 of 32) starting...
+[12] MPI node (12 of 32) starting...
+[6] MPI node (6 of 32) starting...
+[4] MPI node (4 of 32) starting...
+[28] MPI node (28 of 32) starting...
+[27] MPI node (27 of 32) starting...
+[18] MPI node (18 of 32) starting...
+[14] MPI node (14 of 32) starting...
+[3] MPI node (3 of 32) starting...
+[7] MPI node (7 of 32) starting...
+[16] MPI node (16 of 32) starting...
+[15] MPI node (15 of 32) starting...
+[29] MPI node (29 of 32) starting...
+[9] MPI node (9 of 32) starting...
+[19] MPI node (19 of 32) starting...
+[30] MPI node (30 of 32) starting...
+[20] MPI node (20 of 32) starting...
+[31] MPI node (31 of 32) starting...
+[17] MPI node (17 of 32) starting...
+[25] MPI node (25 of 32) starting...
+[26] MPI node (26 of 32) starting...
+[0] PROGRESS time: 7, states: 1000000, trans: 3945495, queue: 26787, MPI: <32 >27 [0]  (hash use 1.5%, collisions 2.8%, visited: 133.2 MiB)
+[0] PROGRESS time: 13, states: 2000000, trans: 7124314, queue: 14052, MPI: <32 >3 [0]  (hash use 3.0%, collisions 4.7%, visited: 261.2 MiB)
+[18] PROGRESS time: 21, states: 1000000, trans: 4554478, queue: 306042, MPI: <32 >32 [18]  (hash use 1.9%, collisions 2.6%, visited: 169.4 MiB)
+[3] PROGRESS time: 21, states: 1000000, trans: 3968633, queue: 1618, MPI: <32 >12 [3]  (hash use 1.5%, collisions 2.9%, visited: 129.9 MiB)
+[22] PROGRESS time: 22, states: 1000000, trans: 3671393, queue: 217, MPI: <32 >4 [22]  (hash use 1.5%, collisions 2.1%, visited: 129.7 MiB)
+[8] PROGRESS time: 23, states: 1000000, trans: 3524622, queue: 5969, MPI: <32 >9 [8]  (hash use 1.5%, collisions 2.4%, visited: 130.5 MiB)
+[0] PROGRESS time: 25, states: 3000000, trans: 10029079, queue: 641, MPI: <32 >12 [0]  (hash use 4.5%, collisions 6.6%, visited: 389.2 MiB)
+[12] PROGRESS time: 25, states: 1000000, trans: 3667765, queue: 527, MPI: <32 >23 [12]  (hash use 1.5%, collisions 2.3%, visited: 129.8 MiB)
+[1] PROGRESS time: 26, states: 1000000, trans: 2945051, queue: 5604, MPI: <32 >27 [1]  (hash use 1.5%, collisions 2.1%, visited: 130.4 MiB)
+[28] PROGRESS time: 28, states: 1000000, trans: 2899492, queue: 5342, MPI: <32 >26 [28]  (hash use 1.5%, collisions 2.2%, visited: 130.4 MiB)
+[2] PROGRESS time: 31, states: 1000000, trans: 2991714, queue: 5848, MPI: <32 >24 [2]  (hash use 1.5%, collisions 2.3%, visited: 130.5 MiB)
+[6] PROGRESS time: 31, states: 1000000, trans: 3568494, queue: 9121, MPI: <32 >28 [6]  (hash use 1.5%, collisions 2.4%, visited: 130.9 MiB)
+[10] PROGRESS time: 32, states: 1000000, trans: 3579884, queue: 98175, MPI: <32 >13 [10]  (hash use 1.6%, collisions 2.3%, visited: 142.4 MiB)
+[17] PROGRESS time: 34, states: 1000000, trans: 3557461, queue: 36701, MPI: <32 >25 [17]  (hash use 1.5%, collisions 2.5%, visited: 134.5 MiB)
+[12] PROGRESS time: 34, states: 2000000, trans: 6371835, queue: 1602, MPI: <32 >29 [12]  (hash use 3.0%, collisions 4.1%, visited: 259.6 MiB)
+[9] PROGRESS time: 38, states: 1000000, trans: 3260669, queue: 657, MPI: <32 >32 [9]  (hash use 1.5%, collisions 2.6%, visited: 129.8 MiB)
+[1] PROGRESS time: 38, states: 2000000, trans: 5801836, queue: 12322, MPI: <32 >30 [1]  (hash use 3.0%, collisions 4.2%, visited: 261.0 MiB)
+[22] PROGRESS time: 41, states: 2000000, trans: 6768701, queue: 27429, MPI: <32 >1 [22]  (hash use 3.0%, collisions 4.5%, visited: 263.0 MiB)
+[0] PROGRESS time: 41, states: 4000000, trans: 12958126, queue: 462, MPI: <32 >19 [0]  (hash use 6.0%, collisions 8.6%, visited: 518.9 MiB)
+[5] PROGRESS time: 43, states: 1000000, trans: 3434370, queue: 5014, MPI: <32 >31 [5]  (hash use 1.5%, collisions 2.3%, visited: 130.4 MiB)
+[15] PROGRESS time: 45, states: 1000000, trans: 3091281, queue: 1392, MPI: <32 >26 [15]  (hash use 1.5%, collisions 2.3%, visited: 129.9 MiB)
+[16] PROGRESS time: 46, states: 1000000, trans: 3612492, queue: 30385, MPI: <32 >22 [16]  (hash use 1.5%, collisions 2.7%, visited: 133.6 MiB)
+[26] PROGRESS time: 46, states: 1000000, trans: 3183435, queue: 873, MPI: <32 >31 [26]  (hash use 1.5%, collisions 2.2%, visited: 129.8 MiB)
+[10] PROGRESS time: 47, states: 2000000, trans: 6873792, queue: 101328, MPI: <32 >32 [10]  (hash use 3.1%, collisions 4.8%, visited: 272.5 MiB)
+[3] PROGRESS time: 48, states: 2000000, trans: 6896487, queue: 11290, MPI: <32 >23 [3]  (hash use 3.0%, collisions 4.5%, visited: 260.9 MiB)
+[11] PROGRESS time: 48, states: 1000000, trans: 3352155, queue: 144304, MPI: <32 >16 [11]  (hash use 1.7%, collisions 2.5%, visited: 148.4 MiB)
+[13] PROGRESS time: 48, states: 1000000, trans: 3704807, queue: 87430, MPI: <32 >30 [13]  (hash use 1.6%, collisions 2.5%, visited: 141.0 MiB)
+[1] PROGRESS time: 49, states: 3000000, trans: 8552398, queue: 58, MPI: <32 >30 [1]  (hash use 4.5%, collisions 6.1%, visited: 389.1 MiB)
+[25] PROGRESS time: 50, states: 1000000, trans: 3311805, queue: 109360, MPI: <32 >24 [25]  (hash use 1.7%, collisions 2.5%, visited: 143.9 MiB)
+[23] PROGRESS time: 51, states: 1000000, trans: 3448936, queue: 57357, MPI: <32 >19 [23]  (hash use 1.6%, collisions 2.7%, visited: 137.1 MiB)
+[25] PROGRESS time: 55, states: 2000000, trans: 6393649, queue: 46871, MPI: <32 >27 [25]  (hash use 3.1%, collisions 4.6%, visited: 265.5 MiB)
+[7] PROGRESS time: 60, states: 1000000, trans: 4127379, queue: 3584, MPI: <32 >28 [7]  (hash use 1.5%, collisions 2.8%, visited: 130.2 MiB)
+[8] PROGRESS time: 61, states: 2000000, trans: 6961089, queue: 129953, MPI: <32 >31 [8]  (hash use 3.2%, collisions 5.0%, visited: 276.3 MiB)
+[12] PROGRESS time: 66, states: 3000000, trans: 9801950, queue: 62104, MPI: <32 >32 [12]  (hash use 4.6%, collisions 6.9%, visited: 397.2 MiB)
+[6] PROGRESS time: 67, states: 2000000, trans: 7224470, queue: 3032, MPI: <32 >19 [6]  (hash use 3.0%, collisions 5.1%, visited: 259.8 MiB)
+[24] PROGRESS time: 69, states: 1000000, trans: 3621013, queue: 3492, MPI: <32 >13 [24]  (hash use 1.5%, collisions 2.6%, visited: 130.2 MiB)
+[2] PROGRESS time: 70, states: 2000000, trans: 6770578, queue: 13101, MPI: <32 >31 [2]  (hash use 3.0%, collisions 5.2%, visited: 261.1 MiB)
+[21] PROGRESS time: 76, states: 1000000, trans: 3387241, queue: 276415, MPI: <32 >32 [21]  (hash use 1.9%, collisions 2.4%, visited: 165.6 MiB)
+[20] PROGRESS time: 77, states: 1000000, trans: 3203930, queue: 10672, MPI: <32 >31 [20]  (hash use 1.5%, collisions 2.3%, visited: 131.1 MiB)
+[10] PROGRESS time: 78, states: 3000000, trans: 10333854, queue: 151173, MPI: <32 >31 [10]  (hash use 4.7%, collisions 7.1%, visited: 408.7 MiB)
+[22] PROGRESS time: 78, states: 3000000, trans: 9799808, queue: 10644, MPI: <32 >13 [22]  (hash use 4.5%, collisions 6.7%, visited: 390.5 MiB)
+[1] PROGRESS time: 79, states: 4000000, trans: 11528386, queue: 53020, MPI: <32 >22 [1]  (hash use 6.0%, collisions 8.6%, visited: 525.7 MiB)
+[3] PROGRESS time: 80, states: 3000000, trans: 10032658, queue: 4578, MPI: <32 >28 [3]  (hash use 4.5%, collisions 6.7%, visited: 389.7 MiB)
+[14] PROGRESS time: 80, states: 1000000, trans: 3588458, queue: 19610, MPI: <32 >12 [14]  (hash use 1.5%, collisions 2.7%, visited: 132.2 MiB)
+[0] PROGRESS time: 81, states: 5000000, trans: 15904565, queue: 30453, MPI: <32 >7 [0]  (hash use 7.5%, collisions 10.9%, visited: 652.4 MiB)
+[26] PROGRESS time: 82, states: 2000000, trans: 5899544, queue: 4523, MPI: <32 >31 [26]  (hash use 3.0%, collisions 4.0%, visited: 260.0 MiB)
+[16] PROGRESS time: 83, states: 2000000, trans: 7231446, queue: 127447, MPI: <32 >28 [16]  (hash use 3.2%, collisions 5.3%, visited: 275.9 MiB)
+[23] PROGRESS time: 84, states: 2000000, trans: 6764321, queue: 3859, MPI: <32 >31 [23]  (hash use 3.0%, collisions 5.3%, visited: 259.9 MiB)
+[1] PROGRESS time: 85, states: 5000000, trans: 15034781, queue: 7145, MPI: <32 >2 [1]  (hash use 7.5%, collisions 11.2%, visited: 649.4 MiB)
+[25] PROGRESS time: 86, states: 3000000, trans: 9255436, queue: 26936, MPI: <32 >5 [25]  (hash use 4.5%, collisions 6.7%, visited: 392.6 MiB)
+[19] PROGRESS time: 86, states: 1000000, trans: 3460948, queue: 44221, MPI: <32 >32 [19]  (hash use 1.6%, collisions 2.4%, visited: 135.4 MiB)
+[24] PROGRESS time: 87, states: 2000000, trans: 7744581, queue: 37791, MPI: <32 >23 [24]  (hash use 3.0%, collisions 5.1%, visited: 264.3 MiB)
+[7] PROGRESS time: 88, states: 2000000, trans: 8577392, queue: 78452, MPI: <32 >32 [7]  (hash use 3.1%, collisions 6.2%, visited: 269.6 MiB)
+[10] PROGRESS time: 90, states: 4000000, trans: 13800330, queue: 84899, MPI: <32 >31 [10]  (hash use 6.1%, collisions 9.3%, visited: 529.8 MiB)
+[2] PROGRESS time: 94, states: 3000000, trans: 11127614, queue: 51896, MPI: <32 >29 [2]  (hash use 4.5%, collisions 7.9%, visited: 395.8 MiB)
+[10] PROGRESS time: 103, states: 5000000, trans: 17472227, queue: 33661, MPI: <32 >8 [10]  (hash use 7.5%, collisions 11.5%, visited: 652.9 MiB)
+[7] PROGRESS time: 110, states: 3000000, trans: 13212221, queue: 89698, MPI: <32 >32 [7]  (hash use 4.6%, collisions 9.8%, visited: 400.7 MiB)
+[11] PROGRESS time: 110, states: 2000000, trans: 7034508, queue: 290434, MPI: <32 >31 [11]  (hash use 3.4%, collisions 5.5%, visited: 297.1 MiB)
+[5] PROGRESS time: 112, states: 2000000, trans: 7060194, queue: 272, MPI: <32 >31 [5]  (hash use 3.0%, collisions 5.1%, visited: 259.4 MiB)
+[13] PROGRESS time: 113, states: 2000000, trans: 7694275, queue: 60163, MPI: <32 >19 [13]  (hash use 3.1%, collisions 5.0%, visited: 267.2 MiB)
+[0] PROGRESS time: 115, states: 6000000, trans: 19226255, queue: 5409, MPI: <32 >30 [0]  (hash use 8.9%, collisions 14.3%, visited: 778.9 MiB)
+[8] PROGRESS time: 115, states: 3000000, trans: 10812444, queue: 199671, MPI: <32 >28 [8]  (hash use 4.8%, collisions 7.9%, visited: 415.0 MiB)
+[9] PROGRESS time: 116, states: 2000000, trans: 6901758, queue: 16930, MPI: <32 >30 [9]  (hash use 3.0%, collisions 5.4%, visited: 261.6 MiB)
+[17] PROGRESS time: 125, states: 2000000, trans: 7059210, queue: 69399, MPI: <32 >31 [17]  (hash use 3.1%, collisions 5.1%, visited: 268.4 MiB)
+[16] PROGRESS time: 125, states: 3000000, trans: 11020563, queue: 281293, MPI: <32 >17 [16]  (hash use 4.9%, collisions 8.9%, visited: 425.6 MiB)
+[12] PROGRESS time: 125, states: 4000000, trans: 13172427, queue: 124351, MPI: <32 >30 [12]  (hash use 6.1%, collisions 10.2%, visited: 534.9 MiB)
+[9] PROGRESS time: 126, states: 3000000, trans: 10402301, queue: 28659, MPI: <32 >9 [9]  (hash use 4.5%, collisions 8.0%, visited: 392.8 MiB)
+[20] PROGRESS time: 127, states: 2000000, trans: 6291316, queue: 7252, MPI: <32 >1 [20]  (hash use 3.0%, collisions 4.4%, visited: 260.3 MiB)
+[0] PROGRESS time: 128, states: 7000000, trans: 22218997, queue: 34078, MPI: <32 >16 [0]  (hash use 10.5%, collisions 16.6%, visited: 912.3 MiB)
+[24] PROGRESS time: 129, states: 3000000, trans: 12045635, queue: 122637, MPI: <32 >11 [24]  (hash use 4.7%, collisions 7.8%, visited: 405.0 MiB)
+[1] PROGRESS time: 132, states: 6000000, trans: 18224088, queue: 5604, MPI: <32 >28 [1]  (hash use 8.9%, collisions 14.2%, visited: 778.9 MiB)
+[2] PROGRESS time: 133, states: 4000000, trans: 15414227, queue: 12, MPI: <32 >32 [2]  (hash use 6.0%, collisions 10.6%, visited: 518.8 MiB)
+[0] PROGRESS time: 134, states: 8000000, trans: 25692672, queue: 108779, MPI: <32 >24 [0]  (hash use 12.1%, collisions 19.8%, visited: 1051.7 MiB)
+[12] PROGRESS time: 135, states: 5000000, trans: 16322818, queue: 47865, MPI: <32 >31 [12]  (hash use 7.5%, collisions 12.3%, visited: 654.7 MiB)
+[15] PROGRESS time: 136, states: 2000000, trans: 6515686, queue: 323, MPI: <32 >5 [15]  (hash use 3.0%, collisions 4.9%, visited: 259.4 MiB)
+[0] PROGRESS time: 137, states: 9000000, trans: 29382012, queue: 153430, MPI: <32 >1 [0]  (hash use 13.6%, collisions 22.6%, visited: 1187.2 MiB)
+[6] PROGRESS time: 138, states: 3000000, trans: 10274424, queue: 2834, MPI: <32 >2 [6]  (hash use 4.5%, collisions 7.1%, visited: 389.5 MiB)
+[8] PROGRESS time: 138, states: 4000000, trans: 15002117, queue: 277355, MPI: <32 >31 [8]  (hash use 6.4%, collisions 11.1%, visited: 554.8 MiB)
+[10] PROGRESS time: 138, states: 6000000, trans: 20937936, queue: 30878, MPI: <32 >29 [10]  (hash use 9.0%, collisions 14.1%, visited: 782.2 MiB)
+[19] PROGRESS time: 140, states: 2000000, trans: 7570514, queue: 42748, MPI: <32 >15 [19]  (hash use 3.0%, collisions 5.0%, visited: 264.9 MiB)
+[24] PROGRESS time: 142, states: 4000000, trans: 16407744, queue: 183169, MPI: <32 >13 [24]  (hash use 6.2%, collisions 10.9%, visited: 542.6 MiB)
+[0] PROGRESS time: 143, states: 10000000, trans: 33059239, queue: 243755, MPI: <32 >2 [0]  (hash use 15.3%, collisions 25.8%, visited: 1328.6 MiB)
+[25] PROGRESS time: 143, states: 4000000, trans: 12336991, queue: 166, MPI: <32 >22 [25]  (hash use 6.0%, collisions 9.1%, visited: 518.8 MiB)
+[16] PROGRESS time: 144, states: 4000000, trans: 14623988, queue: 128476, MPI: <32 >28 [16]  (hash use 6.2%, collisions 12.0%, visited: 535.5 MiB)
+[23] PROGRESS time: 145, states: 3000000, trans: 10209178, queue: 25246, MPI: <32 >31 [23]  (hash use 4.5%, collisions 8.8%, visited: 392.4 MiB)
+[3] PROGRESS time: 145, states: 4000000, trans: 13232860, queue: 144, MPI: <32 >30 [3]  (hash use 6.0%, collisions 9.0%, visited: 518.8 MiB)
+[0] PROGRESS time: 148, states: 11000000, trans: 36559754, queue: 120372, MPI: <32 >30 [0]  (hash use 16.6%, collisions 28.7%, visited: 1442.3 MiB)
+[11] PROGRESS time: 153, states: 3000000, trans: 10358616, queue: 244336, MPI: <32 >32 [11]  (hash use 4.8%, collisions 8.2%, visited: 420.8 MiB)
+[0] PROGRESS time: 154, states: 12000000, trans: 39620711, queue: 7373, MPI: <32 >31 [0]  (hash use 17.9%, collisions 30.9%, visited: 1557.4 MiB)
+[4] PROGRESS time: 154, states: 1000000, trans: 3315120, queue: 1695, MPI: <32 >1 [4]  (hash use 1.5%, collisions 2.7%, visited: 129.9 MiB)
+[1] PROGRESS time: 155, states: 7000000, trans: 21011928, queue: 2389, MPI: <32 >26 [1]  (hash use 10.4%, collisions 16.1%, visited: 908.2 MiB)
+[12] PROGRESS time: 158, states: 6000000, trans: 19589926, queue: 4669, MPI: <32 >29 [12]  (hash use 8.9%, collisions 14.2%, visited: 778.8 MiB)
+[7] PROGRESS time: 163, states: 4000000, trans: 17547224, queue: 109038, MPI: <32 >30 [7]  (hash use 6.1%, collisions 12.9%, visited: 532.9 MiB)
+[2] PROGRESS time: 165, states: 5000000, trans: 19775423, queue: 103514, MPI: <32 >28 [2]  (hash use 7.6%, collisions 13.1%, visited: 661.9 MiB)
+[7] PROGRESS time: 186, states: 5000000, trans: 22019234, queue: 134171, MPI: <32 >30 [7]  (hash use 7.7%, collisions 16.2%, visited: 665.9 MiB)
+[2] PROGRESS time: 188, states: 6000000, trans: 24248449, queue: 112053, MPI: <32 >31 [2]  (hash use 9.1%, collisions 15.6%, visited: 792.7 MiB)
+[2] PROGRESS time: 215, states: 7000000, trans: 28831629, queue: 116303, MPI: <32 >30 [2]  (hash use 10.6%, collisions 18.4%, visited: 923.0 MiB)
+[7] PROGRESS time: 218, states: 6000000, trans: 26560957, queue: 143082, MPI: <32 >31 [7]  (hash use 9.2%, collisions 19.7%, visited: 796.8 MiB)
+[2] PROGRESS time: 240, states: 8000000, trans: 33606581, queue: 139351, MPI: <32 >30 [2]  (hash use 12.1%, collisions 21.3%, visited: 1055.7 MiB)
+[2] PROGRESS time: 270, states: 9000000, trans: 38239850, queue: 105138, MPI: <32 >30 [2]  (hash use 13.6%, collisions 24.1%, visited: 1180.9 MiB)
+rank 16 in job 1  n2111_44614   caused collective abort of all ranks
+  exit status of rank 16: killed by signal 9 
