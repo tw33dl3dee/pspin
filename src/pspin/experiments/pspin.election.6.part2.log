@@ -1,0 +1,20 @@
+  1. no mpd is running on this host
+        172.22.11.11 (n1111.nodes)
+        172.22.11.12 (n1112.nodes)
+        172.22.11.13 (n1113.nodes)
+        172.22.12.12 (n1212.nodes)
+        172.22.12.13 (n1213.nodes)
+        172.22.12.8 (n1208.nodes)
+        172.22.21.1 (n2101.nodes)
+        172.22.21.10 (n2110.nodes)
+        172.22.21.12 (n2112.nodes)
+        172.22.21.13 (n2113.nodes)
+        172.22.21.2 (n2102.nodes)
+        172.22.21.6 (n2106.nodes)
+        172.22.22.1 (n2201.nodes)
+  2. an mpd is running but was started without a "console" (-n option)
+mpdallexit: cannot connect to local mpd (/tmp/mpd2.console_stud057); possible causes:
+mpdboot_n1110.nodes (handle_mpd_output 703): Failed to establish a socket connection with n1212.nodes:41810 : (111, 'Connection refused')
+mpdboot_n1110.nodes (handle_mpd_output 720): failed to connect to mpd on n1212.nodes
+mpiexec: unable to start all procs; may have invalid machine names
+    remaining specified hosts:
