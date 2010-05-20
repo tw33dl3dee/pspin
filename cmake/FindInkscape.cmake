@@ -22,15 +22,23 @@ if(INKSCAPE_EXECUTABLE)
 	unset(_pdf_files)
 
 	foreach(_svg_file ${ARGN})
-	  string(REGEX REPLACE \\.svg$ .pdf _pdf_file ${_svg_file})
+	  string(REGEX REPLACE \\.svg$ .eps _eps_file ${_svg_file})
+	  string(REGEX REPLACE \\.eps$ .pdf _pdf_file ${_eps_file})
 
 	  list(APPEND _pdf_files ${_pdf_file})
 
-	  add_custom_command(OUTPUT ${_pdf_file}
+	  add_custom_command(OUTPUT ${_eps_file}
 		DEPENDS ${_svg_file}
 		COMMAND ${INKSCAPE_EXECUTABLE} 
-		ARGS -D -z --file=${_svg_file} --export-pdf=${_pdf_file}
-		COMMENT "Converting ${_svg_file}"
+		ARGS -D -z --file=${_svg_file} --export-eps=${_eps_file}
+		COMMENT "Exporting ${_svg_file}"
+		)
+
+	  add_custom_command(OUTPUT ${_pdf_file}
+		DEPENDS ${_eps_file}
+		COMMAND ${EPSTOPDF_EXECUTABLE} 
+		ARGS    --outfile=${_pdf_file} ${_eps_file}
+		COMMENT "Converting ${_eps_file}"
 		)
 
 	endforeach()
