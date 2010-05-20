@@ -25,6 +25,7 @@ include(UseLATEX)
 add_subdirectory(src/pspin)
 add_subdirectory(graphics)
 add_subdirectory(articles)
+add_subdirectory(thesis)
 
 find_package(Ctags)
 if(CTAGS_FOUND AND CTAGS_FLAVOR MATCHES Exuberant)
