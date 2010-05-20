@@ -9,3 +9,5 @@ for FILE in pspin.stdout pspin.stderr; do
 done
 
 cat pspin.stderr.log | grep -v indirect_max_size 2>/dev/null
+exit 0
+
