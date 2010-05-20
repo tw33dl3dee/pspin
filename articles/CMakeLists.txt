@@ -1,16 +1,12 @@
-add_custom_command(
-  OUTPUT  report1.pdf report1.aux report1.log
-  DEPENDS report1.tex
-  COMMAND ${PDFLATEX_COMPILER}
-  ARGS    report1.tex
+set(LATEX_OUTPUT_PATH ${CMAKE_CURRENT_BINARY_DIR}/output/tex)
+
+add_latex_document(report1.tex DEFAULT_PDF MANGLE_TARGET_NAMES)
+add_latex_document(report2.tex DEFAULT_PDF MANGLE_TARGET_NAMES)
+add_latex_document(report2-slides.tex 
+  DEPENDS graphics
+  IMAGE_DIRS ../graphics
+  DEFAULT_PDF MANGLE_TARGET_NAMES
 )
 
-add_custom_command(
-  OUTPUT  report2-slides.pdf report2-slides.aux report2-slides.log
-  DEPENDS report2-slides.tex
-  COMMAND ${PDFLATEX_COMPILER}
-  ARGS    report2-slides.tex
-)
-
-add_custom_target(articles ALL DEPENDS report1.pdf report2-slides.pdf)
-add_dependencies(articles graphics)
+add_custom_target(articles ALL)
+add_dependencies(articles report1_pdf report2_pdf report2-slides_pdf)
