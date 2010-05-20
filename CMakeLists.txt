@@ -16,6 +16,8 @@ set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -UDEBUG -O3")
 
 find_package(MPI REQUIRED)
 find_package(Dia REQUIRED)
+find_package(Inkscape REQUIRED)
+find_package(Plotutils REQUIRED)
 
 find_package(LATEX REQUIRED)
 include(UseLATEX)

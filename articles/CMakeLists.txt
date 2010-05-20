@@ -13,4 +13,4 @@ add_custom_command(
 )
 
 add_custom_target(articles ALL DEPENDS report1.pdf report2-slides.pdf)
-add_dependencies(articles dia-pdf)
+add_dependencies(articles graphics)
