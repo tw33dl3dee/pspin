@@ -17,7 +17,7 @@
 # Syntax: notification = always|error|start|never|complete
 # @ notification = complete
 # Syntax: node = [min][,max]
-# @ node = 16
+# @ node = 32
 # @ tasks_per_node = 1
 # @ node_usage = not_shared
 # @ queue

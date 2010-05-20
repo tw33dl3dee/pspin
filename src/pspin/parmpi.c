@@ -47,7 +47,7 @@ int node_id;
 /**
  * Длина асинхронной MPI-очереди
  */
-#define MPI_QLEN      32
+#define MPI_QLEN      128
 
 /**
  * Индекс буфера, взятого последним из очереди приема.
@@ -57,6 +57,8 @@ static int last_buf_no = -1;
  * Очереди приема и отправки.
  */
 static struct mpi_queue sendq, recvq;
+
+#define MPI_BUF_SIZE (256*MiB)
 
 /*
  * Статистика
@@ -382,8 +384,8 @@ static void queue_new_state(struct State *state)
 }
 
 /**
- * Union of all possible message data layouts.
- * Logging messages (`TagDebugLog') not included here.
+ * Объединение всех возможных типов MPI сообщений.
+ * Сообщения журналирования `TagDebugLog' сюда не входят.
  */
 union Message {
 	/**
@@ -565,7 +567,7 @@ static struct State *get_state(void)
 }
 
 /** 
- * @brief Perform DFS search and build hash-table of all states
+ * @brief Параллельный поиск в ширину.
  */
 static void dfs(void)
 {
@@ -663,8 +665,6 @@ static void dfs(void)
 
 		if (state_count%STAT_THRESHOLD == 0)
 			trace_inter_stat();
-		/* if (node_id == 1 && state_count%100 == 0) */
-		/* 	trace_inter_stat(); */
 	}
 
   aborted:
@@ -682,6 +682,10 @@ int main(int argc, char *argv[])
 	MPI_Init(&argc, &argv);
 	MPI_Comm_size(MPI_COMM_WORLD, &node_count);
 	MPI_Comm_rank(MPI_COMM_WORLD, &node_id);
+
+	/* void *mpi_buf = NULL; */
+	/* MPI_Alloc_mem(MPI_BUF_SIZE, MPI_INFO_NULL, &mpi_buf); */
+	/* MPI_Buffer_attach(mpi_buf, MPI_BUF_SIZE); */
 
 #ifdef DEBUG
 	--node_count;
