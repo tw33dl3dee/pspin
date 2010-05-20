@@ -11,3 +11,7 @@ add_latex_document(thesis.tex
 
 add_custom_target(thesis ALL)
 add_dependencies(thesis thesis_pdf)
+
+add_custom_command(TARGET thesis POST_BUILD
+  COMMAND cp ${LATEX_OUTPUT_PATH}/thesis.pdf ${CMAKE_CURRENT_BINARY_DIR}/
+)
