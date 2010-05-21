@@ -27,7 +27,7 @@
 % 5) добавлен \paragraph;
 % 6) уменьшены отспупы после заголовков и учеличены --- до (хотя это, возможно, и нарушает 7-32);
 % 7) сделаны отсупы в оглалвнеии (ГОСТ эту тему обходит, как мы поняли);
-% 8) убран \normalfont отовсюду --- теперь usefont действует на всё.
+% 8) \normalfont
 % 9) разные мелочи.
 
 \ProvidesPackage{G2-105}[2003/07/07 v1.00 General reqs. GOST 2.105-95]
@@ -166,8 +166,8 @@
 \newlength{\Gost@TitleDropSkip}
  \setlength\Gost@TitleDropSkip{\GostBetweenTitleSkip}
  \addtolength\Gost@TitleDropSkip{-\GostAfterTitleSkip}
-%  стиль всех заголовков
-\newcommand\GostTitleStyle{\normalfont\bfseries}% убран \normalfont
+%  стиль всех заголовков, \normalfont оставлен
+\newcommand\GostTitleStyle{\normalfont\bfseries}
 \newcommand\Gost@MainChapterStyle{}
 \newcommand\Gost@ChapterStyle{\Gost@MainChapterStyle}
 
@@ -376,8 +376,20 @@
 
 % 4.3.1 - 4.3.3 Иллюстрации
 
-\newcommand\@makecaption{}
-\RequirePackage[center]{caption2}
+\newcommand\@makecaption{} % Это не нужно 2009
+
+\IfFileExists{caption2.sty}
+{
+  \RequirePackage[center]{caption2}
+  \renewcommand\captionlabeldelim{~---}  % Магейа. ~ на конец не нужен.
+}
+{
+  % Так хуже смотрится (подпись ближе к рисунку), но что поделаешь -- Коротков.
+  \RequirePackage[center,nooneline,labelsep=endash]{caption}
+  \newcommand\captionlabeldelim{~---~}
+}
+
+\def\caption@lsep{~---~}   % У caption нет встроенной опции для em dash
 
 \def\fps@figure{bph}
 \def\ftype@figure{1}
@@ -387,8 +399,6 @@
 \newcounter{figure}
 \newenvironment{figure} {\@float   {figure}}{\end@float   }
 \newenvironment{figure*}{\@dblfloat{figure}}{\end@dblfloat}
-\renewcommand\captionlabeldelim{ ---}
-% \renewcommand\captionmargin{0.2cm} %% virens: это приводит к существенному сужению ширины подписи!!!!
 
 %  Подпись к рисунку
 \addto\captionsrussian{\def\figurename{{\cyr\CYRR\cyri\cyrs\cyru\cyrn\cyro\cyrk}}}
@@ -405,8 +415,6 @@
 \newcounter{table}
 \newenvironment{table} {\@float   {table}}{\end@float   }
 \newenvironment{table*}{\@dblfloat{table}}{\end@dblfloat}
-\renewcommand\captionlabeldelim{ ---}
-% \renewcommand\captionmargin{0.2cm} %% virens: это приводит к существенному сужению ширины подписи!!!!
 
 %  Подпись к таблице
 \addto\captionsrussian{\def\tablename{{\cyr\CYRT\cyra\cyrb\cyrl\cyri\cyrc\cyra}}}
@@ -421,16 +429,18 @@
  \renewcommand{\thetable}{\thechapter.\arabic{table}}%
 }
 
-\RequirePackage{longtable}% многостраничные таблицы
-%   Для выравнивания длинных таблиц
+\RequirePackage{longtable} % многостраничные таблицы
+
 \LTleft=\z@
 \LTright=\fill
-\def\LT@makecaption#1#2#3{%
-  \LT@mcol\LT@cols l{\hbox to\z@{\parbox[t]\LTcapwidth{%
-      \sbox\@tempboxa{#1{#2\captionlabeldelim{} }#3}%
-          {\box\@tempboxa\hfil}%
-          \endgraf}%
-    \hss}}}
+
+% Нулевой зазор между заголовком и таблицей
+\setlength\belowcaptionskip{0pt}
+\setlength\abovecaptionskip{0pt}
+
+\newcommand\subcaption[1]{ % Заголовок без "Таблица..." -- для заголовков на других стр.
+  \multicolumn{\LT@cols}{p{1\textwidth}}{#1}
+}
 
 \def\fps@table{bph}
 \def\ftype@table{1}
@@ -444,8 +454,8 @@
  \EqInChapter\PicInChapter\TableInChapter%
  \gdef\@chapapp{\appendixname}%
  \gdef\thechapter{\@Asbuk\c@chapter}%
- \renewcommand\Gost@ChapterStyle{\Gost@MainChapterStyle}%
- \setlength\Gost@ChapterIndent{\Gost@MainChapterIndent}%
+ \renewcommand\Gost@ChapterStyle{\cyr\CYRP\cyrr\cyri\cyrl\cyro\cyrzh\cyre\cyrn\cyri\cyre~\Gost@MainChapterStyle}%
+ \setlength\Gost@ChapterIndent{0mm}%
 }
 
 % 4.5 Сноски
