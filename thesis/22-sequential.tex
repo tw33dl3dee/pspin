@@ -14,7 +14,7 @@ def StateSpaceDFS(state):
         Visited += state
         for each state' in Next(state):
             StateSpaceDFS(state')
-StateSpaceDFS(start)
+StateSpaceDFS(initial_state)
 \end{CodeBlock}
 
 Для получения $Next(s)$ вычисляются условия выполнимости текущих инструкций всех
