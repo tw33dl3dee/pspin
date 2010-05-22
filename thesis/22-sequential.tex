@@ -7,31 +7,33 @@
 Для построения пространства состояний верификатор SPIN использует последовательный поиск в
 глубину, который можно представить следующим псевдокодом:
 
-\begin{CodeBlock}
-Visited = []
+\begin{lstlisting}[style=pseudocode]
+Visited = ()
+
 def StateSpaceDFS(state):
     if not state in Visited:
-        Visited += state
-        for each state' in Next(state):
-            StateSpaceDFS(state')
+        Visited <- state
+        for each new_state in Next(state):
+            StateSpaceDFS(new_state)
+
 StateSpaceDFS(initial_state)
-\end{CodeBlock}
+\end{lstlisting}
 
 Для получения $Next(s)$ вычисляются условия выполнимости текущих инструкций всех
 процессов, присутствующих в $s$ (отсюда мы получаем множество незаблокированных процессов
 $P_{ready}(s)$), после чего для каждого процесса $P$ из $P_{ready}(s)$ генерируется новое
 состояние, получающееся в результате выполнения его текущей инструкции (номер которой
-хранится в $IP_P$). Это можно представить в виде псевдокода следующим образом:
+хранится в $IP_P$). Это можно представить в виде псевдокода как:
 
-\begin{CodeBlock}
+\begin{lstlisting}[style=pseudocode]
 def Next(state):
-    Next = []
+    Next = ()
     for each process in state:
         if Executable(process):
-            state' = Copy(state)
-            Step(state', process)
-            Next += state'
-\end{CodeBlock}
+            new_state = Copy(state)
+            Step(new_state, process)
+            Next <- new_state
+\end{lstlisting}
 
 Здесь \Code{Executable}~--- функция проверки выполнимости текущей инструкции процесса, а
 \Code{Step}~--- функция трансформации состояния при выполнении текущей инструкции
