@@ -17,4 +17,4 @@ add_custom_command(TARGET thesis POST_BUILD
   COMMAND cp ${LATEX_OUTPUT_PATH}/thesis.pdf ${CMAKE_CURRENT_BINARY_DIR}/
 )
 
-add_custom_target(texclean rm -f *.aux *.toc *.log *.out)
+add_custom_target(texclean ALL rm -f *.aux *.toc *.log *.out)
