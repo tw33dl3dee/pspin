@@ -1,7 +1,6 @@
 set(LATEX_OUTPUT_PATH ${CMAKE_CURRENT_BINARY_DIR}/output/tex)
 
-file(GLOB TEX_FILES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} [0-9][0-9]-*.tex *.cls *.sty *.clo)
-string(REGEX REPLACE \\.tex$ .aux AUX_FILES ${TEX_FILES})
+file(GLOB TEX_FILES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} [0-9][0-9]-*.tex *.cls *.sty *.clo *.bst)
 
 add_latex_document(thesis.tex 
   INPUTS ${TEX_FILES}
@@ -18,4 +17,4 @@ add_custom_command(TARGET thesis POST_BUILD
   COMMAND cp ${LATEX_OUTPUT_PATH}/thesis.pdf ${CMAKE_CURRENT_BINARY_DIR}/
 )
 
-add_custom_target(texclean ALL rm -f *.aux *.toc *.log *.out)
+add_custom_target(texclean ALL rm -f *.aux *.toc *.log *.out *.bbl *.blg)

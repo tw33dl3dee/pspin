@@ -22,57 +22,6 @@ citecolor=black, menucolor=black, filecolor=bla,
 \usepackage{tikz}
 \usetikzlibrary{arrows,automata}
 
-\usepackage{listings}
-\usepackage{listingsutf8}
-
-\lstset{
-  breakatwhitespace=true,
-  breaklines=true,
-  captionpos=b,
-  extendedchars=\true,
-  inputencoding=utf8,
-  numbers=left,
-  showspaces=false,
-  showstringspaces=false,
-  showtabs=false,
-  stepnumber=1,
-  tabsize=4
-}
-
-\lstdefinestyle{pseudocode}{
-  basicstyle=\small,
-  frame=none,
-  keywordstyle=\color{black}\bfseries\underbar,
-  language=Pseudocode,
-  numberstyle=\footnotesize
-}
-
-\lstdefinestyle{realcode}{
-  basicstyle=\scriptsize,
-  frame=none,
-  keywordstyle=\color{black}\bfseries,
-  numberstyle=\footnotesize
-}
-
-\lstdefinestyle{simplecode}{
-  basicstyle=\footnotesize,
-  frame=none,
-  keywordstyle=\color{black}\bfseries,
-  numberstyle=\footnotesize
-}
-
-\lstdefinelanguage[]{Pseudocode}[]{Python}{
-  morekeywords={each,empty},
-  morecomment=[s]{\{}{\}},
-  literate=
-    {->}{\ensuremath{$\rightarrow$}~}2%
-    {<-}{\ensuremath{$\leftarrow$}~}2%
-}[keywords,comments]
-
-\renewcommand*\thelstnumber{\oldstylenums{\the\value{lstnumber}}}
-\renewcommand\lstlistingname{\cyr\CYRL\cyri\cyrs\cyrt\cyri\cyrn\cyrg}
-\renewcommand\lstlistlistingname{\cyr\CYRL\cyri\cyrs\cyrt\cyri\cyrn\cyrg\cyri}
-
 %%% Local Variables: 
 %%% mode: latex
 %%% TeX-master: "thesis"
