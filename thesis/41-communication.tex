@@ -1,0 +1,60 @@
+\chapter{Взаимодействие узлов}
+\label{cha:communication}
+
+\section{Выбор средств параллельного выполнения}
+\label{sec:parall-selection}
+
+Используемое для параллельного выполнения средство должно обладать следующими свойсвами:
+\begin{enumerate}
+\item поддерживать модель неразделяемой памяти (системы с разделяемой памятью не
+  представляют в данном случае интереса, поскольку основной предпосылкой к
+  распараллеливанию является нехватка памяти на отдельной машине);
+\item быть достаточно универсальным и распространнеым.
+\end{enumerate}
+
+Для данной задачи подходят два средства -- MPI (Message Passing Interface, \cite{MPI}) и UPC (Unified
+Parallel Compiler,~\cite{UPC12}).
+
+\section{Огранизация пересылки состояний}
+\label{sec:mpi-interaction}
+
+\subsection{Сравнение способов и примитивов взаимодействия в MPI}
+\label{sec:mpi-primitives}
+
+\subsection{Схема асинхронного обмена сообщениями}
+\label{sec:async-mpi-queue}
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=1.0\textwidth]{../graphics/mpi-async-seq}  
+  \caption{Асинхронное взаимодействие узлов (MPI)}
+  \label{fig:mpi-async-seq}
+\end{figure}
+
+\subsection{Формат сообщений}
+\label{sec:message-format}
+
+\section{Локальная и сетевая очереди состояний}
+\label{sec:local-network-queue}
+
+\section{Распределенное завершение}
+\label{sec:distributed-termination}
+
+\subsection{Алгоритм Дейкстры}
+\label{sec:distr-term-dijkstra}
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=1\textwidth]{../graphics/distr-termination}  
+  \caption{Распределенное завершение}
+\label{fig:dist-term}
+\end{figure}
+
+\section{Журналирование и отладка}
+\label{sec:mpi-logging}
+
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: "thesis"
+%%% End: 
