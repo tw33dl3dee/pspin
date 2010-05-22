@@ -1,8 +1,10 @@
-\chapter{Хранение состояний в памяти}
-\label{cha:state-store}
+\chapter{Хранение состояний в памяти узлов}
+\label{cha:par-state-store}
+
+Рассказать о Visited и Queue.
 
 \section{Полное хэширование}
-\label{sec:fullstate}
+\label{sec:fullhash-store}
 
 \begin{figure}[ht]
   \centering
@@ -13,7 +15,7 @@
 \end{figure}
 
 \section{Битовое хэширование}
-\label{sec:buthash}
+\label{sec:bithash-store}
 
 \begin{figure}[ht]
   \centering
@@ -22,19 +24,9 @@
   \label{fig:bitstate}
 \end{figure}
 
-\section{Локальная и сетевая очереди состояний}
-\label{sec:local-network-queue}
+\section{Выбор функции хэширования}
+\label{sec:hashing-function}
 
-
-\section{Представление состояния}
-\label{sec:state-represent}
-
-\begin{figure}[ht]
-  \centering
-  \includegraphics[width=0.7\textwidth]{../graphics/state-representation}  
-  \caption{Представление состояний}
-  \label{fig:state-repr}
-\end{figure}
 
 %%% Local Variables: 
 %%% mode: latex
