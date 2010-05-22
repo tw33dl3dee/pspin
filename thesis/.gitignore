@@ -6,3 +6,5 @@
 *.fmt
 auto
 output
+*.bbl
+*.blg
