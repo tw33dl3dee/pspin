@@ -34,7 +34,7 @@ if(PIC2PLOT_EXECUTABLE)
 	  add_custom_command(OUTPUT ${_eps_file}
 		DEPENDS ${_pic_file}
 		COMMAND ${PIC2PLOT_EXECUTABLE} 
-		ARGS -f 0.012 -F HersheyCyrillic -Tps ${_pic_file} > ${_eps_file}
+		ARGS -f 0.015 -F HersheyCyrillic -Tps ${_pic_file} > ${_eps_file}
 		COMMENT "Plotting ${_pic_file}"
 		)
 
