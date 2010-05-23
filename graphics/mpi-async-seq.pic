@@ -1,19 +1,16 @@
 .PS
 
-#maxpswid = 2000;
-#maxpsht = 2000;
-
 #boxht = 2;
-boxwid = 1.7;
+boxwid = 0.9;
 
 copy "inc/sequence.pic";
 
 # Define the objects
 object(P1,"P1:процесс");
-object(Q1,"Q1:очередь MPI");
-object(C1,"C1:коммуникатор MPI");
-object(C2,"C2:коммуникатор MPI");
-object(Q2,"Q2:очередь MPI");
+object(Q1,"Q1:очередь");
+object(C1,"C1:коммуникатор");
+object(C2,"C2:коммуникатор");
+object(Q2,"Q2:очередь");
 object(P2,"P2:процесс");
 step();
 
@@ -21,9 +18,9 @@ active(P1);
 active(P2);
 step();
 
-message(P1,Q1,"получение буфера");
+message(P1,Q1,"получить буфер");
 active(Q1);
-message(P2,Q2,"освобождение буфера");
+message(P2,Q2,"освободить буфер");
 active(Q2);
 async();
 message(Q2,C2,"MPI_Irecv");
@@ -54,7 +51,7 @@ inactive(Q1);
 inactive(C1);
 inactive(P2);
 
-message(P1,Q1,"получение буфера");
+message(P1,Q1,"получить буфер");
 active(Q1);
 message(Q1,C1,"MPI_Wait");
 active(C1);
@@ -79,7 +76,7 @@ inactive(Q2);
 rmessage(Q1,P1,"буфер");
 inactive(Q1);
 
-message(P2,Q2,"освобождение буфера");
+message(P2,Q2,"освободить буфер");
 active(Q2);
 async();
 message(Q2,C2,"MPI_Irecv");
