@@ -22,6 +22,9 @@ find_package(Plotutils REQUIRED)
 find_package(LATEX REQUIRED)
 include(UseLATEX)
 
+find_package(Gnuplot REQUIRED)
+include(UseGnuplot)
+
 add_subdirectory(src/pspin)
 add_subdirectory(graphics)
 add_subdirectory(articles)
