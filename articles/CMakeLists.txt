@@ -8,5 +8,7 @@ add_latex_document(report2-slides.tex
   DEFAULT_PDF MANGLE_TARGET_NAMES
 )
 
+add_latex_document(review.tex DEFAULT_PDF MANGLE_TARGET_NAMES)
+
 add_custom_target(articles ALL)
-add_dependencies(articles report1_pdf report2_pdf report2-slides_pdf)
+add_dependencies(articles report1_pdf report2_pdf report2-slides_pdf review_pdf)
