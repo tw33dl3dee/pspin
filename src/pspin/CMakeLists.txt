@@ -86,5 +86,3 @@ set_target_properties(pspin-emu
 )
 
 enable_distclean(pspin)
-
-add_subdirectory(plots)
