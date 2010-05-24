@@ -20,7 +20,57 @@ citecolor=black, menucolor=black, filecolor=bla,
 
 \usepackage{pgf}
 \usepackage{tikz}
-\usetikzlibrary{arrows,automata}
+\usetikzlibrary{arrows,automata,shapes}
+
+% Значения по умолчанию для listings
+\lstset{
+  breakatwhitespace=true,% разрыв строк только на whitespacce
+  breaklines=true,       % переносить длинные строки
+  captionpos=b,          % подписи снизу
+  extendedchars=\true,   % допуск utf
+  inputencoding=utf8,
+  numbers=left,          % нумерация слeва
+  showspaces=false,      % показывать пробелы подчеркиваниями -- идиотизм 70-х годов
+  showstringspaces=false,
+  showtabs=false,        % и табы тоже
+  stepnumber=1,
+  tabsize=4              % кому нужны табы по 8 символов?..
+}
+
+
+% Стиль для псесдовода: строчки обычно короткие, поэтому размер шрифта побольше
+\lstdefinestyle{pseudocode}{
+  basicstyle=\small,
+  frame=none,
+  keywordstyle=\color{black}\bfseries\underbar,
+  language=Pseudocode,
+  numberstyle=\footnotesize
+}
+
+% Стиль для обычного кода: маленький шрифт
+\lstdefinestyle{realcode}{
+  basicstyle=\scriptsize,
+  frame=none,
+  numberstyle=\footnotesize
+}
+
+% Стиль для коротких кусков обычного кода: средний шрифт
+\lstdefinestyle{simplecode}{
+  basicstyle=\footnotesize,
+  frame=none,
+  numberstyle=\footnotesize
+}
+
+% Определим свой язык для написания псевдокодов на основе Python
+\lstdefinelanguage[]{Pseudocode}[]{Python}{
+  morekeywords={each,empty,wait,do},% ключевые слова добавлять сюда
+  morecomment=[s]{\{}{\}},% комменты {а-ля Pascal} смотрятся нагляднее
+  literate=% а сюда добавлять операторы, которые хотите отображать как мат. символы
+    {->}{\ensuremath{$\rightarrow$}~}2%
+    {<-}{\ensuremath{$\leftarrow$}~}2%
+    {:=}{\ensuremath{$\leftarrow$}~}2%
+    {[]}{\ensuremath{$\varnothing$}~}2%
+}[keywords,comments]
 
 %%% Local Variables: 
 %%% mode: latex
