@@ -14,6 +14,7 @@
 #include <assert.h>
 #include <string.h>
 #include <time.h>
+#include <sys/time.h>
 
 #include "config.h"
 #include "state.h"
@@ -53,14 +54,14 @@ static size_t max_bfs_len;
 /**
  * Время запуска.
  */
-static time_t start_time;
+static struct timeval start_time;
 
 /** 
  * @brief Запись времени начала работы.
  */
 static void trace_start()
 {
-	start_time = time(NULL);
+	gettimeofday(&start_time, NULL);
 }
 
 /** 
@@ -93,7 +94,11 @@ static void trace_state_new(struct State *state)
  */
 static void trace_summary()
 {
-	double run_time = difftime(time(NULL), start_time);
+	struct timeval end_time;
+	gettimeofday(&end_time, NULL);
+
+	double run_time = (end_time.tv_sec - start_time.tv_sec) + 
+	    0.000001*(end_time.tv_usec - start_time.tv_usec);
 
 	iprintf("Emulation summary:\n");
 
@@ -123,6 +128,13 @@ static void trace_summary()
 			max_bfs_len*100./state_count, max_bfs_len*100./trans_count);
 
 	state_hash_stats();
+
+	iprintf("BRIEF S%.0f T%.0f M%.0f R%.3f I%.3f\n",
+	        (double)state_count, (double)trans_count, (double)xnode_count, run_time, 0.0);
+
+	for (int i = 0; i < NODECOUNT; ++i) 
+		iprintf("[%d] BRIEF S%.0f T%.0f M%.0f R%.3f I%.3f\n", 
+		        i, (double)states_per_node[i], (double)trans_count/NODECOUNT, (double)xnode_count/NODECOUNT, run_time, 0.0);		
 }
 
 /** 
@@ -130,8 +142,12 @@ static void trace_summary()
  */
 static void trace_inter_stat()
 {
-	double run_time = difftime(time(NULL), start_time);
-	
+	struct timeval end_time;
+	gettimeofday(&end_time, NULL);
+
+	double run_time = (end_time.tv_sec - start_time.tv_sec) + 
+	    0.000001*(end_time.tv_usec - start_time.tv_usec);
+
 	iprintf("[%.0f] States: %.0f, trans: %.0f ", 
 	        run_time, (double)state_count, (double)trans_count);
 	state_hash_inter_stats();
