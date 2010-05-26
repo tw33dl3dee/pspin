@@ -1,0 +1,54 @@
+[10] States: 10000000, trans: 15660007  (hash use 0.3%, collisions 0.2%, BFS: 5.7 MiB)
+[19] States: 20000000, trans: 31148334  (hash use 0.7%, collisions 0.4%, BFS: 5.7 MiB)
+[27] States: 30000000, trans: 46661120  (hash use 1.1%, collisions 0.6%, BFS: 5.7 MiB)
+[35] States: 40000000, trans: 63383610  (hash use 1.4%, collisions 0.7%, BFS: 5.7 MiB)
+[44] States: 50000000, trans: 79872426  (hash use 1.7%, collisions 0.9%, BFS: 5.7 MiB)
+[52] States: 60000000, trans: 96227290  (hash use 2.1%, collisions 1.1%, BFS: 5.7 MiB)
+[61] States: 70000000, trans: 111791701  (hash use 2.4%, collisions 1.3%, BFS: 5.7 MiB)
+[69] States: 80000000, trans: 127753977  (hash use 2.8%, collisions 1.4%, BFS: 5.7 MiB)
+[78] States: 90000000, trans: 144400870  (hash use 3.1%, collisions 1.6%, BFS: 5.7 MiB)
+[86] States: 100000000, trans: 160556165  (hash use 3.5%, collisions 1.8%, BFS: 5.7 MiB)
+[95] States: 110000000, trans: 176853599  (hash use 3.8%, collisions 1.9%, BFS: 5.7 MiB)
+[103] States: 120000000, trans: 193077703  (hash use 4.2%, collisions 2.1%, BFS: 5.7 MiB)
+[112] States: 130000000, trans: 209742358  (hash use 4.5%, collisions 2.3%, BFS: 6.2 MiB)
+[121] States: 140000000, trans: 226343105  (hash use 4.9%, collisions 2.5%, BFS: 6.2 MiB)
+[130] States: 150000000, trans: 242967044  (hash use 5.2%, collisions 2.6%, BFS: 6.2 MiB)
+[138] States: 160000000, trans: 259472598  (hash use 5.6%, collisions 2.8%, BFS: 6.2 MiB)
+[147] States: 170000000, trans: 275822605  (hash use 5.9%, collisions 2.9%, BFS: 6.2 MiB)
+[155] States: 180000000, trans: 291741789  (hash use 6.3%, collisions 3.1%, BFS: 6.2 MiB)
+[164] States: 190000000, trans: 308028182  (hash use 6.6%, collisions 3.3%, BFS: 6.2 MiB)
+[172] States: 200000000, trans: 324126586  (hash use 7.0%, collisions 3.4%, BFS: 6.2 MiB)
+[181] States: 210000000, trans: 340055545  (hash use 7.3%, collisions 3.6%, BFS: 6.2 MiB)
+[189] States: 220000000, trans: 356716166  (hash use 7.7%, collisions 3.7%, BFS: 6.2 MiB)
+[197] States: 230000000, trans: 372580556  (hash use 8.0%, collisions 3.9%, BFS: 6.2 MiB)
+[206] States: 240000000, trans: 388593337  (hash use 8.4%, collisions 4.0%, BFS: 6.2 MiB)
+[214] States: 250000000, trans: 404889697  (hash use 8.7%, collisions 4.2%, BFS: 6.2 MiB)
+[223] States: 260000000, trans: 420827720  (hash use 9.1%, collisions 4.3%, BFS: 6.2 MiB)
+[231] States: 270000000, trans: 436596123  (hash use 9.4%, collisions 4.5%, BFS: 6.2 MiB)
+[239] States: 280000000, trans: 452365183  (hash use 9.8%, collisions 4.6%, BFS: 6.2 MiB)
+[248] States: 290000000, trans: 468425951  (hash use 10.1%, collisions 4.8%, BFS: 6.2 MiB)
+[256] States: 300000000, trans: 484958073  (hash use 10.5%, collisions 4.9%, BFS: 6.2 MiB)
+Emulation summary:
+	Transitions taken: 490241550 (1893467.5/sec)
+	Messages passed:   69866191 (14.25% trans)
+	States:
+		Total:   303256339 (1171271.6/sec)
+		Node  0: 80723431 (26.6%)
+		Node  1: 93793776 (30.9%)
+		Node  2: 108797523 (35.9%)
+		Node  3: 19941609 (6.6%)
+		Min/max: 0.18
+	BFS queue len:     197296 (0.07% states, 0.04% trans)
+	State hash:
+		Entries:       8589934592
+		Used:          909769017 (10.6%)
+		Collisions:    45154997 (5.0%)
+		Avg col. len.: 1.1
+	State size:
+		Min:           31
+		Max:           31
+		Avg:           31.0
+	Memory usage:
+		Hashtable:     1024.0 MiB
+		BFS queue:     6.2 MiB
+BRIEF S303256339 T490241550 M69866191 R258.912 I0.000

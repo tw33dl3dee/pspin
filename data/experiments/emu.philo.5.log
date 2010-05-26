@@ -1,0 +1,25 @@
+[9] States: 10000000, trans: 15961729  (hash use 0.3%, collisions 0.2%, BFS: 0.6 MiB)
+Emulation summary:
+	Transitions taken: 29640513 (1926899.4/sec)
+	Messages passed:   5024948 (16.95% trans)
+	States:
+		Total:   18598855 (1209092.5/sec)
+		Node  0: 4886015 (26.3%)
+		Node  1: 5718995 (30.7%)
+		Node  2: 6558575 (35.3%)
+		Node  3: 1435270 (7.7%)
+		Min/max: 0.22
+	BFS queue len:     20720 (0.11% states, 0.07% trans)
+	State hash:
+		Entries:       8589934592
+		Used:          55796565 (0.6%)
+		Collisions:    182057 (0.3%)
+		Avg col. len.: 1.0
+	State size:
+		Min:           27
+		Max:           27
+		Avg:           27.0
+	Memory usage:
+		Hashtable:     1024.0 MiB
+		BFS queue:     0.6 MiB
+BRIEF S18598855 T29640513 M5024948 R15.382 I0.000
