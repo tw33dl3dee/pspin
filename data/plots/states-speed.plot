@@ -9,6 +9,8 @@ set ylabel "Время (сек)"
 set key left top
 set logscale x
 set logscale y
+set format x "10^{%L}"
+set format y "10^{%L}"
 
 set style line 1 lt 1 lc rgb "#9C0E0E" pt 2
 set style line 2 lt 1 lc rgb "#0057AE" pt 10
