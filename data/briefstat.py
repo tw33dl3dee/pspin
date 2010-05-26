@@ -42,6 +42,7 @@ def parse_log(lines):
 
 def parse_spin_log(lines):
     state_rgx = r'\W*(\d+) states\, stored'
+    trans_rgx = r'\W*(\d+) transitions \(= stored\+matched\)'
     time_rgx = r'pan: elapsed time ([\d\.]+) seconds'
     speed_rgx = r'pan: rate\W+([\d\.]+) states/second'
     S = 0
@@ -51,6 +52,8 @@ def parse_spin_log(lines):
     for line in lines:
         m = re.match(state_rgx, line)
         if m: S = int(m.group(1))
+        m = re.match(trans_rgx, line)
+        if m: T = int(m.group(1))
         m = re.match(time_rgx, line)
         if m: t = float(m.group(1))
         m = re.match(speed_rgx, line)
