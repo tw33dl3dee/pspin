@@ -1,6 +1,6 @@
 set(LATEX_OUTPUT_PATH ${CMAKE_CURRENT_BINARY_DIR}/output/tex)
 
-file(GLOB TEX_FILES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} [0-9][0-9]-*.tex *.cls *.sty *.clo *.bst)
+file(GLOB TEX_FILES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} [0-9][0-9]-*.tex *.cls *.sty *.clo *.bst ../data/*.tex)
 
 add_latex_document(thesis.tex 
   INPUTS ${TEX_FILES}
