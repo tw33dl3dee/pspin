@@ -7,21 +7,32 @@
 \section{Средства для проведения эксперимента}
 \label{sec:experim-idef0}
 
-
-
 \section{Зависимость количества состояний от времени}
 \label{sec:space-time}
 
 \section{Скорость генерации состояний}
 \label{sec:stategen-speed}
 
+\begin{table}[ht]
+  \centering
+  \caption{Сравнение скорости генерации состояний}
+  \begin{tabular}{ccc}
+    \hline
+    Модель & Spin, сост./сек & Данная работа, сост./сек \\
+    \hline
+    \textbf{Election} (6) & 346483 & 649748 \\
+    \textbf{Peterson} (5) & 532698 & 545838 \\
+    \textbf{Philo} (6) & 501624 & 1171272 \\
+    \hline
+  \end{tabular}
+  \label{tab:stategen-speed}
+\end{table}
+
 \section{Сравнение распределения состояний}
 \label{sec:partition-cmp}
 
 \section{Анализ результатов}
 \label{sec:exp-analysis}
-
-
 
 %%% Local Variables: 
 %%% mode: latex
