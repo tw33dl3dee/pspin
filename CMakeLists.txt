@@ -27,6 +27,7 @@ include(UseGnuplot)
 
 add_subdirectory(src/pspin)
 add_subdirectory(graphics)
+add_subdirectory(data/plots)
 add_subdirectory(articles)
 add_subdirectory(thesis)
 

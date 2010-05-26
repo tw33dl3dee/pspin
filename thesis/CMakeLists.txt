@@ -6,7 +6,7 @@ add_latex_document(thesis.tex
   INPUTS ${TEX_FILES}
   DEPENDS graphics
   IMAGE_DIRS ../graphics
-  IMAGE_DIRS ../graphics/plots
+  IMAGE_DIRS ../data/plots
   BIBFILES thesis.bib
   DEFAULT_PDF MANGLE_TARGET_NAMES
 )

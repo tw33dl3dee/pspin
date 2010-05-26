@@ -8,6 +8,3 @@ add_pic_files(pic-pdf ${PIC_FILES})
 
 add_custom_target(graphics)
 add_dependencies(graphics dia-pdf svg-pdf pic-pdf)
-
-add_subdirectory(plots)
-add_dependencies(graphics plots)
