@@ -1,0 +1,9 @@
+State-vector 40 byte, depth reached 999999, errors: 0
+  6552183 states, stored
+ 24670354 states, matched
+ 31222537 transitions (= stored+matched)
+        0 atomic steps
+hash conflicts:  24459525 (resolved)
+  366.457	memory usage (Mbyte)
+pan: elapsed time 12.3 seconds
+pan: rate  532697.8 states/second
