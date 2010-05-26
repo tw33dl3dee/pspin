@@ -5,8 +5,7 @@ file(GLOB TEX_FILES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} [0-9][0-9]-*.tex *.cls 
 add_latex_document(thesis.tex 
   INPUTS ${TEX_FILES}
   DEPENDS graphics
-  IMAGE_DIRS ../graphics
-  IMAGE_DIRS ../data/plots
+  IMAGE_DIRS ../graphics ../data/plots
   BIBFILES thesis.bib
   DEFAULT_PDF MANGLE_TARGET_NAMES
 )
