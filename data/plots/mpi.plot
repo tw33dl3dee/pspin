@@ -4,7 +4,7 @@ set encoding koi8r
 set output "mpi.eps"
 
 set xlabel "Размер сообщения (байт)"
-set ylabel "Время (мксек)"
+set ylabel "Время передачи (мксек)"
 
 set xtics 0,128,1024
 set xrange [ 0 : 1200 ]
