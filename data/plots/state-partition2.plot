@@ -16,9 +16,9 @@ set y2range [0 : ]
 set ytics  10 nomirror 
 set y2tics 10 nomirror
 
-set title "1 proc"
+set title "По 1 процессу"
 
-set xtics ("Election" 1, "Philo" 5)
+set xtics ("Алгоритм выбора лидера" 1, "Философы" 5)
 
 set ylabel "%" rotate by 0
 set y2label "Время (сек)"
@@ -31,7 +31,7 @@ plot 'state-partition2-1.dat' using ($1*4+0):(100*$2):(1) with boxes title "Со
 
 set origin 0.0, 0.33
 
-set title "2 proc"
+set title "По 2 процессам"
 
 plot 'state-partition2-2.dat' using ($1*4+0):(100*$2):(1) with boxes title "Сообщений при переходах, %" fs pattern 1 lc rgb "#9C0E0E", 'state-partition2-2.dat' using ($1*4+1):(100*$3):(1)  with boxes title "Неравномерность распределения, %" fs pattern 4 ls 1 lc rgb "#0057AE", 'state-partition2-2.dat' using ($1*4+2):5:(1) axes x1y2 with boxes title "Время выполнения" fs solid 0.2 ls 1 lc rgb "#648000", 'state-partition2-2.dat' using ($1*4+2):4:(1) axes x1y2 with boxes title "Время простоя" fs solid 0.5 ls 1 lc rgb "#648000"
 
@@ -39,7 +39,7 @@ set origin 0.0, 0.66
 
 set key left top
 
-set title "Full"
+set title "По всему состоянию"
 
 plot 'state-partition2-full.dat' using ($1*4+0):(100*$2):(1) with boxes title "Сообщений при переходах, %" fs pattern 1 lc rgb "#9C0E0E", 'state-partition2-full.dat' using ($1*4+1):(100*$3):(1)  with boxes title "Неравномерность распределения, %" fs pattern 4 ls 1 lc rgb "#0057AE", 'state-partition2-full.dat' using ($1*4+2):5:(1) axes x1y2 with boxes title "Время выполнения" fs solid 0.2 ls 1 lc rgb "#648000", 'state-partition2-full.dat' using ($1*4+2):4:(1) axes x1y2 with boxes title "Время простоя" fs solid 0.5 ls 1 lc rgb "#648000"
 
