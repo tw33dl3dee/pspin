@@ -52,13 +52,20 @@ Promela может оказаться слишком медленной.
 и условий их выполнимости, из которого генерируется код на~С.
 
 Функциональная модель всего процесса предварительной обработки и собственно генерации
-состояний на рис.~\ref{fig:idef0-codegen}.
+состояний на рис.~\ref{fig:idef0-codegen1}~и~\ref{fig:idef0-codegen2}.
 
 \begin{figure}[ht]
   \centering
-  %\includegraphics[width=1.1\textwidth]{../graphics/idef0-codegen}  
-  \caption{Процесс предварительной обработки модели}
-\label{fig:idef0-codegen}
+  \includegraphics[width=1.1\textwidth]{../graphics/stategen-idef0-b0}
+  \caption{Функциональная схема процесса генерации состояний}
+\label{fig:idef0-codegen1}
+\end{figure}
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=1.1\textwidth]{../graphics/stategen-idef0-b1}
+  \caption{Функциональная схема процесса предварительной обработки модели}
+\label{fig:idef0-codegen2}
 \end{figure}
 
 Таким образом, генерируются следующие части кода:

@@ -166,13 +166,20 @@ $M = (S, S_0, R, L)$, формализующую данную систему.
 иных ошибок в системе. В результате получается либо доказательство того, что система
 удовлетворяет всем требованиям, либо опровержение и контрпример~--- путь в модели Крипке,
 на котором какое-то из утверждений не выполняется. Данный процесс представлен на
-рис.~\ref{fig:idef0-verification}.
+рис.~\ref{fig:modelchk-idef0-tlcd} и~\ref{fig:modelchk-idef0-a0}.
 
 \begin{figure}[htb]
   \centering
-  %\includegraphics[width=1.0\textwidth]{../graphics/idef0-verification}
+  \includegraphics[width=1.0\textwidth]{../graphics/modelchk-idef0-tlcd}
+  \caption{Функциональная схема процесса проверки свойств модели~--- верхний уровень}
+  \label{fig:modelchk-idef0-tlcd}
+\end{figure}
+
+\begin{figure}[htb]
+  \centering
+  \includegraphics[width=1.0\textwidth]{../graphics/modelchk-idef0-a0}
   \caption{Функциональная схема процесса проверки свойств модели}
-  \label{fig:idef0-verification}
+  \label{fig:modelchk-idef0-a0}
 \end{figure}
 
 Проверяемые утверждения можно поделить на две категории.
