@@ -298,14 +298,14 @@ ParStateSpaceBFS()
     \includegraphics[height=0.88\textheight]{../graphics/mpi-deploy}
 \end{center}
 
-\section{Посылка сообщения удаленному узлу}
+\section{Алгооритм отправки сообщений удаленному узлу}
 \label{sec:mpi-send-flowchart}
 
 \begin{center}
   \includegraphics[height=0.88\textheight]{../graphics/mpi-send-flowchart-horz}
 \end{center}
 
-\section{Последовательность взаимодействия двух узлов}
+\section{Взаимодействие двух MPI-процессов}
 \label{sec:mpi-sequence}
 
 \begin{center}
@@ -341,7 +341,7 @@ ParStateSpaceBFS()
   \includegraphics[width=1\textwidth]{../graphics/exp-idef0}
 \end{center}
 
-\section{Зависимость количества состояний от времени}
+\section{Зависимость требуемого времени от числа состояний}
 \label{sec:states-time}
 
 \begin{center}
@@ -373,6 +373,8 @@ ParStateSpaceBFS()
 \begin{minipage}[m]{0.5\linewidth}
   \includegraphics[width=1.1\textwidth,page=2]{../data/plots/state-partition1-horz}  
 \end{minipage}
+
+% Отношение числа MPI-сообщений к числу переходов между состояниями модули
 
 \section{Выводы}
 \label{sec:conclusion}
