@@ -17,7 +17,9 @@ if __name__ == '__main__':
             S,T,M,R = briefstat.extract_emu_stat(log)
             Pspin[modelname] = T/R
 
+    lastmodel = None
     for m in sorted(set.intersection(set(Spin.keys()), set(Pspin.keys()))):
         sp1 = Spin.get(m, 0)
         sp2 = Pspin.get(m, 0)
-        print r"\textbf{%s} (%d) & %.0f & %.0f & %.1f \\" % (m[0], m[1], sp1, sp2, sp2/sp1)
+        print r"\textbf{%s} & %d & %.0f & %.0f & %.1f \\" % (((lastmodel != m[0]) and m[0] or ""), m[1], sp1, sp2, sp2/sp1)
+        lastmodel = m[0]
