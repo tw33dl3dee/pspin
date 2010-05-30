@@ -93,6 +93,17 @@
 
 \TitleSlide
 
+\section{Классы ошибок в ПО и методы их устранения}
+\label{sec:error-classes}
+
+\begin{center}
+  \begin{tabular}{|c|c|c|} \hline Вероятность & \multicolumn{2}{|c|}{Степень критичности}
+    \\ \cline{2-3} возникновения & Высокая & Низкая \\ \hline
+    Высокая & Тестирование & Тестирование \\ \hline Низкая & Проверка модели & \\
+    \hline
+  \end{tabular}
+\end{center}
+
 \section{Цель и задачи}
 \label{sec:goal-tasks}
 
@@ -107,17 +118,6 @@
 \item Провести эксперименты и проанализировать их результаты
 \end{itemize}
 \normalsize
-
-\section{Классы ошибок в ПО и методы их устранения}
-\label{sec:error-classes}
-
-\begin{center}
-  \begin{tabular}{|c|c|c|} \hline Вероятность & \multicolumn{2}{|c|}{Степень критичности}
-    \\ \cline{2-3} возникновения & Высокая & Низкая \\ \hline
-    Высокая & Тестирование & Тестирование \\ \hline Низкая & Проверка модели & \\
-    \hline
-  \end{tabular}
-\end{center}
 
 \section{Автомат Мили для задачи о философах}
 \label{sec:mealey}
@@ -167,23 +167,17 @@ Eat:
 }  
 \end{lstlisting}
 
-\section{Проблемы верификации конечных моделей}
+\section{Проверка конечных моделей}
 \label{sec:verif-troubles}
 
 \begin{itemize}
 \item Размер пространства состояний растет экспоненциально
 
-\item Модели среднего размера требуют более 10 Гб оперативной памяти для хранения пространства состояний
-
-\item На верификацию такой модели уходят недели
+\item Модели среднего размера требуют более 10 Гб оперативной памяти для хранения
+  пространства состояний
 \end{itemize}
 
-\section{Уменьшение затрат на хранение состояний}
-\label{sec:ram-lightening}
-
 \begin{minipage}[t]{0.5\linewidth}
-  \textbf{Существующие подходы}
-
   \begin{flushleft}
     \begin{itemize}
     \item Использование битового \mbox{хэширования}
@@ -194,8 +188,6 @@ Eat:
 \end{minipage}
 \begin{minipage}[t]{0.5\linewidth}
   \begin{flushleft}
-   \textbf{ Предлагаемый подход}
-
     \begin{itemize}
     \item Параллельная \mbox{генерация} состояний
     \end{itemize}
@@ -277,7 +269,7 @@ ParStateSpaceBFS()
   \includegraphics[width=0.9\textwidth]{../graphics/state-partition}
 \end{center}
 
-\section{Хранение состояний в памяти узла}
+\section{Хранение состояний в ОЗУ узла}
 \label{sec:state-store-full}
 
 \begin{center}
