@@ -15,6 +15,11 @@ add_latex_document(report3-slides.tex
   DEFAULT_PDF MANGLE_TARGET_NAMES
 )
 
+add_latex_document(paco-thesis.tex 
+  BIBFILES ../thesis/thesis.bib
+  DEFAULT_PDF MANGLE_TARGET_NAMES 
+)
+
 add_latex_document(review.tex DEFAULT_PDF MANGLE_TARGET_NAMES)
 
 add_custom_target(articles ALL)
