@@ -1,76 +1,49 @@
-program -> (module sep?)+;
-
-module -> proctype | decl_list;
-
-proctype -> proc_hdr "(" decl_list? ")" "{" sequence "}";
-
-proc_hdr -> active? "proc" name;
-
-name_list -> name | name_list "," name;
-
-decl_list -> decl | decl_list ";" decl;
-
-decl -> visible? typename ivar_list;
-
-ivar_list -> ivar | ivar_list "," ivar;
-
-typename -> T_TYPE | "chan";
-
-active -> "active" "[" const "]" | "active";
-
-sequence -> epsilon | step | step sep sequence;
-
-sep -> ";" | "-"">";
-
-step -> stmt | decl;
-
-varref_list -> varref | varref_list "," varref;
-
-ivar -> name "[" expr "]" | name ch_init | name ivar_init?;
-
-ivar_init -> "=" expr;
-
-ch_init -> "=" "[" const "]" "of" "{" typename_list "}";
-
-typename_list -> typename | typename_list "," typename;
-
-varref -> name | name idx | varref "." name;
-
-idx -> "[" expr "]";
-
-send -> varref "!" send_args;
-
-recv -> varref "?" recv_args;
-
-send_args -> arg_list | expr "(" arg_list ")";
-
-recv_args -> recv_list | recv_arg "(" recv_list ")";
-
-recv_list -> recv_arg | recv_list "," recv_arg;
-
-recv_arg -> varref | "eval" "(" varref ")" | O_ADD? const;
-
-assign -> varref "=" expr | varref O_INCDEC;
-
-stmt -> "if" options "fi" | "do" options "od" | "atomic" "{" sequence "}" | 
-        send | recv | assign | "else" | "break" | "goto" name | name ":" stmt | 
-        "print" "(" T_STRING print_list? ")" | "assert" "(" expr ")" | expr;
-
-print_list -> "," arg_list;
-
-arg_list -> arg | arg_list "," arg;
-
-arg -> expr;
-
-options -> ":" ":" sequence | options ":" ":" sequence;
-
-expr -> expr O_AND expr | expr O_OR expr | expr O_ADD expr | expr O_MULT expr | expr O_BIT expr 
-     | expr "<" expr | expr ">" expr | expr O_RELEQ expr | expr O_EQ expr | expr O_SHIFT expr | 
-     O_TILDE expr | O_ADD expr | O_SEND expr | "(" expr ")" | T_BUILTIN "(" expr ")" | T_CHANOP "(" varref ")" | 
-     "(" expr "-"">" expr ":" expr ")" | poll | varref | const;
-
-uname -> name;
-
-name -> T_ID;
-
-const -> T_NUMBER;
+program -> (module sep?)+
+module -> proctype | decl_list
+proctype -> proc_hdr "(" decl_list? ")" "{" sequence "}"
+proc_hdr -> active? "proc" name
+name_list -> name | name_list "," name
+decl_list -> decl | decl_list ";" decl
+decl -> visible? typename ivar_list
+ivar_list -> ivar | ivar_list "," ivar
+typename -> T_TYPE | "chan"
+active -> "active" "[" const "]" | "active"
+sequence -> epsilon | step | step sep sequence
+sep -> ";" | "-"">"
+step -> stmt | decl
+varref_list -> varref | varref_list "," varref
+ivar -> name "[" expr "]" | name ch_init | name ivar_init?
+ivar_init -> "=" expr
+ch_init -> "=" "[" const "]" "of" "{" typename_list "}"
+typename_list -> typename | typename_list "," typename
+varref -> name | name idx | varref "." name
+idx -> "[" expr "]"
+send -> varref "!" send_args
+recv -> varref "?" recv_args
+send_args -> arg_list | expr "(" arg_list ")"
+recv_args -> recv_list | recv_arg "(" recv_list ")"
+recv_list -> recv_arg | recv_list "," recv_arg
+recv_arg -> varref | "eval" "(" varref ")" | O_ADD? const
+assign -> varref "=" expr | varref O_INCDEC
+stmt -> "if" options "fi" | 
+        "do" options "od" | 
+        "atomic" "{" sequence "}" | 
+        send | recv | assign | 
+        "else" | "break" | "goto" name | 
+        name ":" stmt | 
+        "print" "(" T_STRING print_list? ")" | 
+        "assert" "(" expr ")" | expr
+print_list -> "," arg_list
+arg_list -> arg | arg_list "," arg
+arg -> expr
+options -> ":" ":" sequence | options ":" ":" sequence
+expr -> expr O_AND expr | expr O_OR expr | expr O_ADD expr | 
+        expr O_MULT expr | expr O_BIT expr | expr "<" expr | 
+        expr ">" expr | expr O_RELEQ expr | expr O_EQ expr | 
+        expr O_SHIFT expr | O_TILDE expr | O_ADD expr | 
+        O_SEND expr | "(" expr ")" | T_BUILTIN "(" expr ")" | 
+        T_CHANOP "(" varref ")" | poll | varref | const |
+        "(" expr "-"">" expr ":" expr ")"
+uname -> name
+name -> T_ID
+const -> T_NUMBER

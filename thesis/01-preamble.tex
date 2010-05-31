@@ -61,6 +61,15 @@ citecolor=black, menucolor=black, filecolor=bla,
   numberstyle=\footnotesize
 }
 
+% Стиль для BNF
+\lstdefinestyle{grammar}{
+  basicstyle=\footnotesize,
+  frame=none,
+  numberstyle=\footnotesize,
+  stringstyle=\bfseries\ttfamily,
+  language=BNF
+}
+
 % Определим свой язык для написания псевдокодов на основе Python
 \lstdefinelanguage[]{Pseudocode}[]{Python}{
   morekeywords={each,empty,wait,do},% ключевые слова добавлять сюда
@@ -71,15 +80,17 @@ citecolor=black, menucolor=black, filecolor=bla,
     {:=}{\ensuremath{$\leftarrow$}~}2%
 }[keywords,comments]
 
+% Свой язык для задания грамматик в BNF
 \lstdefinelanguage[]{BNF}[]{}{
   morekeywords={},
   morecomment=[s]{@}{@},
+  morestring=[b]",%
   literate=% а сюда добавлять операторы, которые хотите отображать как мат. символы
     {->}{\ensuremath{$\rightarrow$}~}2%
     {*}{\ensuremath{$^*$}~}2%
     {+}{\ensuremath{$^+$}~}2%
     {|}{\ensuremath{$|$}~}2%
-}[keywords,comments]
+}[keywords,comments,strings]
 
 %% \textsubscript : holy shit
 
