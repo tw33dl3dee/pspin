@@ -31,5 +31,5 @@ set origin -0.05, 0.1
 
 set title "Выборы лидера"
 
-plot 'state-partition1-horz-election.dat' using ($1*4+0):(100*$2):(1) with boxes title "Доля сообщений среди переходов, %" fs pattern 1 lc rgb "#9C0E0E", 'state-partition1-horz-election.dat' using ($1*4+1):(100*$3+1):(1)  with boxes title "Неравномерность распределения, %" fs pattern 4 ls 1 lc rgb "#0057AE", 'state-partition1-horz-election.dat' using ($1*4+2):5:(1) axes x1y2 with boxes title "Время выполнения, сек" fs solid 0.2 ls 1 lc rgb "#648000", 'state-partition1-horz-election.dat' using ($1*4+2):4:(1) axes x1y2 with boxes title "Время простоя, сек" fs solid 0.5 ls 1 lc rgb "#648000"
+plot 'state-partition1-horz-election.dat' using ($1*4+0):(100*$2):(1) with boxes title "Доля сообщений среди переходов {/Symbol t}, %" fs pattern 1 lc rgb "#9C0E0E", 'state-partition1-horz-election.dat' using ($1*4+1):(100*$3+1):(1)  with boxes title "Неравномерность распределения {/Symbol x}, %" fs pattern 4 ls 1 lc rgb "#0057AE", 'state-partition1-horz-election.dat' using ($1*4+2):5:(1) axes x1y2 with boxes title "Время выполнения, сек" fs solid 0.2 ls 1 lc rgb "#648000", 'state-partition1-horz-election.dat' using ($1*4+2):4:(1) axes x1y2 with boxes title "Время простоя, сек" fs solid 0.5 ls 1 lc rgb "#648000"
 

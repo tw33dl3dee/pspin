@@ -3,6 +3,8 @@
 \usepackage[utf8]{inputenc}
 \usepackage[english, russian]{babel}
 
+%\usepackage[T2A]{fontenc} 
+
 \usepackage{slides}
 
 \hyphenpenalty=5000
@@ -23,13 +25,13 @@
 \usepackage{alltt}
 
 \usepackage{listings}
+
 % Значения по умолчанию для listings
 \lstset{
   breakatwhitespace=true,% разрыв строк только на whitespacce
   breaklines=true,       % переносить длинные строки
   captionpos=b,          % подписи снизу
-  extendedchars=\true,   % допуск utf
-  inputencoding=utf8,
+  inputencoding=koi8-r,
   numbers=left,          % нумерация слeва
   showspaces=false,      % показывать пробелы подчеркиваниями -- идиотизм 70-х годов
   showstringspaces=false,
@@ -38,21 +40,14 @@
   tabsize=4              % кому нужны табы по 8 символов?..
 }
 
-
 % Стиль для псесдовода: строчки обычно короткие, поэтому размер шрифта побольше
 \lstdefinestyle{pseudocode}{
   basicstyle=\small,
   frame=none,
   keywordstyle=\color{black}\bfseries\underbar,
   language=Pseudocode,
-  numberstyle=\footnotesize
-}
-
-% Стиль для обычного кода: маленький шрифт
-\lstdefinestyle{realcode}{
-  basicstyle=\scriptsize,
-  frame=none,
-  numberstyle=\footnotesize
+  numberstyle=\footnotesize,
+  commentstyle=\footnotesize\it
 }
 
 % Стиль для коротких кусков обычного кода: средний шрифт
@@ -70,6 +65,7 @@
     {->}{\ensuremath{$\rightarrow$}~}2%
     {<-}{\ensuremath{$\leftarrow$}~}2%
     {:=}{\ensuremath{$\leftarrow$}~}2%
+    {<--}{\ensuremath{$\Longleftarrow$}~}2%
 }[keywords,comments]
 
 \def\Student{Коротков Иван Андреевич}
@@ -93,38 +89,54 @@
 
 \TitleSlide
 
-\section{Классы ошибок в ПО и методы их устранения}
-\label{sec:error-classes}
+\section{Процесс проверки свойств конечной модели}
+\label{sec:modelchk-idef0}
 
 \begin{center}
-  \begin{tabular}{|c|c|c|} \hline Вероятность & \multicolumn{2}{|c|}{Степень критичности}
-    \\ \cline{2-3} возникновения & Высокая & Низкая \\ \hline
-    Высокая & Тестирование & Тестирование \\ \hline Низкая & Проверка модели & \\
-    \hline
-  \end{tabular}
+  \includegraphics[width=1\textwidth]{../graphics/modelchk-idef0-slides}
 \end{center}
 
 \section{Цель и задачи}
 \label{sec:goal-tasks}
 
-Разработка и исследование метода параллельной генерации состояний конечной
+Разработка и исследование метода параллельной генерации состояний конечной дискретной
 детерминированной модели.
 
-\small
-\begin{itemize}
-\item Проанализировать проблемы проверки моделей и существующие подходы к их решению
-\item Разработать и реализовать алгоритм параллельной генерации состояний
-\item Спроектировать метод автоматического распределения состояний между узлами
-\item Провести эксперименты и проанализировать их результаты
-\end{itemize}
-\normalsize
+\small {
+  \begin{itemize}
+  \item Проанализировать проблемы проверки моделей и существующие подходы к их решению
+  \item Разработать и реализовать алгоритм параллельной генерации состояний
+  \item Спроектировать метод автоматического распределения состояний между узлами
+  \item Провести эксперименты и проанализировать их результаты
+  \end{itemize}
+}
 
-\section{Автомат Мили для задачи о философах}
-\label{sec:mealey}
+\section{Последовательный алгоритм генерации состояний}
+\label{sec:seq-stategen}
 
-\begin{center}
-  \includegraphics[height=0.85\textheight]{../graphics/philo-mealey}
-\end{center}
+\small{
+  \begin{itemize}
+  \item Поиск в глубину на графе состояний модели
+  \item Граф в общем случае циклический~--- необходимо хранить \textit{множество посещенных состояний}
+  \item Число состояний для больших моделей превышает $10^{10}$ за счет комбинаторного
+    роста~--- \textit{невозможно} хранить в ОЗУ одной машины
+  \end{itemize}
+  
+  \begin{minipage}[t]{0.25\linewidth}
+    \begin{flushright}
+      Применяемые решения:
+    \end{flushright}
+  \end{minipage}
+  \begin{minipage}[t]{0.7\linewidth}
+    \begin{flushleft}
+      \begin{itemize}
+      \item Использование битового \mbox{хэширования} \\ $\Rightarrow$ неполное покрытие множества состояний
+      \item Сжатие хранимых состояний \\ $\Rightarrow$ малый выигрыш в расходе памяти
+      \item Метод сокращение частных порядков \\ $\Rightarrow$ ограничена применимость
+      \end{itemize}
+    \end{flushleft}
+  \end{minipage}
+}
 
 \section{Модель Крипке: определение}
 \label{sec:kripke-def}
@@ -140,75 +152,10 @@ L)$, где:
   атомарных высказываний, истинных в этом состоянии.
 \end{enumerate}
 
-\section{Модель Крипке для системы из двух философов}
-\label{sec:kripke-philo}
-
-\begin{center}
-  \includegraphics[height=0.85\textheight]{../graphics/philo-kripke}
-\end{center}
-
-\section{Описание модели философов на языке Promela}
-\label{sec:prml-philo}
-
-\begin{lstlisting}[language=Promela,style=simplecode]
-bit  fork[5]
-byte nr_eat
-
-active [5] proctype Philosopher() {
-Think:
-  atomic { fork[_pid] == 0 -> fork[_pid] = 1 };
-One:
-  atomic { fork[(_pid + 1)%5] == 0 -> fork[(_pid + 1)%5] = 1; 
-           nr_eat++ };
-Eat:
-  atomic { nr_eat--; fork[(_pid + 1)%5] = 0 };
-  fork[_pid] = 0;
-  goto Think
-}  
-\end{lstlisting}
-
-\section{Проверка конечных моделей}
-\label{sec:verif-troubles}
-
-\begin{itemize}
-\item Размер пространства состояний растет экспоненциально
-
-\item Модели среднего размера требуют более 10 Гб оперативной памяти для хранения
-  пространства состояний
-\end{itemize}
-
-\begin{minipage}[t]{0.5\linewidth}
-  \begin{flushleft}
-    \begin{itemize}
-    \item Использование битового \mbox{хэширования}
-    \item Сжатие хранимых состояний
-    \item Метод сокращение частных порядков
-    \end{itemize}
-  \end{flushleft}
-\end{minipage}
-\begin{minipage}[t]{0.5\linewidth}
-  \begin{flushleft}
-    \begin{itemize}
-    \item Параллельная \mbox{генерация} состояний
-    \end{itemize}
-  \end{flushleft}
-\end{minipage}
-
 \section{Алгоритм распределенного хранения состояний}
 \label{sec:distr-storage}
 
-\begin{lstlisting}[style=pseudocode]
-Visited = ()
-
-def ParStateSpaceDFS(state):
-    node = StateNode(state)
-    if not state in node.Visited:
-        node.Visited <- state
-        for each new_state in Next(state):
-            StateSpaceDFS(new_state)
-
-ParStateSpaceDFS(initial_state)
-\end{lstlisting}
+\lstinputlisting[style=pseudocode,basicstyle=\scriptsize]{../data/inc/par-state-space-dfs.code}
 
 \section{Пример работы алгоритма распределенного хранения}
 \label{sec:distr-storage2}
@@ -229,22 +176,7 @@ ParStateSpaceDFS(initial_state)
 \section{Алгоритм распределенной генерации состояний}
 \label{sec:distr-generation}
 
-\begin{lstlisting}[style=pseudocode]
-Visited = ()
-Queue   = (initial_state)
-def ParStateSpaceBFS():
-    while not empty(Queue):
-        Queue -> state
-        node = StateNode(state)
-        if NodeId = node:
-            if not state in Visited:
-                Visited <- state
-                for each new_state in Next(state):
-                    Queue <- new_state
-        else:
-            node.Queue <- state
-ParStateSpaceBFS()
-\end{lstlisting}
+\lstinputlisting[style=pseudocode,basicstyle=\scriptsize]{../data/inc/par-state-space-bfs.code}
 
 \section{Пример работы алгоритма распределенной генерации}
 \label{sec:distr-generation2}
@@ -276,25 +208,18 @@ ParStateSpaceBFS()
   \includegraphics[width=0.9\textwidth]{../graphics/fullstate}
 \end{center}
 
-\section{Компоненты параллельного генератора}
+\section{Компоненты разработанного ПО}
 \label{sec:component-diag}
 
 \begin{center}
-  \includegraphics[height=0.88\textheight]{../graphics/components}
+  \includegraphics[width=1\textwidth]{../graphics/components}
 \end{center}
 
-\section{Развертывание параллельного генератора}
-\label{sec:deployment-diag}
+\section{Компоненты параллельного генератора состояний}
+\label{sec:component-diag}
 
 \begin{center}
-    \includegraphics[height=0.88\textheight]{../graphics/mpi-deploy}
-\end{center}
-
-\section{Алгооритм отправки сообщений удаленному узлу}
-\label{sec:mpi-send-flowchart}
-
-\begin{center}
-  \includegraphics[height=0.88\textheight]{../graphics/mpi-send-flowchart-horz}
+  \includegraphics[width=1\textwidth]{../graphics/stategen-components}
 \end{center}
 
 \section{Взаимодействие двух MPI-процессов}
@@ -321,7 +246,7 @@ ParStateSpaceBFS()
   \includegraphics[height=0.85\textheight]{../graphics/pmlparse-inner}
 \end{minipage}
 
-\section{Содержание экспериментов}
+\section{Исследование}
 \label{sec:experim}
 
 \begin{itemize}
@@ -333,6 +258,23 @@ ParStateSpaceBFS()
   \includegraphics[width=1\textwidth]{../graphics/exp-idef0}
 \end{center}
 
+\section{Исходные данные для экспериментов}
+\label{sec:experim-input}
+
+\begin{minipage}[t]{0.15\linewidth}
+Модели:  
+\end{minipage}
+\begin{minipage}[t]{0.85\linewidth}
+  \begin{itemize}
+  \item Обедающие философы, число сторон от 5 до 8
+  \item Алгоритм выбора лидера, число сторон от 4 до 7
+  \end{itemize}
+
+\end{minipage}
+\begin{center}
+  \includegraphics[width=1\textwidth]{../graphics/mpi-deploy-horz}
+\end{center}
+
 \section{Зависимость требуемого времени от числа состояний}
 \label{sec:states-time}
 
@@ -340,7 +282,7 @@ ParStateSpaceBFS()
   \includegraphics[height=0.88\textheight]{../data/plots/states-speed}
 \end{center}
 
-\section{Сравнение скорость генерации состояний}
+\section{Сравнение скорости генерации состояний}
 \label{sec:stategen-speed}
 
 \begin{tabular}{ccccc}
@@ -366,7 +308,14 @@ ParStateSpaceBFS()
   \includegraphics[width=1.1\textwidth,page=2]{../data/plots/state-partition1-horz}  
 \end{minipage}
 
-% Отношение числа MPI-сообщений к числу переходов между состояниями модули
+\small{
+  \begin{minipage}[m]{0.5\linewidth}
+    $$ \tau = \frac{\text{Суммарное число сообщений}}{\text{Суммарное число переходов}} $$    
+  \end{minipage}
+  \begin{minipage}[m]{0.5\linewidth}
+    $$ \xi = \sigma_S/\overline{S}$$ $$ S_i - \text{число состояний на узле i} $$
+  \end{minipage}
+}
 
 \section{Выводы}
 \label{sec:conclusion}
