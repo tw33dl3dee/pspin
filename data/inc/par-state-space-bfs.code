@@ -1,5 +1,5 @@
-Visited = ()                           { множество посещенных состояний  }
-Queue   = (initial_state)                      { очередь поиска в ширину }
+Visited = []                           { множество посещенных состояний  }
+Queue   = [initial_state]                      { очередь поиска в ширину }
 
 def ParStateSpaceBFS():                           { обход графа в ширину }
     while not empty(Queue):

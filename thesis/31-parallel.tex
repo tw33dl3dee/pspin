@@ -42,7 +42,7 @@ $i$ узла, хранящего $s'$, после чего делается уд
 следующим образом (выполняется на головном узле):
 
 \begin{lstlisting}[style=pseudocode]
-Visited = ()
+Visited = []
 
 def ParStateSpaceDFS(state):
     node = StateNode(state)
@@ -92,8 +92,8 @@ $Q$. Порождая новое состояние, узел $i$ проверя
 Псевдокод, выполняемый на всех узлах:
 
 \begin{lstlisting}[style=pseudocode]
-Visited = ()
-Queue   = (initial_state)
+Visited = []
+Queue   = [initial_state]
 
 def ParStateSpaceBFS():
     while not empty(Queue):
