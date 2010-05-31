@@ -27,7 +27,6 @@ citecolor=black, menucolor=black, filecolor=bla,
   breakatwhitespace=true,% разрыв строк только на whitespacce
   breaklines=true,       % переносить длинные строки
   captionpos=b,          % подписи снизу
-  extendedchars=\true,   % допуск utf
   inputencoding=utf8,
   numbers=left,          % нумерация слeва
   showspaces=false,      % показывать пробелы подчеркиваниями -- идиотизм 70-х годов
@@ -44,7 +43,8 @@ citecolor=black, menucolor=black, filecolor=bla,
   frame=none,
   keywordstyle=\color{black}\bfseries\underbar,
   language=Pseudocode,
-  numberstyle=\footnotesize
+  numberstyle=\footnotesize,
+  commentstyle=\footnotesize\it
 }
 
 % Стиль для обычного кода: маленький шрифт
@@ -78,6 +78,7 @@ citecolor=black, menucolor=black, filecolor=bla,
     {->}{\ensuremath{$\rightarrow$}~}2%
     {<-}{\ensuremath{$\leftarrow$}~}2%
     {:=}{\ensuremath{$\leftarrow$}~}2%
+    {<--}{\ensuremath{$\Longleftarrow$}~}2%
 }[keywords,comments]
 
 % Свой язык для задания грамматик в BNF
