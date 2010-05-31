@@ -1,6 +1,6 @@
 set(LATEX_OUTPUT_PATH ${CMAKE_CURRENT_BINARY_DIR}/output/tex)
 
-file(GLOB INC_FILES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} ../data/inc/*)
+file(GLOB INC_FILES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} ../data/inc/* ../thesis/*.bst)
 
 add_latex_document(report1.tex DEFAULT_PDF MANGLE_TARGET_NAMES)
 add_latex_document(report2.tex DEFAULT_PDF MANGLE_TARGET_NAMES)
@@ -19,6 +19,7 @@ add_latex_document(report3-slides.tex
 )
 
 add_latex_document(paco-thesis.tex 
+  INPUTS ${INC_FILES}
   BIBFILES ../thesis/thesis.bib
   DEFAULT_PDF MANGLE_TARGET_NAMES 
 )
