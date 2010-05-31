@@ -2,69 +2,72 @@ program -> (module sep?)+;
 
 module -> proctype | decl_list;
 
-proctype -> proc_hdr P_LPAREN decl_list? P_RPAREN P_LBRACE sequence P_RBRACE;
+proctype -> proc_hdr "(" decl_list? ")" "{" sequence "}";
 
-proc_hdr -> active? K_PROC name;
+proc_hdr -> active? "proc" name;
 
-init_hdr -> K_INIT;
+name_list -> name | name_list "," name;
 
-name_list -> name | name_list P_COMMA name;
-
-decl_list -> decl | decl_list P_SEMICOL decl;
+decl_list -> decl | decl_list ";" decl;
 
 decl -> visible? typename ivar_list;
 
-ivar_list -> ivar | ivar_list P_COMMA ivar;
+ivar_list -> ivar | ivar_list "," ivar;
 
-typename -> T_TYPE | K_CHAN;
+typename -> T_TYPE | "chan";
 
-active -> K_ACTIVE P_LSQBRACE const P_RSQBRACE | K_ACTIVE;
+active -> "active" "[" const "]" | "active";
 
 sequence -> epsilon | step | step sep sequence;
 
-sep -> P_SEMICOL | P_SEQ;
+sep -> ";" | "-"">";
 
 step -> stmt | decl;
 
-varref_list -> varref | varref_list P_COMMA varref;
+varref_list -> varref | varref_list "," varref;
 
-ivar -> name P_LSQBRACE expr P_RSQBRACE | name ch_init | name ivar_init?;
+ivar -> name "[" expr "]" | name ch_init | name ivar_init?;
 
-ivar_init -> O_ASSIGN expr;
+ivar_init -> "=" expr;
 
-ch_init -> O_ASSIGN P_LSQBRACE const P_RSQBRACE K_OF P_LBRACE typename_list P_RBRACE;
+ch_init -> "=" "[" const "]" "of" "{" typename_list "}";
 
-typename_list -> typename | typename_list P_COMMA typename;
+typename_list -> typename | typename_list "," typename;
 
-varref -> name | name idx | varref P_DOT name;
+varref -> name | name idx | varref "." name;
 
-idx -> P_LSQBRACE expr P_RSQBRACE;
+idx -> "[" expr "]";
 
-send -> varref O_SEND send_args;
+send -> varref "!" send_args;
 
-recv -> varref O_RECV recv_args;
+recv -> varref "?" recv_args;
 
-send_args -> arg_list | expr P_LPAREN arg_list P_RPAREN;
+send_args -> arg_list | expr "(" arg_list ")";
 
-recv_args -> recv_list | recv_arg P_LPAREN recv_list P_RPAREN;
+recv_args -> recv_list | recv_arg "(" recv_list ")";
 
-recv_list -> recv_arg | recv_list P_COMMA recv_arg;
+recv_list -> recv_arg | recv_list "," recv_arg;
 
-recv_arg -> varref | K_EVAL P_LPAREN varref P_RPAREN | O_ADD? const;
+recv_arg -> varref | "eval" "(" varref ")" | O_ADD? const;
 
-assign -> varref O_ASSIGN expr | varref O_INCDEC;
+assign -> varref "=" expr | varref O_INCDEC;
 
-stmt -> K_IF options K_FI | K_DO options K_OD | K_ATOMIC P_LBRACE sequence P_RBRACE | send | recv | assign | K_ELSE | K_BREAK | K_GOTO name | name P_COLON stmt | K_PRINT P_LPAREN T_STRING print_list? P_RPAREN | K_ASSERT P_LPAREN expr P_RPAREN | expr;
+stmt -> "if" options "fi" | "do" options "od" | "atomic" "{" sequence "}" | 
+        send | recv | assign | "else" | "break" | "goto" name | name ":" stmt | 
+        "print" "(" T_STRING print_list? ")" | "assert" "(" expr ")" | expr;
 
-print_list -> P_COMMA arg_list;
+print_list -> "," arg_list;
 
-arg_list -> arg | arg_list P_COMMA arg;
+arg_list -> arg | arg_list "," arg;
 
 arg -> expr;
 
-options -> P_COLON P_COLON sequence | options P_COLON P_COLON sequence;
+options -> ":" ":" sequence | options ":" ":" sequence;
 
-expr -> K_RUN name P_LPAREN arg_list? P_RPAREN prio? | expr O_AND expr | expr O_OR expr | expr O_ADD expr | expr O_MULT expr | expr O_BIT expr | expr P_LAQUO expr | expr P_RAQUO expr | expr O_RELEQ expr | expr O_EQ expr | expr O_SHIFT expr | O_TILDE expr | O_ADD expr | O_SEND expr | P_LPAREN expr P_RPAREN | T_BUILTIN P_LPAREN expr P_RPAREN | T_CHANOP P_LPAREN varref P_RPAREN | P_LPAREN expr P_SEQ expr P_COLON expr P_RPAREN | poll | varref | const | name idx P_AT name;
+expr -> expr O_AND expr | expr O_OR expr | expr O_ADD expr | expr O_MULT expr | expr O_BIT expr 
+     | expr "<" expr | expr ">" expr | expr O_RELEQ expr | expr O_EQ expr | expr O_SHIFT expr | 
+     O_TILDE expr | O_ADD expr | O_SEND expr | "(" expr ")" | T_BUILTIN "(" expr ")" | T_CHANOP "(" varref ")" | 
+     "(" expr "-"">" expr ":" expr ")" | poll | varref | const;
 
 uname -> name;
 

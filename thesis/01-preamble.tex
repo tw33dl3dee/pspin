@@ -71,6 +71,16 @@ citecolor=black, menucolor=black, filecolor=bla,
     {:=}{\ensuremath{$\leftarrow$}~}2%
 }[keywords,comments]
 
+\lstdefinelanguage[]{BNF}[]{}{
+  morekeywords={},
+  morecomment=[s]{@}{@},
+  literate=% а сюда добавлять операторы, которые хотите отображать как мат. символы
+    {->}{\ensuremath{$\rightarrow$}~}2%
+    {*}{\ensuremath{$^*$}~}2%
+    {+}{\ensuremath{$^+$}~}2%
+    {|}{\ensuremath{$|$}~}2%
+}[keywords,comments]
+
 %% \textsubscript : holy shit
 
 \makeatletter
