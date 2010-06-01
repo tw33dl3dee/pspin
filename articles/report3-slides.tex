@@ -130,9 +130,9 @@
   \begin{minipage}[t]{0.7\linewidth}
     \begin{flushleft}
       \begin{itemize}
-      \item Использование битового \mbox{хэширования} \\ $\Rightarrow$ неполное покрытие множества состояний
+      \item Использование битового \mbox{хэширования} \\ $\Rightarrow$ неполное покрытие графа состояний
       \item Сжатие хранимых состояний \\ $\Rightarrow$ малый выигрыш в расходе памяти
-      \item Метод сокращение частных порядков \\ $\Rightarrow$ ограничена применимость
+      \item Метод сокращения частных порядков \\ $\Rightarrow$ ограничена применимость
       \end{itemize}
     \end{flushleft}
   \end{minipage}
@@ -194,18 +194,28 @@ L)$, где:
   \end{flushleft}
 \end{minipage}
 
-\section{Распределение состояний между узлами}
+\section{Предложенные способы распределения хранимых состояний между вычислительными узлами}
 \label{sec:state-partitioning}
 
+\begin{minipage}[m]{0.7\linewidth}
+  \includegraphics[width=1\textwidth]{../graphics/state-partition-slides}  
+\end{minipage}
+\begin{minipage}[m]{0.3\linewidth}
+  $$ M_1 = T \cdot (1 - \frac{1}{N}) $$
+  \\ ~ \\
+  $$ M_2 = \frac{T}{P} \cdot (1 - \frac{1}{N}) $$
+\end{minipage}
+
 \begin{center}
-  \includegraphics[width=0.9\textwidth]{../graphics/state-partition}
+  $N$~--- число узлов, $T$~--- переходов между состояниями, \\
+  $M$~--- сообщений между узлами
 \end{center}
 
-\section{Хранение состояний в ОЗУ узла}
+\section{Схема хранения состояний в ОЗУ узла}
 \label{sec:state-store-full}
 
 \begin{center}
-  \includegraphics[width=0.9\textwidth]{../graphics/fullstate}
+  \includegraphics[width=0.9\textwidth]{../graphics/fullstate-slides}
 \end{center}
 
 \section{Компоненты разработанного ПО}
@@ -298,7 +308,7 @@ L)$, где:
   \hline
 \end{tabular}
 
-\section{Сравнение методов распределения состояний}
+\section{Сравнение способов распределения состояний}
 \label{sec:partition-cmp}
 
 \begin{minipage}[m]{0.5\linewidth}
@@ -313,7 +323,7 @@ L)$, где:
     $$ \tau = \frac{\text{Суммарное число сообщений}}{\text{Суммарное число переходов}} $$    
   \end{minipage}
   \begin{minipage}[m]{0.5\linewidth}
-    $$ \xi = \sigma_S/\overline{S}$$ $$ S_i - \text{число состояний на узле i} $$
+    $$ \xi = \sigma_S/\overline{S}$$ $$ S_i - \text{число состояний на узле~} i $$
   \end{minipage}
 }
 
