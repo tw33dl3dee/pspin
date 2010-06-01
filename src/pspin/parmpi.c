@@ -312,7 +312,7 @@ static int termination_check()
 		 */
 		if (msg_counter.color == White && msg_accum.color == White && msg_accum.count == 0) {
 			termination_detected(node_id);
-			eprintf("==VERIFICATION PASSED\n");
+			eprintf("\033[01;32m==VERIFICATION PASSED\033[00m\n");
 			return -1;
 		}
 		/* Otherwise, node 0 may start a new probe. */

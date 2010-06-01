@@ -175,7 +175,7 @@ do_transition(int pid, int dest_ip,
 	current = PROC_BY_OFFSET(state, current__offset);
 #define ASSERT(expr, repr)								\
 	if (!(expr)) {										\
-		eprintf("==ASSERTION VIOLATED: %s\n", repr);	\
+		eprintf("\033[01;31m==ASSERTION VIOLATED:\033[00m %s\n", repr);	\
 		edump_state(state);								\
 		aborted = TransitionCausedAbort;				\
 	}
@@ -227,7 +227,7 @@ check_endstate(struct State *state)
 	return 0;
 
   invalid:
-	eprintf("==INVALID END STATE\n");
+	eprintf("\033[01;31m==INVALID END STATE:\033[00m\n");
 	edump_state(state);
 	return -1;
 }
