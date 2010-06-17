@@ -1,0 +1,11 @@
+Visited = ()                            { множество посещенных состояний }
+
+def ParStateSpaceDFS(state):                     { обход графа в глубину }
+    node = StateNode(state)            { номер узла, хранящего состояние }
+    if not state in node.Visited:           { синхронный удаленный вызов }
+                            { для проверки, пройдено ли уже это состояние}
+        node.Visited <-- state
+        for each new_state in Next(state):
+            StateSpaceDFS(new_state)
+
+ParStateSpaceDFS(initial_state)

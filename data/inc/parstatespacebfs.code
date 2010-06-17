@@ -1,0 +1,17 @@
+Visited = ()                           { множество посещенных состояний  }
+Queue   = (initial_state)                      { очередь поиска в ширину }
+
+def ParStateSpaceBFS():                           { обход графа в ширину }
+    while not empty(Queue):
+        Queue -> state                      { выбор состояния из очереди }
+        node = StateNode(state)        { номер узла, хранящего состояние }
+        if NodeId = node:                  { состояние хранится локально }
+            if not state in Visited:
+                Visited <- state
+                for each new_state in Next(state):
+                    Queue <- new_state
+        else:                          { состояние хранится другим узлом }
+            node.Queue <-- state            { асинхронный удаленный вызов } 
+                       { для добавления состояния в очередь другого узла } 
+
+ParStateSpaceBFS()
