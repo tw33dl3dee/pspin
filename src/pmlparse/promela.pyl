@@ -41,6 +41,10 @@ INITIAL:
 		# switch to C mode
 		self.PUSHSTATE(1)
 
+	"<<\(":
+		# switch to C mode
+		self.PUSHSTATE(2)
+
 	"\{":			return "P_LBRACE"
 	"\}":			return "P_RBRACE"
 	"\(":			return "P_LPAREN"
@@ -144,6 +148,21 @@ INITIAL:
 
 C_CODE:
 	"}>>":			self.POPSTATE()
+	"\t":
+		self.charno += self.SPACES_PER_TAB - 1
+		self.value = ' '
+		return "C_CHAR"
+	"\r":			return
+	"\n":
+		self.lineno += 1
+		self.charno = 1
+		self.value = ' '
+		return "C_CHAR"
+	"^#[^\n]*":		return		# strip pragmas off
+	".":			return "C_CHAR"
+
+C_EXPR:
+	"\)>>":			self.POPSTATE()
 	"\t":
 		self.charno += self.SPACES_PER_TAB - 1
 		self.value = ' '
