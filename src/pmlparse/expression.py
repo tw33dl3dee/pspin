@@ -246,3 +246,20 @@ class ChanOpExpr(Expr):
 
     def code(self):
         return "CHAN_%s(%s)" % (self._op, self._chan.code())
+
+
+class CCodeExpr(Expr):
+    """Arbitrary C expression
+    """
+
+    def __init__(self, c_expr):
+        """
+
+        Arguments:
+        - `c_expr`: (str) C expression
+        """
+        Expr.__init__(self)
+        self._c_expr = c_expr
+
+    def code(self):
+        return self._c_expr

@@ -143,9 +143,16 @@ INITIAL:
 		return
 
 C_CODE:
-	"(.|\n|\r)*\}>>":
-		self.lineno += self.value.count('\n')
-		self.charno = 1  # FIXME
-		self.value = self.value[:-3].translate(None, '\r\t\n').strip()
-		self.POPSTATE()
-		return "C_CODE"
+	"}>>":			self.POPSTATE()
+	"\t":
+		self.charno += self.SPACES_PER_TAB - 1
+		self.value = ' '
+		return "C_CHAR"
+	"\r":			return
+	"\n":
+		self.lineno += 1
+		self.charno = 1
+		self.value = ' '
+		return "C_CHAR"
+	"^#[^\n]*":		return		# strip pragmas off
+	".":			return "C_CHAR"

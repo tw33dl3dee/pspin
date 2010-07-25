@@ -287,7 +287,7 @@ stmt ->
 		return AtomicStmt(kids[2] + [codegen.cur_proc.add_stmt(AtomicEndStmt())])
 	| D_STEP P_LBRACE sequence P_RBRACE:
 		raise NotImplementedError(kids[0])
-	| K_C_CODE C_CODE:
+	| K_C_CODE c_code:
 		return CCodeStmt(kids[1])
 	| P_LBRACE sequence P_RBRACE:
 		raise NotImplementedError('nested blocks')
@@ -362,6 +362,8 @@ expr ->
 		return BinaryExpr(*kids)
 	| expr O_SHIFT expr:
 		return BinaryExpr(*kids)
+	| O_C_EXPR c_code:
+		return CCodeExpr(kids[1])
 	| O_TILDE expr:
 		return UnaryExpr(*kids)
 	| O_ADD expr:
@@ -384,6 +386,11 @@ expr ->
 		return ConstExpr(kids[0])
 	| name idx P_AT name:
 		raise NotImplementedError(kids[2])
+	;
+
+c_code ->
+	C_CHAR+:
+		return ''.join(kids[0]).strip()
 	;
 
 uname ->
