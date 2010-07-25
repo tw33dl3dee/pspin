@@ -508,7 +508,7 @@ class RecvStmt(SendStmt):
     
     def executable(self):
         return ChanOpExpr('nempty', self._chan_ref).code()
-    
+
     def execute(self):
         recv_code_tpl = "CHAN_RECV($chan); $recv_ops"
         recv_op_tpl = "$var = $field_ref"
@@ -523,3 +523,21 @@ class RecvStmt(SendStmt):
 
     def debug_repr(self):
         return "%s ? %s" % (self._chan.name, ", ".join([str(e) for e in self._arg_list]))
+
+
+class CCodeStmt(Stmt):
+    """Arbitrary C code
+
+    Always executable
+    """
+
+    def __init__(self, c_code):
+        """
+        Arguments:
+        - `c_code`: (str) C code to execute
+        """
+        super(CCodeStmt, self).__init__()
+        self._c_code = c_code
+
+    def execute(self):
+        return self._c_code

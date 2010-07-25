@@ -37,6 +37,10 @@ definitions:
 
 
 INITIAL:
+	"<<\{":
+		# switch to C mode
+		self.PUSHSTATE(1)
+
 	"\{":			return "P_LBRACE"
 	"\}":			return "P_RBRACE"
 	"\(":			return "P_LPAREN"
@@ -69,7 +73,7 @@ INITIAL:
 	"assert":		return "K_ASSERT"
 	"atomic":		return "K_ATOMIC"
 	"break":		return "K_BREAK"
-	"chan": 		return "K_CHAN"
+	"chan":		return "K_CHAN"
 	"d_step":		return "K_DSTEP"
 	"do":			return "K_DO"
 	"else":			return "K_ELSE"
@@ -89,9 +93,11 @@ INITIAL:
 	"run":			return "K_RUN"
 	"typedef":		return "K_TYPEDEF"
 	"unless":		return "K_UNLESS"
+	"c_code":		return "K_C_CODE"
+	"c_expr":		return "O_C_EXPR"
 	"{K_EXCL}":		return "K_EXCL"
 	"{K_PRINT}":	return "K_PRINT"
-	"{K_TRACE}":	
+	"{K_TRACE}":
 		if self.value == "trace":
 			self.value = 1
 		else:
@@ -102,8 +108,8 @@ INITIAL:
 			self.value = 1
 		else:
 			self.value = 0
-		return "K_VIS"		
-	
+		return "K_VIS"
+
 	"{T_BUILTIN}":	return "T_BUILTIN"
 	"{T_CHANOP}":	return "T_CHANOP"
 	"{T_CONST}":
@@ -135,3 +141,11 @@ INITIAL:
 	".":
 		raise Exception, ("Illegal character '%s'" % self.value)
 		return
+
+C_CODE:
+	"(.|\n|\r)*\}>>":
+		self.lineno += self.value.count('\n')
+		self.charno = 1  # FIXME
+		self.value = self.value[:-3].translate(None, '\r\t\n').strip()
+		self.POPSTATE()
+		return "C_CODE"

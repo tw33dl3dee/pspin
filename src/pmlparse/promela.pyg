@@ -287,6 +287,8 @@ stmt ->
 		return AtomicStmt(kids[2] + [codegen.cur_proc.add_stmt(AtomicEndStmt())])
 	| D_STEP P_LBRACE sequence P_RBRACE:
 		raise NotImplementedError(kids[0])
+	| K_C_CODE C_CODE:
+		return CCodeStmt(kids[1])
 	| P_LBRACE sequence P_RBRACE:
 		raise NotImplementedError('nested blocks')
 	| send:
