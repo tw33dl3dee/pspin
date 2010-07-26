@@ -25,6 +25,8 @@ class Codegen(object):
         with file(fname, "w") as f:
             self.write_block(f, 'STATE_DECL', self.state_decl())
             self.write_block(f, 'PROC_DECL', self.proc_decl())
+            self.write_block(f, 'C_CODE_DEF', self.c_code_def())
+            self.write_block(f, 'C_CODE_UNDEF', self.c_code_undef())
             self.write_block(f, 'STATE_INIT', self.state_init())
             self.write_block(f, 'PROCSTATE_INIT', self.procstate_init())
             self.write_block(f, 'VALID_ENDSTATES', self.valid_endstates())
@@ -224,6 +226,23 @@ $init;
         valid_endstates_tpl = "static int *valid_endstates[] = { $endstates }"
         endstates = ', '.join([p.valid_endstate_ips() for p in self._procs])
         return Template(valid_endstates_tpl).substitute(endstates=endstates)
+
+    def c_code_def(self):
+        """Returns C code that defines macros for naming current state
+        and all processes in c_code and c_expr
+        """
+        lines = [p.c_code_def() for p in self._procs]
+        # Empty string to prevent adding ; to end of last macro
+        lines += ["#define this (*state)", ""]
+        return '\n'.join(lines)
+
+    def c_code_undef(self):
+        """Returns C code that undefines macros defined by c_code_def
+        """
+        lines = [p.c_code_undef() for p in self._procs]
+        # Empty string to prevent adding ; to end of last macro
+        lines += ["#undef this", ""]
+        return '\n'.join(lines)
 
     def finish(self):
         """Settles Codegen object, must be called after all proctypes and declarations

@@ -223,12 +223,26 @@ class Process(object):
         return ";\n".join(lines)
 
     def valid_endstate_ips(self):
-        """Return C-code (str) with array of valid endstate IP values for this proctype
+        """Returns C-code (str) with array of valid endstate IP values for this proctype
         """
         valid_ips_tpl = '(int []){ $ips }'
         valid_ips = [str(stmt.ip) for stmt in self._end_stmts]
         valid_ips.append(str(-1))
         return Template(valid_ips_tpl).substitute(ips=', '.join(valid_ips))
+
+    def c_code_def(self):
+        """Returns C code that defines macros for naming current process
+        in c_code and c_expr
+        """
+        proc_def_tpl = "#define P$procname ($ref)"
+        return Template(proc_def_tpl).substitute(procname=self.name,
+                                                 ref=self.ref())
+
+    def c_code_undef(self):
+        """Returns C code that undefines macros defined by c_code_def
+        """
+        proc_undef_tpl = "#undef P$procname"
+        return Template(proc_undef_tpl).substitute(procname=self.name)
 
     def add_stmt(self, stmt):
         """Adds new statement (not necessarily from topmost block) to process

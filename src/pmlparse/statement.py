@@ -627,5 +627,19 @@ class CCodeStmt(Stmt):
         super(CCodeStmt, self).__init__()
         self._c_code = c_code
 
+    def debug_repr(self):
+        return self._c_code.replace('\n', ' ')
+
     def execute(self):
-        return self._c_code
+        c_code_tpl = """
+#undef TRANSITIONS
+#define C_CODE_DEF
+#include STATEGEN_FILE
+#undef  C_CODE_DEF
+                $code
+#define C_CODE_UNDEF
+#include STATEGEN_FILE
+#undef  C_CODE_UNDEF
+#define TRANSITIONS
+"""
+        return Template(c_code_tpl).substitute(code=self._c_code)
