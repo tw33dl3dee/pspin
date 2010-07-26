@@ -377,7 +377,7 @@ expr ->
 	| T_CHANOP P_LPAREN varref P_RPAREN:
 		return ChanOpExpr(kids[0], kids[2])
 	| P_LPAREN expr P_SEQ expr P_COLON expr P_RPAREN:
-		return TernaryExpr(*kids[1:6])
+		return TernaryExpr(kids[1], '?', kids[3], ':', kids[5])
 	| poll:
 		return kids[0]
 	| varref:
