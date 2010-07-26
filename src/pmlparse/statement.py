@@ -17,6 +17,8 @@ class Stmt(object):
         self._next = []
         self._prev = None
         self.parent_proc = None
+        self.starts_atomic = False
+        self.ends_atomic = False
 
     def __str__(self):
         return self.debug_repr()
@@ -37,6 +39,24 @@ class Stmt(object):
         Needs not to end with semicolon
         """
         return ""
+
+    def pre_exec(self):
+        """Generates C code to execute before the statement
+
+        Needs not to end with semicolon
+        """
+        return None
+
+    def post_exec(self):
+        """Generates C code to execute after the statement
+
+        Needs not to end with semicolon
+        """
+        if self.starts_atomic:
+            return "BEGIN_ATOMIC()"
+        if self.ends_atomic:
+            return "END_ATOMIC()"
+        return None
 
     def add_label(self, label):
         """Adds label to statement
@@ -384,6 +404,7 @@ class SequenceStmt(Stmt):
         Stmt.__init__(self)
         self._stmts = stmts
         self._next = [stmts[0]]
+        self._omittable = True
 
     def set_next(self, stmt):
         self._stmts[-1].set_next(stmt)
@@ -400,8 +421,8 @@ class SequenceStmt(Stmt):
 class AtomicStmt(SequenceStmt):
     """Atomic statement sequence
 
-    Behaves like simple sequence.
-    Executes by setting global atomicity flag
+    This is a dumb statement, needed only to set starts_atomic/ends_atomic
+    flags on it's children
     """
 
     def __init__(self, stmts):
@@ -411,28 +432,11 @@ class AtomicStmt(SequenceStmt):
         - `stmts`: list of Stmt objects
         """
         super(AtomicStmt, self).__init__(stmts)
-
-    def executable(self):
-        return self._stmts[0].executable()
-
-    def execute(self):
-        return "BEGIN_ATOMIC()"
+        stmts[0].starts_atomic = True
+        stmts[-1].ends_atomic = True
 
     def debug_repr(self):
         return "atomic"
-
-
-class AtomicEndStmt(Stmt):
-    """Closes atomic block
-
-    This statement is always inserted by grammar at the end of atomic block
-    """
-
-    def execute(self):
-        return "END_ATOMIC()"
-
-    def debug_repr(self):
-        return "atomic end"
 
 
 class PrintStmt(Stmt):

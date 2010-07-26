@@ -160,7 +160,9 @@ class Process(object):
             if ($executable) {
                 NEW_STATE();
                 RECORD_STEP("$step_str");
+                $pre_exec;
                 $execute;
+                $post_exec;
                 goto passed;
             }
             goto blocked"""
@@ -168,6 +170,8 @@ class Process(object):
                                                  # TODO: was self.lookup_var("_ip").ref())]
         for stmt in self._stmts:
             lines.append(Template(case_tpl).substitute(ip=stmt.ip, executable=stmt.executable(),
+                                                       pre_exec=stmt.pre_exec() or "",
+                                                       post_exec=stmt.post_exec() or "",
                                                        execute=stmt.execute(), step_str=str(stmt)))
         lines += ["\t\tdefault:\n\t\t\tassert(0)", "\t\t}"]
         return ";\n".join(lines)
