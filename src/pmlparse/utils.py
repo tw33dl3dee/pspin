@@ -12,6 +12,11 @@ def listify(x):
         return [x]
 
 
+def enum(*sequential, **named):
+    enums = dict(zip(sequential, range(len(sequential))), **named)
+    return type('Enum', (), enums)
+
+
 def flatten(a):
     """Flatten a list."""
     return bounce(flatten_k(a, lambda x: x))

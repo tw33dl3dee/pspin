@@ -3,7 +3,7 @@
 
 from variable import *
 from expression import SimpleRef, ChanOpExpr
-from utils import flatten
+from utils import flatten, enum
 from string import Template
 
 
@@ -16,9 +16,9 @@ class Stmt(object):
         self.ip = None
         self._next = []
         self._prev = None
-        self.parent_proc = None
-        self.starts_atomic = False
-        self.ends_atomic = False
+        self._parent_proc = None
+        self._starts_atomic = False
+        self._ends_atomic = False
         self._omittable = False
 
     def __str__(self):
@@ -46,6 +46,8 @@ class Stmt(object):
 
         Needs not to end with semicolon
         """
+        if self.starts_atomic and not self.ends_atomic:
+            return "BEGIN_ATOMIC()"
         return None
 
     def post_exec(self):
@@ -53,11 +55,31 @@ class Stmt(object):
 
         Needs not to end with semicolon
         """
-        if self.starts_atomic:
-            return "BEGIN_ATOMIC()"
-        if self.ends_atomic:
+        if not self.starts_atomic and self.ends_atomic:
             return "END_ATOMIC()"
         return None
+
+    def set_atomic(self, starts, ends):
+        """Sets atomicity context of statement
+
+        Arguments:
+        - `starts`: if True, starts atomic context
+        - `ends`: if True, ends atomic context
+
+        If any argument is None, corresponding flag is left unchanged
+        """
+        if starts is not None:
+            self._starts_atomic = starts
+        if ends is not None:
+            self._ends_atomic = ends
+
+    @property
+    def starts_atomic(self):
+        return self._starts_atomic
+
+    @property
+    def ends_atomic(self):
+        return self._ends_atomic
 
     @property
     def omittable(self):
@@ -116,44 +138,56 @@ class Stmt(object):
         """
         return []
 
-    def settle(self):
+    SettlePass = enum('PRE', 'POST_MINI')
+
+    def settle(self, pass_no):
         """Settles Stmt object, must be called after all statements in proctype have been parsed
 
         Actually this is usable for statements that depend on other statements only
+        There are currently 2 settle passes:
+        1. Right after adding all statements
+        2. After minimization (throwing away omittables)
+
+        Arguments:
+        - `pass_no`: settle pass number
         """
         pass
 
+    def next_reduced(self):
+        ends_atomic_acc = None
+        next_stmts = []
+
+        def atomic_check(acc, e):
+            if acc is not None and acc != e:
+                raise RuntimeError, "Cannot reduce statement atomicity context"
+            return e
+                          
+        for stmt in self._next:
+            if stmt.omittable:
+                e, n = stmt.next_reduced()
+                ends_atomic_acc = atomic_check(ends_atomic_acc, e)
+                next_stmts += n
+            else:
+                ends_atomic_acc = atomic_check(ends_atomic_acc, False)
+                next_stmts.append(stmt)
+        return (ends_atomic_acc or self.ends_atomic), next_stmts
+
     def minimize(self):
-        """Minimizes statement graph, throwing omittable statements out
-        
-        Should be called after settle()
+        """Minimizes statement graph, fixing _next to point to non-omittables
+
+        Is called for all statements, including omittables themselves
+        Should be called after settle(PRE)
         Ignores _prev!
         """
-        if self._omittable:
-            # no need for omittables
-            return
-        
-        old_next = self._next
-        new_next = []
-        finished = False
-        
-        while not finished:
-            finished = True
-            new_next = []
-            for stmt in old_next:
-                if stmt.omittable:
-                    new_next += stmt.next
-                    finished = False
-                else:
-                    new_next.append(stmt)
-            old_next = new_next
-        self._next = new_next
+        ends_atomic_acc, self._next = self.next_reduced()
+        if not self.omittable:
+            self.set_atomic(None, ends_atomic_acc)
 
 
 class NoopStmt(Stmt):
     """Does nothing. Differs from base Stmt only in name
     """
-    def __init__(self, name):
+    def __init__(self, name, omittable=False):
         """
 
         Arguments:
@@ -161,6 +195,7 @@ class NoopStmt(Stmt):
         """
         super(NoopStmt, self).__init__()
         self._name = name
+        self._omittable = omittable
 
     def debug_repr(self):
         return self._name
@@ -258,7 +293,8 @@ class GotoStmt(Stmt):
     def debug_repr(self):
         return "goto %s" % self._label
 
-    def settle(self):
+    def settle(self, pass_no):
+        # Will be called for 1st pass only
         self.set_next(self._label.parent_stmt)
 
 
@@ -396,6 +432,11 @@ class IfStmt(Stmt):
         return "(%s)" % " || ".join([branch[0].executable() for branch in self._options
                                      if type(branch[0]) is not ElseStmt])
 
+    def set_atomic(self, starts, ends):
+        for branch in self._options:
+            branch[0].set_atomic(starts, None)
+            branch[-1].set_atomic(None, ends)
+
     def debug_repr(self):
         return "if"
 
@@ -454,6 +495,10 @@ class SequenceStmt(Stmt):
         self._prev.set_next(self)
         stmt.set_next(self)
 
+    def set_atomic(self, starts, ends):
+        self._stmts[0].set_atomic(starts, None)
+        self._stmts[-1].set_atomic(None, ends)
+
     def debug_repr(self):
         return "-(-"
 
@@ -472,8 +517,7 @@ class AtomicStmt(SequenceStmt):
         - `stmts`: list of Stmt objects
         """
         super(AtomicStmt, self).__init__(stmts)
-        stmts[0].starts_atomic = True
-        stmts[-1].ends_atomic = True
+        self.set_atomic(True, True)
 
     def debug_repr(self):
         return "atomic"

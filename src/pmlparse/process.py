@@ -259,12 +259,16 @@ class Process(object):
         self.add_var(Variable("_ip", SimpleType('byte', SimpleType.MAX_ALIGN)))
         self.add_var(Variable("_proctype", SimpleType('byte', SimpleType.MAX_ALIGN)))
         self.sanity_check()
+        # First settle pass
         for stmt in self._stmts:
-            stmt.settle()
+            stmt.settle(Stmt.SettlePass.PRE)
         for stmt in self._stmts:
             stmt.minimize()
         # Throw omittable statements out after minimization
         self._stmts = [s for s in self._stmts if not s.omittable]
+        # Second settle pass
+        for stmt in self._stmts:
+            stmt.settle(Stmt.SettlePass.POST_MINI)
 
     def sizeof(self):
         """Returns C-code (str) that evaluates to process data structure size
