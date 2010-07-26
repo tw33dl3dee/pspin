@@ -261,6 +261,10 @@ class Process(object):
         self.sanity_check()
         for stmt in self._stmts:
             stmt.settle()
+        for stmt in self._stmts:
+            stmt.minimize()
+        # Throw omittable statements out after minimization
+        self._stmts = [s for s in self._stmts if not s.omittable]
 
     def sizeof(self):
         """Returns C-code (str) that evaluates to process data structure size

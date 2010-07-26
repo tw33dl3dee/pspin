@@ -19,6 +19,7 @@ class Stmt(object):
         self.parent_proc = None
         self.starts_atomic = False
         self.ends_atomic = False
+        self._omittable = False
 
     def __str__(self):
         return self.debug_repr()
@@ -57,6 +58,12 @@ class Stmt(object):
         if self.ends_atomic:
             return "END_ATOMIC()"
         return None
+
+    @property
+    def omittable(self):
+        """If True, statement may be left out (by graph reduction) with no side effect
+        """
+        return self._omittable
 
     def add_label(self, label):
         """Adds label to statement
@@ -115,6 +122,32 @@ class Stmt(object):
         Actually this is usable for statements that depend on other statements only
         """
         pass
+
+    def minimize(self):
+        """Minimizes statement graph, throwing omittable statements out
+        
+        Should be called after settle()
+        Ignores _prev!
+        """
+        if self._omittable:
+            # no need for omittables
+            return
+        
+        old_next = self._next
+        new_next = []
+        finished = False
+        
+        while not finished:
+            finished = True
+            new_next = []
+            for stmt in old_next:
+                if stmt.omittable:
+                    new_next += stmt.next
+                    finished = False
+                else:
+                    new_next.append(stmt)
+            old_next = new_next
+        self._next = new_next
 
 
 class NoopStmt(Stmt):
@@ -220,6 +253,7 @@ class GotoStmt(Stmt):
         """
         Stmt.__init__(self)
         self._label = label
+        self._omittable = True
 
     def debug_repr(self):
         return "goto %s" % self._label
@@ -264,6 +298,7 @@ class ElseStmt(Stmt):
     def __init__(self):
         Stmt.__init__(self)
         self.cond = None
+        # BUG self._omittable = True
 
     def executable(self):
         if self.cond is None:
@@ -279,6 +314,9 @@ class BreakStmt(Stmt):
 
     Always executable, does nothing
     """
+    def __init__(self):
+        super(BreakStmt, self).__init__()
+        self._omittable = True
 
     def find_break_stmts(self):
         return [self]
@@ -292,6 +330,7 @@ class AssertStmt(Stmt):
 
     Always executable
     """
+    #BUG: omittable, join with previous statement
 
     def __init__(self, expr):
         """
@@ -326,6 +365,7 @@ class IfStmt(Stmt):
         Stmt.__init__(self)
         self._options = options
         self._next = [branch[0] for branch in options]
+        self._omittable = True
         self._has_else = False
         for branch in options:
             if type(branch[0]) is ElseStmt:
