@@ -63,6 +63,6 @@ struct Channel {
  * @param field_offset Смещение требуемого поля
  */
 #define CHAN_FIELD(chan, type, entry_size, entry_idx, field_offset)		\
-	*(type *)&chan[sizeof(struct Channel) + (entry_size)*(entry_idx) + (field_offset)]
+	(*(type *)&chan[sizeof(struct Channel) + (entry_size)*(entry_idx) + (field_offset)])
 
 #endif /* _CHANNEL_H_ */

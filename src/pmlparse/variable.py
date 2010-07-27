@@ -369,7 +369,7 @@ class Channel(Variable):
     def printf_ref(self):
         printf_ref_tpl = "(int)CHAN_LEN($chan), (int)CHAN_MAXLEN($chan), $fields"
         return Template(printf_ref_tpl).substitute(chan=self.ref(),
-                                                   fields=", ".join([self.field_ref(e, f)
+                                                   fields=", ".join([self._typelist[f].printf_ref(self.field_ref(e, f))
                                                                      for e in range(self._max_len)
                                                                      for f in range(len(self._typelist))]))
 
