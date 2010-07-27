@@ -20,6 +20,7 @@ class Stmt(object):
         self._starts_atomic = False
         self._ends_atomic = False
         self._omittable = False
+        self._endstate = False
 
     def __str__(self):
         return self.debug_repr()
@@ -86,6 +87,18 @@ class Stmt(object):
         """If True, statement may be left out (by graph reduction) with no side effect
         """
         return self._omittable
+
+    @property
+    def endstate(self):
+        """If True, this statement is considered a valid endstate
+        """
+        return self._endstate
+
+    def set_endstate(self, endstate):
+        """Sets statement endstate flag to given value, if not None
+        """
+        if endstate:
+            self._endstate = endstate
 
     def add_label(self, label):
         """Adds label to statement
@@ -154,23 +167,44 @@ class Stmt(object):
         pass
 
     def next_reduced(self):
-        ends_atomic_acc = None
+        """Calculates next statements in reduced (minimized) graph
+ 
+        Returns: tuple (
+        (1) is valid endstate (True or None),
+        (2) ends atomic (bool),
+        (3) next statements (list)
+        )
+
+        Deduces whether current statement ends atomic context or is a valid endstate
+        """
+        ends_atomic = None
+        endstate = None
         next_stmts = []
 
+        # Deduce whether we need to end atomic context
+        # 1) if all next statements are omittable and end atomic context, True
+        # 2) if each of next statements either does not end atomic context or is not omittable, False
+        # Error otherwise (when there are some omittable statement that end atomic, but not all)
         def atomic_check(acc, e):
             if acc is not None and acc != e:
                 raise RuntimeError, "Cannot reduce statement atomicity context"
             return e
-                          
+
         for stmt in self._next:
             if stmt.omittable:
-                e, n = stmt.next_reduced()
-                ends_atomic_acc = atomic_check(ends_atomic_acc, e)
+                es, ea, n = stmt.next_reduced()
+                ends_atomic = atomic_check(ends_atomic, ea)
                 next_stmts += n
+                # If any of reachable omittable statements is valid endstate,
+                # this statement should also be endstate
+                endstate = es or endstate
             else:
-                ends_atomic_acc = atomic_check(ends_atomic_acc, False)
+                ends_atomic = atomic_check(ends_atomic, False)
                 next_stmts.append(stmt)
-        return (ends_atomic_acc or self.ends_atomic), next_stmts
+
+        return ((self.endstate or endstate),
+                (self.ends_atomic or ends_atomic),
+                next_stmts)
 
     def minimize(self):
         """Minimizes statement graph, fixing _next to point to non-omittables
@@ -178,10 +212,13 @@ class Stmt(object):
         Is called for all statements, including omittables themselves
         Should be called after settle(PRE)
         Ignores _prev!
+
+        Updates atomicity and endstate validness
         """
-        ends_atomic_acc, self._next = self.next_reduced()
+        endstate, ends_atomic, self._next = self.next_reduced()
         if not self.omittable:
-            self.set_atomic(None, ends_atomic_acc)
+            self.set_atomic(None, ends_atomic)
+            self.set_endstate(endstate)
 
 
 class NoopStmt(Stmt):

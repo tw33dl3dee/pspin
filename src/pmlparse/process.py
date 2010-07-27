@@ -17,10 +17,20 @@ class Label(object):
         - `name`: label name
         """
         self._name = name
-        self.parent_stmt = None
+        self._parent_stmt = None
 
     def __str__(self):
         return self._name
+
+    @property3
+    def parent_stmt(self):
+        def __get__(self):
+            return self._parent_stmt
+        def __set__(self, parent_stmt):
+            self._parent_stmt = parent_stmt
+            # Labels with names like 'end...' denote valid endstates
+            if self._name.startswith('end'):
+                parent_stmt.set_endstate(True)
 
 
 class Process(object):
@@ -265,9 +275,10 @@ class Process(object):
     def finish(self):
         """Settles Process object, must be called after all statements and declarations
         """
-        end_stmt = NoopStmt("-end-")
+        # Add omittable valid endstate Noop at end of each process
+        end_stmt = NoopStmt("-end-", True)
+        end_stmt.set_endstate(True)
         self.add_stmt(end_stmt)
-        self._end_stmts.append(end_stmt)
         # Alignment of special vars is forced to maximum value
         # so that they appear at the beginning of field list
         self.add_var(Variable("_ip", SimpleType('byte', SimpleType.MAX_ALIGN)))
@@ -283,6 +294,8 @@ class Process(object):
         # Second settle pass
         for stmt in self._stmts:
             stmt.settle(Stmt.SettlePass.POST_MINI)
+        # Form valid endstates list
+        self._end_stmts = [s for s in self._stmts if s.endstate]
 
     def sizeof(self):
         """Returns C-code (str) that evaluates to process data structure size
