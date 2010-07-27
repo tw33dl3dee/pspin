@@ -132,6 +132,11 @@ static struct State *copy_state_add_process(const struct State *state, int proct
 	return new_state;
 }
 
+/**
+ * If non-zero, current process is inside d_step block
+ */
+static int in_dstep = 0;
+
 /** 
  * @brief Perform transition, if possible.
  * 
@@ -183,6 +188,8 @@ do_transition(int pid, int dest_ip,
 	state_dprintf("*** " fmt, ##args);
 #define BEGIN_ATOMIC() STATEATOMIC(state) = pid
 #define END_ATOMIC()   STATEATOMIC(state) = -1
+#define BEGIN_DSTEP() in_dstep = 1
+#define END_DSTEP() in_dstep = 0
 
 #define TRANSITIONS
 #include STATEGEN_FILE

@@ -290,8 +290,8 @@ stmt ->
 		return DoStmt(kids[1])
 	| K_ATOMIC P_LBRACE sequence P_RBRACE:
 		return AtomicStmt(kids[2] + [codegen.cur_proc.add_stmt(NoopStmt('-atomic end-', True))])
-	| D_STEP P_LBRACE sequence P_RBRACE:
-		raise NotImplementedError(kids[0])
+	| K_DSTEP P_LBRACE sequence P_RBRACE:
+		return DstepStmt(kids[2] + [codegen.cur_proc.add_stmt(NoopStmt('-d_step end-', True))])
 	| K_C_CODE c_code:
 		return CCodeStmt(kids[1])
 	| P_LBRACE sequence P_RBRACE:

@@ -19,6 +19,8 @@ class Stmt(object):
         self._parent_proc = None
         self._starts_atomic = False
         self._ends_atomic = False
+        self._starts_dstep = False
+        self._ends_dstep = False
         self._omittable = False
         self._endstate = False
 
@@ -47,6 +49,8 @@ class Stmt(object):
 
         Needs not to end with semicolon
         """
+        if self.starts_dstep and not self.ends_dstep:
+            return "BEGIN_DSTEP()"
         if self.starts_atomic and not self.ends_atomic:
             return "BEGIN_ATOMIC()"
         return None
@@ -58,6 +62,8 @@ class Stmt(object):
         """
         if not self.starts_atomic and self.ends_atomic:
             return "END_ATOMIC()"
+        if not self.starts_dstep and self.ends_dstep:
+            return "END_DSTEP()"
         return None
 
     def set_atomic(self, starts, ends):
@@ -74,6 +80,20 @@ class Stmt(object):
         if ends is not None:
             self._ends_atomic = ends
 
+    def set_dstep(self, starts, ends):
+        """Sets d_step context of statement
+
+        Arguments:
+        - `starts`: if True, starts d_step context
+        - `ends`: if True, ends d_step context
+
+        If any argument is None, corresponding flag is left unchanged
+        """
+        if starts is not None:
+            self._starts_dstep = starts
+        if ends is not None:
+            self._ends_dstep = ends
+
     @property
     def starts_atomic(self):
         return self._starts_atomic
@@ -81,6 +101,14 @@ class Stmt(object):
     @property
     def ends_atomic(self):
         return self._ends_atomic
+
+    @property
+    def starts_dstep(self):
+        return self._starts_dstep
+
+    @property
+    def ends_dstep(self):
+        return self._ends_dstep
 
     @property
     def omittable(self):
@@ -123,7 +151,7 @@ class Stmt(object):
     def next(self):
         """List of next statements (reachable immeaditaly after current is executed)
 
-        All statements in list are atomic statements (no if/do blocks)
+        All statements in list are simple statements (no if/do blocks)
         """
         return self._next
 
@@ -172,38 +200,44 @@ class Stmt(object):
         Returns: tuple (
         (1) is valid endstate (True or None),
         (2) ends atomic (bool),
+        (3) ends d_step (bool)
         (3) next statements (list)
         )
 
-        Deduces whether current statement ends atomic context or is a valid endstate
+        Deduces whether current statement ends atomic/d_step context or is a valid endstate
         """
         ends_atomic = None
+        ends_dstep = None
         endstate = None
         next_stmts = []
 
-        # Deduce whether we need to end atomic context
         # 1) if all next statements are omittable and end atomic context, True
         # 2) if each of next statements either does not end atomic context or is not omittable, False
         # Error otherwise (when there are some omittable statement that end atomic, but not all)
-        def atomic_check(acc, e):
+        def deduce_atomic(acc, e):
             if acc is not None and acc != e:
                 raise RuntimeError, "Cannot reduce statement atomicity context"
             return e
 
         for stmt in self._next:
             if stmt.omittable:
-                es, ea, n = stmt.next_reduced()
-                ends_atomic = atomic_check(ends_atomic, ea)
+                es, ea, ed, n = stmt.next_reduced()
+                # Deduce atomic and d_step context for current statement
+                ends_atomic = deduce_atomic(ends_atomic, ea)
+                ends_dstep = deduce_atomic(ends_dstep, ed)
                 next_stmts += n
                 # If any of reachable omittable statements is valid endstate,
                 # this statement should also be endstate
                 endstate = es or endstate
             else:
-                ends_atomic = atomic_check(ends_atomic, False)
+                # Next non-omittable statements do not affect atomicity
+                ends_atomic = deduce_atomic(ends_atomic, False)
+                ends_dstep = deduce_atomic(ends_dstep, False)
                 next_stmts.append(stmt)
 
         return ((self.endstate or endstate),
                 (self.ends_atomic or ends_atomic),
+                (self.ends_dstep or ends_dstep),
                 next_stmts)
 
     def minimize(self):
@@ -215,9 +249,10 @@ class Stmt(object):
 
         Updates atomicity and endstate validness
         """
-        endstate, ends_atomic, self._next = self.next_reduced()
+        endstate, ends_atomic, ends_dstep, self._next = self.next_reduced()
         if not self.omittable:
             self.set_atomic(None, ends_atomic)
+            self.set_dstep(None, ends_dstep)
             self.set_endstate(endstate)
 
 
@@ -473,6 +508,11 @@ class IfStmt(Stmt):
         for branch in self._options:
             branch[0].set_atomic(starts, None)
             branch[-1].set_atomic(None, ends)
+            
+    def set_dstep(self, starts, ends):
+        for branch in self._options:
+            branch[0].set_dstep(starts, None)
+            branch[-1].set_dstep(None, ends)
 
     def debug_repr(self):
         return "if"
@@ -536,6 +576,10 @@ class SequenceStmt(Stmt):
         self._stmts[0].set_atomic(starts, None)
         self._stmts[-1].set_atomic(None, ends)
 
+    def set_dstep(self, starts, ends):
+        self._stmts[0].set_dstep(starts, None)
+        self._stmts[-1].set_dstep(None, ends)
+
     def debug_repr(self):
         return "-(-"
 
@@ -558,6 +602,26 @@ class AtomicStmt(SequenceStmt):
 
     def debug_repr(self):
         return "atomic"
+
+
+class DstepStmt(SequenceStmt):
+    """Deterministic step (d_step) statement sequence
+
+    This is a dumb statement, needed only to set starts_dstep/ends_dstep
+    flags on it's children
+    """
+
+    def __init__(self, stmts):
+        """
+
+        Arguments:
+        - `stmts`: list of Stmt objects
+        """
+        super(DstepStmt, self).__init__(stmts)
+        self.set_dstep(True, True)
+
+    def debug_repr(self):
+        return "d_step"
 
 
 class PrintStmt(Stmt):
