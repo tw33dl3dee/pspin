@@ -213,8 +213,8 @@ typename_list ->
 varref ->
 	name:
 		return SimpleRef(codegen.lookup_var(kids[0]))
-	| name idx:
-		return IdxRef(codegen.lookup_var(kids[0]), kids[1])
+	| varref idx:
+		return IdxRef(*kids)
 	| varref P_DOT name:
 		return FieldRef(kids[0], kids[2])
 	;

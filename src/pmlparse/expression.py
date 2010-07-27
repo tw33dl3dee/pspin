@@ -55,6 +55,9 @@ class VarRef(Expr):
     def deref(self):
         """Returns Variable object being referenced
         """
+        raise NotImplementedError
+
+    def code(self):
         return NotImplemented
 
 
@@ -82,28 +85,28 @@ class SimpleRef(VarRef):
 
 
 class IdxRef(VarRef):
-    """Indexed reference to a variable
+    """Indexed reference of another variable reference
     """
 
-    def __init__(self, var, idx):
+    def __init__(self, varref, idx):
         """
 
         Arguments:
-        - `var`: Variable object
+        - `varref`: VarRef object
         - `idx`: index (Expression object)
         """
         VarRef.__init__(self)
-        self._var = var
+        self._varref = varref
         self._idx = idx
 
     def __str__(self):
-        return "%s[%s]" % (self._var, self._idx)
+        return "%s[%s]" % (self._varref, self._idx)
 
     def code(self):
-        return "(%s[%s])" % (self._var.ref(), self._idx.code())
+        return "(%s[%s])" % (self._varref.code(), self._idx.code())
 
     def deref(self):
-        return self._var
+        return self._varref.deref()
 
 
 class FieldRef(VarRef):
@@ -126,6 +129,9 @@ class FieldRef(VarRef):
 
     def code(self):
         return "(%s.%s)" % (self._varref.code(), self._field)
+
+    def deref(self):
+        return self._varref.deref()
 
 
 class RunExpr(Expr):
