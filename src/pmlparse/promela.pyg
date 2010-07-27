@@ -284,9 +284,11 @@ stmt ->
 	| K_DO options K_OD:
 		return DoStmt(kids[1])
 	| K_ATOMIC P_LBRACE sequence P_RBRACE:
-		return AtomicStmt(kids[2] + [codegen.cur_proc.add_stmt(AtomicEndStmt())])
+		return AtomicStmt(kids[2] + [codegen.cur_proc.add_stmt(NoopStmt('-atomic end-', True))])
 	| D_STEP P_LBRACE sequence P_RBRACE:
 		raise NotImplementedError(kids[0])
+	| K_C_CODE c_code:
+		return CCodeStmt(kids[1])
 	| P_LBRACE sequence P_RBRACE:
 		raise NotImplementedError('nested blocks')
 	| send:
@@ -360,6 +362,8 @@ expr ->
 		return BinaryExpr(*kids)
 	| expr O_SHIFT expr:
 		return BinaryExpr(*kids)
+	| O_C_EXPR c_code:
+		return CCodeExpr(kids[1])
 	| O_TILDE expr:
 		return UnaryExpr(*kids)
 	| O_ADD expr:
@@ -373,7 +377,7 @@ expr ->
 	| T_CHANOP P_LPAREN varref P_RPAREN:
 		return ChanOpExpr(kids[0], kids[2])
 	| P_LPAREN expr P_SEQ expr P_COLON expr P_RPAREN:
-		return TernaryExpr(*kids[1:6])
+		return TernaryExpr(kids[1], '?', kids[3], ':', kids[5])
 	| poll:
 		return kids[0]
 	| varref:
@@ -382,6 +386,11 @@ expr ->
 		return ConstExpr(kids[0])
 	| name idx P_AT name:
 		raise NotImplementedError(kids[2])
+	;
+
+c_code ->
+	C_CHAR+:
+		return ''.join(kids[0]).strip()
 	;
 
 uname ->

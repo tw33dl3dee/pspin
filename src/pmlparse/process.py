@@ -160,7 +160,9 @@ class Process(object):
             if ($executable) {
                 NEW_STATE();
                 RECORD_STEP("$step_str");
+                $pre_exec;
                 $execute;
+                $post_exec;
                 goto passed;
             }
             goto blocked"""
@@ -168,6 +170,8 @@ class Process(object):
                                                  # TODO: was self.lookup_var("_ip").ref())]
         for stmt in self._stmts:
             lines.append(Template(case_tpl).substitute(ip=stmt.ip, executable=stmt.executable(),
+                                                       pre_exec=stmt.pre_exec() or "",
+                                                       post_exec=stmt.post_exec() or "",
                                                        execute=stmt.execute(), step_str=str(stmt)))
         lines += ["\t\tdefault:\n\t\t\tassert(0)", "\t\t}"]
         return ";\n".join(lines)
@@ -219,12 +223,26 @@ class Process(object):
         return ";\n".join(lines)
 
     def valid_endstate_ips(self):
-        """Return C-code (str) with array of valid endstate IP values for this proctype
+        """Returns C-code (str) with array of valid endstate IP values for this proctype
         """
         valid_ips_tpl = '(int []){ $ips }'
         valid_ips = [str(stmt.ip) for stmt in self._end_stmts]
         valid_ips.append(str(-1))
         return Template(valid_ips_tpl).substitute(ips=', '.join(valid_ips))
+
+    def c_code_def(self):
+        """Returns C code that defines macros for naming current process
+        in c_code and c_expr
+        """
+        proc_def_tpl = "#define P$procname ($ref)"
+        return Template(proc_def_tpl).substitute(procname=self.name,
+                                                 ref=self.ref())
+
+    def c_code_undef(self):
+        """Returns C code that undefines macros defined by c_code_def
+        """
+        proc_undef_tpl = "#undef P$procname"
+        return Template(proc_undef_tpl).substitute(procname=self.name)
 
     def add_stmt(self, stmt):
         """Adds new statement (not necessarily from topmost block) to process
@@ -255,8 +273,16 @@ class Process(object):
         self.add_var(Variable("_ip", SimpleType('byte', SimpleType.MAX_ALIGN)))
         self.add_var(Variable("_proctype", SimpleType('byte', SimpleType.MAX_ALIGN)))
         self.sanity_check()
+        # First settle pass
         for stmt in self._stmts:
-            stmt.settle()
+            stmt.settle(Stmt.SettlePass.PRE)
+        for stmt in self._stmts:
+            stmt.minimize()
+        # Throw omittable statements out after minimization
+        self._stmts = [s for s in self._stmts if not s.omittable]
+        # Second settle pass
+        for stmt in self._stmts:
+            stmt.settle(Stmt.SettlePass.POST_MINI)
 
     def sizeof(self):
         """Returns C-code (str) that evaluates to process data structure size

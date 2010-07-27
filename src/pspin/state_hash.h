@@ -85,6 +85,8 @@ extern int state_hash_init();
 extern void state_hash_stats(void);
 extern void state_hash_inter_stats(void);
 
+extern int dump_new_states;
+
 /**
  * Initial hash seed used for hash-based partitioning
  */

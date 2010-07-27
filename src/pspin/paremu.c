@@ -15,6 +15,7 @@
 #include <string.h>
 #include <time.h>
 #include <sys/time.h>
+#include <getopt.h>
 
 #include "config.h"
 #include "state.h"
@@ -256,8 +257,22 @@ static void bfs(void)
 	trace_summary();
 }
 
-int main()
+int main(int ac, char *av[])
 {
+	char c;
+
+	opterr = 0;
+	while ((c = getopt(ac, av, "d")) != -1)
+		switch (c) {
+		case 'd':
+			dump_new_states = 1;
+			break;
+
+		default:
+			abort();
+		}
+		
 	bfs();
+
 	return 0;
 }

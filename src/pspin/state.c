@@ -272,6 +272,8 @@ void edump_state(struct State *state)
 #include STATEGEN_FILE
 #undef  PROCSTATE_EDUMP
 	}
+
+	eprintf("-------------------------------------------------------\n");
 }
 
 /** 
