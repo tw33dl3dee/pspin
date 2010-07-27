@@ -103,6 +103,7 @@ class BuiltinType(Type):
         return self.printf_types.get(self._name, 'int')
 
     def printf_ref(self, varref):
+        # For built-in types, this just printf varref prefixed with type cast
         return "(%s)%s" % (self._printf_type(), varref)
 
 
@@ -155,11 +156,12 @@ class UserType(Type):
                                                    fields=field_decls)
 
     def printf_format(self):
-        # BUG: use f.print_format, add to it 'depth' argument
-        return "{%s}" % (", ".join(["%s:%s" % (f, f.type.printf_format()) for f in self._fields]))
+        return "{%s}" % (", ".join(["%s:%s" % (f, f.printf_format(1)) for f in self._fields]))
 
     def printf_ref(self, varref):
-        return ", ".join([f.type.printf_ref("(%s.%s)" % (varref, f.ref())) for f in self._fields])
+        # this prints printf() arguments to refence all fields, passing
+        # to each field's printf_ref() it's reference via our reference
+        return ", ".join([f.printf_ref("(%s.%s)" % (varref, f.ref())) for f in self._fields])
 
 
 #############################################################
@@ -239,24 +241,39 @@ class Variable(object):
         else:
             return "%s" % self._name
 
-    def printf_format(self):
+    def printf_format(self, depth=0):
         """Generates string to be used as printf-format specifier
         """
-        skip = " "*(10 - len(self._name))
+        if depth == 0:
+            skip = " "*(10 - len(self._name))
+        else:
+            skip = ""
         if self._arrsize:
             return skip + "[%s]" % (", ".join([self._type.printf_format()]*self._arrsize.eval()))
         else:
             return skip + self._type.printf_format()
 
-    def _elem_printf_ref(self):
-        return self._type.printf_ref(self.ref())
+    def printf_ref(self, selfref=None):
+        """Generates C code with arguments to printf() for printing this variable
 
-    def printf_ref(self):
+        Arguments:
+        - `selfref`: how to reference outselves. If None, self.ref() is used
+
+        When selfref is not None, it means that we are part of some bigger structure
+        (e.g., array field inside a typedef)
+
+        selfref is passed to our type's print_ref so that it can print our structure
+        using this reference
+
+        Fuck a fuck (C)
+        """
+        if selfref is None:
+            selfref = self.ref()
         if self._arrsize:
-            return ",".join(["%s[%d]" % (self._elem_printf_ref(), i)
+            return ",".join([self.type.printf_ref("%s[%d]" % (selfref, i))
                              for i in range(self._arrsize.eval())])
         else:
-            return self._elem_printf_ref()
+            return self.type.printf_ref(selfref)
 
 
 class SpecialVariable(Variable):
