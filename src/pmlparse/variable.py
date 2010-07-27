@@ -23,6 +23,39 @@ class Type(object):
     def c_size(self):
         """Returns C code which evaluates to machine size of this type
         """
+        return "sizeof(%s)" % self.c_type()
+
+    def c_type(self):
+        """C-type corresponding to this type (str)
+        """
+        return NotImplemented
+
+    def c_align(self):
+        """Not actual align (depends on platform) but score telling
+        how this type is expected to be aligned
+
+        Bigger values mean higher alignment requirement
+        """
+        return NotImplemented
+
+    def c_bitsize(self):
+        """Bit-size of C type corresponding to this type (int)
+
+        Returns 0 if type has no fixed bit-size.
+        """
+        return 0
+
+    def printf_format(self):
+        """printf specifier to use for this type (str)
+        """
+        return NotImplemented
+
+    def printf_ref(self, varref):
+        """printf() argument for printing variable of given type
+
+        Arguments:
+        - `varref`: C code (str) with variable refernce
+        """
         return NotImplemented
 
 
@@ -55,37 +88,22 @@ class BuiltinType(Type):
         self._align = align
 
     def c_type(self):
-        """C-type corresponding to this type (str)
-        """
         return self.c_types[self._name]
 
-    def c_size(self):
-        return "sizeof(%s)" % self.c_type()
-
     def c_align(self):
-        """Not actual align (depends on platform) but score telling
-        how this type is expected to be aligned
-
-        Bigger values mean higher alignment requirement
-        """
         return self._align or self.c_aligns[self.c_type()]
 
     def c_bitsize(self):
-        """Bit-size of C type corresponding to this type (int)
-
-        Returns 0 if type has no fixed bit-size.
-        """
         return self.c_bitsizes.get(self._name)
 
     def printf_format(self):
-        """printf specifier to use for this type (str)
-        """
         return self.printf_codes.get(self._name, '%d')
 
-    def printf_type(self):
-        """C-type to pass to printf (str)
-        """
+    def _printf_type(self):
         return self.printf_types.get(self._name, 'int')
+
+    def printf_ref(self, varref):
+        return "(%s)%s" % (self._printf_type(), varref)
 
 
 class SimpleType(BuiltinType):
@@ -102,6 +120,46 @@ class ChanType(BuiltinType):
     def __init__(self):
         # Minimal align, so that channels go last
         super(ChanType, self).__init__("byte", 1)
+
+
+class UserType(Type):
+    """User-defined types (structures)
+    """
+    def __init__(self, name):
+        super(UserType, self).__init__(name)
+        self._fields = []
+
+    def c_type(self):
+        return "struct Utype%s" % str(self)
+
+    def c_align(self):
+        # Align by first field
+        if len(self._fields):
+            return self._fields[0].type.c_align()
+        else:
+            return 1
+
+    def add_field(self, fieldvar):
+        self._fields.append(fieldvar)
+
+    def finish(self):
+        pass
+
+    def decl(self):
+        utype_decl_tpl = """$hdr {
+    $fields;
+}
+"""
+        field_decls = ';\n\t'.join([f.decl() for f in self._fields])
+        return Template(utype_decl_tpl).substitute(hdr=self.c_type(),
+                                                   fields=field_decls)
+
+    def printf_format(self):
+        # BUG: use f.print_format, add to it 'depth' argument
+        return "{%s}" % (", ".join(["%s:%s" % (f, f.type.printf_format()) for f in self._fields]))
+
+    def printf_ref(self, varref):
+        return ", ".join([f.type.printf_ref("(%s.%s)" % (varref, f.ref())) for f in self._fields])
 
 
 #############################################################
@@ -154,7 +212,7 @@ class Variable(object):
     def check_type(self):
         """Used for type validation
         """
-        if not type(self._type) is SimpleType:
+        if not type(self._type) in (SimpleType, UserType):
             raise RuntimeError, "Invalid type `%s' for `%s'" % (self._type, self._name)
 
     def decl(self):
@@ -177,9 +235,9 @@ class Variable(object):
         """Generates C-expression that references variable
         """
         if self.parent:
-            return "((%s)->%s)" % (self.parent.ref(), self._name)
+            return "(%s)->%s" % (self.parent.ref(), self._name)
         else:
-            return "(%s)" % self._name
+            return "%s" % self._name
 
     def printf_format(self):
         """Generates string to be used as printf-format specifier
@@ -190,12 +248,15 @@ class Variable(object):
         else:
             return skip + self._type.printf_format()
 
+    def _elem_printf_ref(self):
+        return self._type.printf_ref(self.ref())
+
     def printf_ref(self):
         if self._arrsize:
-            return ",".join(["(%s)%s[%d]" % (self._type.printf_type(), self.ref(), i)
+            return ",".join(["%s[%d]" % (self._elem_printf_ref(), i)
                              for i in range(self._arrsize.eval())])
         else:
-            return "(%s)%s" % (self._type.printf_type(), self.ref())
+            return self._elem_printf_ref()
 
 
 class SpecialVariable(Variable):

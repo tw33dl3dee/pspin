@@ -13,8 +13,10 @@ class Codegen(object):
     """
     def __init__(self):
         self._vars = dict()
+        self._utypes = dict()
         self._procs = []
         self.cur_proc = None
+        self.cur_utype = None
 
     def write_file(self, fname):
         """Writes out generated code to file
@@ -25,6 +27,7 @@ class Codegen(object):
         with file(fname, "w") as f:
             self.write_block(f, 'STATE_DECL', self.state_decl())
             self.write_block(f, 'PROC_DECL', self.proc_decl())
+            self.write_block(f, 'UTYPE_DECL', self.utype_decl())
             self.write_block(f, 'C_CODE_DEF', self.c_code_def())
             self.write_block(f, 'C_CODE_UNDEF', self.c_code_undef())
             self.write_block(f, 'STATE_INIT', self.state_init())
@@ -66,6 +69,25 @@ class Codegen(object):
         self.cur_proc.finish()
         self.cur_proc = None
 
+    def start_utype(self, name):
+        """
+        """
+        if name in self._utypes:
+            raise RuntimeError, "Redefinition: `%s'" % name
+        self.cur_utype = UserType(name)
+        self._utypes[name] = self.cur_utype
+        return self.cur_utype
+
+    def end_utype(self):
+        self.cur_utype.finish()
+        self.cur_utype = None
+
+    def lookup_utype(self, name):
+        if name in self._utypes:
+            return self._utypes[name]
+        else:
+            raise RuntimeError, "Undefined user type: `%s'" % name
+
     def add_var(self, var, vartype = None):
         """Adds variable to current scope
 
@@ -77,7 +99,9 @@ class Codegen(object):
         """
         if vartype is not None:
             var.set_type(vartype)
-        if self.cur_proc is not None:
+        if self.cur_utype is not None:
+            return self.cur_utype.add_field(var)
+        elif self.cur_proc is not None:
             return self.cur_proc.add_var(var)
         elif var.name in self._vars:
             raise RuntimeError, "Redefinition: `%s'" % var.name
@@ -145,6 +169,11 @@ static int procactive[] = { $procactive }"""
         lines.append(Template(procsizes_tpl).substitute(nproctype=len(self._procs),
                                                         procsizes=procsizes, procactive=procactive))
         return ";\n".join(lines)
+
+    def utype_decl(self):
+        """Returns C-code which declares user types
+        """
+        return ";\n".join(ut.decl() for ut in self._utypes.values())
 
     def transitions_init(self):
         """Returns C-code (str) that initializes transitions for all proctypes

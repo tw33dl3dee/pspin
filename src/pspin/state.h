@@ -35,6 +35,10 @@ struct Process {
 	char data[0];
 };
 
+#define UTYPE_DECL
+#include STATEGEN_FILE
+#undef  UTYPE_DECL
+
 #define STATE_DECL
 #include STATEGEN_FILE
 #undef  STATE_DECL

@@ -124,7 +124,7 @@ class FieldRef(VarRef):
     def __str__(self):
         return "%s.%s" % (self._varref, self._field)
 
-    def ref(self):
+    def code(self):
         return "(%s.%s)" % (self._varref.code(), self._field)
 
 

@@ -79,8 +79,13 @@ trace ->
 	;
 
 utype ->
-	K_TYPEDEF name P_LBRACE decl_list P_RBRACE:
-		raise NotImplementedError(kids[0])
+	utype_hdr P_LBRACE decl_list P_RBRACE:
+		codegen.end_utype()
+	;
+
+utype_hdr ->
+	K_TYPEDEF name:
+		return codegen.start_utype(kids[1])
 	;
 
 mtype ->
@@ -122,7 +127,7 @@ typename ->
 	| K_CHAN:
 		return ChanType()
 	| uname:
-		raise NotImplementedError(kids[0])
+		return codegen.lookup_utype(kids[0])
 	;
 
 active ->
