@@ -148,6 +148,8 @@ void dump_state(struct State *state);
 void edump_state(struct State *state);
 void hexdump_state(struct State *state);
 
+extern int use_pml_printf;
+
 enum TransitionResult 
 do_transition(transitions_t transitions,
               int pid, int dest_ip,

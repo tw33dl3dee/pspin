@@ -263,16 +263,20 @@ int main(int ac, char *av[])
 	char c;
 
 	opterr = 0;
-	while ((c = getopt(ac, av, "d")) != -1)
+	while ((c = getopt(ac, av, "dp")) != -1)
 		switch (c) {
 		case 'd':
 			dump_new_states = 1;
 			break;
 
+		case 'p':
+			use_pml_printf = 1;
+			break;
+
 		default:
 			abort();
 		}
-		
+
 	bfs();
 
 	return 0;

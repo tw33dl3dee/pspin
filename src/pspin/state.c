@@ -137,6 +137,11 @@ static struct State *copy_state_add_process(const struct State *state, int proct
  */
 static int in_dstep = 0;
 
+/**
+ * If non-zero, printf() output from PROMELA goes to stderr
+ */
+int use_pml_printf;
+
 /** 
  * @brief Perform transition, if possible.
  *
@@ -203,12 +208,20 @@ do_transition(transitions_t transitions,
 		edump_state(state);									\
 		aborted = TransitionCausedAbort;					\
 	}
-#define PRINTF(fmt, args...)					\
-	state_dprintf("*** " fmt, ##args);
 #define BEGIN_ATOMIC() STATEATOMIC(state) = pid
 #define END_ATOMIC()   STATEATOMIC(state) = -1
 #define BEGIN_DSTEP() in_dstep = 1
 #define END_DSTEP() in_dstep = 0
+
+#ifdef DEBUG
+#	define PRINTF(fmt, args...)					\
+	printf("%d\n", use_pml_printf);				\
+	state_dprintf("*** " fmt, ##args);
+#else
+#	define PRINTF(fmt, args...)					\
+	if (use_pml_printf)							\
+		eprintf("*** " fmt, ##args)
+#endif
 
 #define C_CODE_DEF
 #include STATEGEN_FILE
