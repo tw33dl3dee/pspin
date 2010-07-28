@@ -2,7 +2,7 @@
 #
 
 from __future__ import with_statement
-from process import Process
+import process
 from variable import *
 from string import Template
 from expression import ConstExpr
@@ -61,7 +61,7 @@ class Codegen(object):
         - `active`: active count or 0 if not active,
         - `name`: proctype name
         """
-        self.cur_proc = Process(active, name)
+        self.cur_proc = process.Process(active, name)
         self._procs.append(self.cur_proc)
         return self.cur_proc
 
@@ -178,6 +178,7 @@ struct State {
 #define PROCIP(process) (process)->_ip
 #define PROCTYPE(process) (process)->_proctype
 #define PROCSIZE(process) procsizes[(process)->_proctype]
+#define PROC_IP_BYTES $ip_bytes
 
 static size_t procsizes[] = { $procsizes };
 static int procactive[] = { $procactive }"""
@@ -185,7 +186,8 @@ static int procactive[] = { $procactive }"""
         procactive = ", ".join([str(p.active) for p in self._procs])
         lines = [p.decl() for p in self._procs]
         lines.append(Template(procsizes_tpl).substitute(nproctype=len(self._procs),
-                                                        procsizes=procsizes, procactive=procactive))
+                                                        procsizes=procsizes, procactive=procactive,
+                                                        ip_bytes=process.ip_byte_size))
         return ";\n".join(lines)
 
     def utype_decl(self):
@@ -302,3 +304,5 @@ $init;
         """
         self.add_var(Variable('_svsize', SimpleType('short')))
         self.add_var(Variable('_atomic', SimpleType('pid'), initval=ConstExpr(-1)))
+        for proc in self._procs:
+            proc.settle()

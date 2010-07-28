@@ -17,24 +17,6 @@
 
 #include "channel.h"
 
-/**
- * General process structure
- */
-struct Process {
-	/**
-	 * IP (0-based)
-	 */
-    unsigned char _ip ;
-	/**
-	 * Proctype (0-based)
-	 */
-    unsigned char _proctype ;
-	/**
-	 * Other data (process-specific)
-	 */
-	char data[0];
-};
-
 #define UTYPE_DECL
 #include STATEGEN_FILE
 #undef  UTYPE_DECL
@@ -46,6 +28,30 @@ struct Process {
 #define PROC_DECL
 #include STATEGEN_FILE
 #undef  PROC_DECL
+
+/**
+ * General process structure
+ */
+struct Process {
+	/**
+	 * IP (0-based)
+	 */
+#if PROC_IP_BYTES == 2
+    short _ip;
+#elif PROC_IP_BYTES == 1
+    unsigned char _ip;
+#else
+#	error Unsupported IP size
+#endif
+	/**
+	 * Proctype (0-based)
+	 */
+    unsigned char _proctype;
+	/**
+	 * Other data (process-specific)
+	 */
+	char data[0];
+};
 
 /**
  * Size required to hold state's size

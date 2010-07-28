@@ -70,8 +70,9 @@ class BuiltinType(Type):
     Arrays and bit-fields do count as built-in, too.
     """
 
+    # `none' is special type used as temporary placeholder
     c_types = {'bit': 'unsigned', 'bool': 'unsigned', 'byte': 'unsigned char',
-               'short': 'short', 'int': 'int', 'pid':'char'}
+               'short': 'short', 'int': 'int', 'pid': 'char', 'none': ''}
     c_bitsizes = {'bit': 1, 'bool': 1}
     # Need not be actual alignments, see c_align()
     c_aligns = {'unsigned':4, 'int':4, 'short':2, 'unsigned char':1, 'char':1}
@@ -86,6 +87,7 @@ class BuiltinType(Type):
         """
 
         Arguments:
+        - `name`: type name
         - `align`: type alignment requirement (instead of default, given by c_aligns)
         """
         if not name in self.c_types:
@@ -120,6 +122,13 @@ class SimpleType(BuiltinType):
     """Simple type (from PROMELA's point of view)
 
     Doesn't differ from built-in type, really
+    """
+    pass
+
+
+class SpecialType(Type):
+    """Placeholder for special variable types not translated
+    to C code ('none', for example, used as IP's placeholder type)
     """
     pass
 
@@ -249,7 +258,7 @@ class Variable(object):
     def check_type(self):
         """Used for type validation
         """
-        if not type(self._type) in (SimpleType, UserType):
+        if not type(self._type) in (SimpleType, UserType, SpecialType):
             raise RuntimeError, "Invalid type `%s' for `%s'" % (self._type, self._name)
 
     def decl(self):

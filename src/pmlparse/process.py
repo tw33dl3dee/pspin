@@ -6,6 +6,12 @@ from statement import Stmt, NoopStmt
 from string import Template
 
 
+# Global maximum of state counts in all processes
+max_state_count = 0
+# Number of bytes used to store IP
+ip_byte_size = 1
+
+
 class Label(object):
     """Process label object
     """
@@ -264,8 +270,11 @@ class Process(object):
         Arguments:
         - `stmt`: Stmt object
         """
-        self._stmts.append(stmt)
+        global max_state_count
         self._state_count += 1
+        max_state_count = max(max_state_count, self._state_count)
+
+        self._stmts.append(stmt)
         stmt.ip = self._state_count - 1
         stmt.parent_proc = self
         if self._last_stmt:
@@ -275,34 +284,50 @@ class Process(object):
         return stmt
 
     def finish(self):
-        """Settles Process object, must be called after all statements and declarations
+        """Finalizes Process object, must be called after all statements and declarations
         """
         # Add omittable valid endstate Noop at end of each process
         end_stmt = NoopStmt("-end-", True)
         end_stmt.set_endstate(True)
         self.add_stmt(end_stmt)
-        # If process has > 256 states, use 2 bytes for IP, otherwise only 1
-        if self._state_count > 256:
-            ip_type = 'short'
-        else:
-            ip_type = 'byte'
-        # Alignment of special vars is forced to maximum value
-        # so that they appear at the beginning of field list
-        self.add_var(Variable("_ip", SimpleType(ip_type, SimpleType.MAX_ALIGN)))
+
+        # IP's type a placeholder to be replaced in settle()
+        self.add_var(Variable("_ip", SpecialType('none')))
+        # Alignment of special vars like _proctype and (later in settle()) _ip
+        # is forced to maximum value so that they appear at the beginning of field list
         self.add_var(Variable("_proctype", SimpleType('byte', SimpleType.MAX_ALIGN)))
         self.sanity_check()
+
         # First settle pass
         for stmt in self._stmts:
             stmt.settle(Stmt.SettlePass.PRE)
         for stmt in self._stmts:
             stmt.minimize()
+
         # Throw omittable statements out after minimization
         self._stmts = [s for s in self._stmts if not s.omittable]
+
         # Second settle pass
         for stmt in self._stmts:
             stmt.settle(Stmt.SettlePass.POST_MINI)
+
         # Form valid endstates list
         self._end_stmts = [s for s in self._stmts if s.endstate]
+
+    def settle(self):
+        """Settles Process objects, must be called after all processes
+        have been parsed and created
+        """
+        # If process has > 256 states, use 2 bytes for IP, otherwise only 1
+        global ip_byte_size
+        if max_state_count > 256:
+            ip_byte_size = 2
+            ip_type = 'short'
+        else:
+            ip_byte_size = 1
+            ip_type = 'byte'
+        # Replace IP's placeholder type with real one know
+        self._vars["_ip"].set_type(SimpleType(ip_type, SimpleType.MAX_ALIGN))
 
     def sizeof(self):
         """Returns C-code (str) that evaluates to process data structure size
