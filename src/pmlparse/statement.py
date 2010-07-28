@@ -49,22 +49,24 @@ class Stmt(object):
 
         Needs not to end with semicolon
         """
+        lines = []
         if self.starts_dstep and not self.ends_dstep:
-            return "BEGIN_DSTEP()"
+            lines.append("BEGIN_DSTEP()")
         if self.starts_atomic and not self.ends_atomic:
-            return "BEGIN_ATOMIC()"
-        return None
+            lines.append("BEGIN_ATOMIC()")
+        return len(lines) and "; ".join(lines) or None
 
     def post_exec(self):
         """Generates C code to execute after the statement
 
         Needs not to end with semicolon
         """
+        lines = []
         if not self.starts_atomic and self.ends_atomic:
-            return "END_ATOMIC()"
+            lines.append("END_ATOMIC()")
         if not self.starts_dstep and self.ends_dstep:
-            return "END_DSTEP()"
-        return None
+            lines.append("END_DSTEP()")
+        return len(lines) and "; ".join(lines) or None
 
     def set_atomic(self, starts, ends):
         """Sets atomicity context of statement
