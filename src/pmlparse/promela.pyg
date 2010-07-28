@@ -293,8 +293,8 @@ stmt ->
 	| K_DSTEP P_LBRACE sequence P_RBRACE:
 		# d_step end statement is non-omittable (single exit point)
 		return DstepStmt(kids[2] + [codegen.cur_proc.add_stmt(NoopStmt('d_step END'))])
-	| K_C_CODE c_code:
-		return CCodeStmt(kids[1])
+	| K_C_CODE c_cond? c_code:
+		return CCodeStmt(kids[1], kids[2])
 	| P_LBRACE sequence P_RBRACE:
 		raise NotImplementedError('nested blocks')
 	| send:
@@ -368,7 +368,7 @@ expr ->
 		return BinaryExpr(*kids)
 	| expr O_SHIFT expr:
 		return BinaryExpr(*kids)
-	| O_C_EXPR c_code:
+	| O_C_EXPR c_expr:
 		return CCodeExpr(kids[1])
 	| O_TILDE expr:
 		return UnaryExpr(*kids)
@@ -395,7 +395,17 @@ expr ->
 	;
 
 c_code ->
-	C_CHAR+:
+	C_CODE_CHAR+:
+		return ''.join(kids[0]).strip()
+	;
+
+c_expr ->
+	C_EXPR_CHAR+:
+		return ''.join(kids[0]).strip()
+	;
+
+c_cond ->
+	C_COND_CHAR+:
 		return ''.join(kids[0]).strip()
 	;
 

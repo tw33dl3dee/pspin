@@ -728,22 +728,26 @@ class RecvStmt(SendStmt):
 
 class CCodeStmt(Stmt):
     """Arbitrary C code
-
-    Always executable
     """
 
-    def __init__(self, c_code):
+    def __init__(self, c_cond, c_code):
         """
         Arguments:
+        - `c_cond`: (str) C code with executable condition; if None, always executable
         - `c_code`: (str) C code to execute
         """
         super(CCodeStmt, self).__init__()
+        self._c_cond = c_cond
         self._c_code = c_code
 
     def debug_repr(self):
         return self._c_code.replace('\n', ' ')
 
+    def executable(self):
+        return self._c_cond or "1"
+
     def execute(self):
+        return self._c_code
         c_code_tpl = """
 #undef TRANSITIONS
 #define C_CODE_DEF

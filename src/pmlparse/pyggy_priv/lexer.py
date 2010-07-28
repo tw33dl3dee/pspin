@@ -147,7 +147,7 @@ The subclass must provide nextch() and PUSHBACK() methods.
 		return self.starts[startstate][self.startofline]
 
 	def PUSHSTATE(self, startstateno) :
-		"pus a new start state on the stack"
+		"put a new start state on the stack"
 		if startstateno < 0 or startstateno >= len(self.starts) :
 			raise ApiError("bad start state")
 		self.startstack.append(startstateno)
@@ -155,10 +155,14 @@ The subclass must provide nextch() and PUSHBACK() methods.
 	def POPSTATE(self) :
 		"pop the current start state from the stack"
 		if len(self.startstack) <= 1 :
-			raise ApiErro("popping empty start state stack")
+			raise ApiError("popping empty start state stack")
 		val = self.startstack[-1]
 		self.startstack[-1:] = []
 		return val
+
+	def GETSTATE(self):
+		"return current start state"
+		return self.startstack[-1]
 
 	def token(self) :
 		"lex out another token"

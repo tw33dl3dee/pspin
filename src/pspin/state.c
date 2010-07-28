@@ -205,9 +205,17 @@ do_transition(int pid, int dest_ip,
 #define BEGIN_DSTEP() in_dstep = 1
 #define END_DSTEP() in_dstep = 0
 
+#define C_CODE_DEF
+#include STATEGEN_FILE
+#undef  C_CODE_DEF
+
 #define TRANSITIONS
 #include STATEGEN_FILE
 #undef  TRANSITIONS
+
+#define C_CODE_UNDEF
+#include STATEGEN_FILE
+#undef  C_CODE_UNDEF
 
   passed:
 	PROCIP(current) = dest_ip;

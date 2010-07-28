@@ -37,19 +37,27 @@ definitions:
 
 
 INITIAL:
-	"<<\{":
-		# switch to C mode
-		self.PUSHSTATE(1)
+	"\{":
+		if hasattr(self, 'c_code') and self.c_code:
+			# switch to C mode
+			self.PUSHSTATE(C_CODE)
+		else:
+			return "P_LBRACE"
+	"\(":
+		if hasattr(self, 'c_code') and self.c_code:
+			# switch to C mode
+			self.PUSHSTATE(C_EXPR)
+		else:
+			return "P_LPAREN"
+	"\[":
+		if hasattr(self, 'c_code') and self.c_code:
+			# switch to C mode
+			self.PUSHSTATE(C_COND)
+		else:
+			return "P_LSQBRACE"
 
-	"<<\(":
-		# switch to C mode
-		self.PUSHSTATE(2)
-
-	"\{":			return "P_LBRACE"
 	"\}":			return "P_RBRACE"
-	"\(":			return "P_LPAREN"
 	"\)":			return "P_RPAREN"
-	"\[":			return "P_LSQBRACE"
 	"\]":			return "P_RSQBRACE"
 	"<":			return "P_LAQUO"
 	">":			return "P_RAQUO"
@@ -97,8 +105,12 @@ INITIAL:
 	"run":			return "K_RUN"
 	"typedef":		return "K_TYPEDEF"
 	"unless":		return "K_UNLESS"
-	"c_code":		return "K_C_CODE"
-	"c_expr":		return "O_C_EXPR"
+	"c_code":
+		self.c_code = True
+		return "K_C_CODE"
+	"c_expr":
+		self.c_code = True
+		return "O_C_EXPR"
 	"{K_EXCL}":		return "K_EXCL"
 	"{K_PRINT}":	return "K_PRINT"
 	"{K_TRACE}":
@@ -147,31 +159,71 @@ INITIAL:
 		return
 
 C_CODE:
-	"}>>":			self.POPSTATE()
+	"\}":
+		self.POPSTATE()
+		if self.GETSTATE() == INITIAL:
+			self.c_code = False
+		else:
+			return "C_CODE_CHAR"
+    "\{":			
+		self.PUSHSTATE(C_CODE)
+		return "C_CODE_CHAR"
 	"\t":
 		self.charno += self.SPACES_PER_TAB - 1
 		self.value = ' '
-		return "C_CHAR"
+		return "C_CODE_CHAR"
 	"\r":			return
 	"\n":
 		self.lineno += 1
 		self.charno = 1
 		self.value = ' '
-		return "C_CHAR"
+		return "C_CODE_CHAR"
 	"^#[^\n]*":		return		# strip pragmas off
-	".":			return "C_CHAR"
+	".":			return "C_CODE_CHAR"
 
 C_EXPR:
-	"\)>>":			self.POPSTATE()
+	"\)":
+		self.POPSTATE()
+		if self.GETSTATE() == INITIAL:
+			self.c_code = False
+		else:
+			return "C_EXPR_CHAR"
+    "\(":
+		self.PUSHSTATE(C_EXPR)
+		return "C_EXPR_CHAR"
 	"\t":
 		self.charno += self.SPACES_PER_TAB - 1
 		self.value = ' '
-		return "C_CHAR"
+		return "C_EXPR_CHAR"
 	"\r":			return
 	"\n":
 		self.lineno += 1
 		self.charno = 1
 		self.value = ' '
-		return "C_CHAR"
+		return "C_EXPR_CHAR"
 	"^#[^\n]*":		return		# strip pragmas off
-	".":			return "C_CHAR"
+	".":			return "C_EXPR_CHAR"
+
+C_COND:
+	"\]":
+		self.POPSTATE()
+		if self.GETSTATE() == INITIAL:
+			# Note that self.c_code is not reset
+			pass
+		else:
+			return "C_COND_CHAR"
+    "\[":
+		self.PUSHSTATE(C_COND)
+		return "C_COND_CHAR"
+	"\t":
+		self.charno += self.SPACES_PER_TAB - 1
+		self.value = ' '
+		return "C_COND_CHAR"
+	"\r":			return
+	"\n":
+		self.lineno += 1
+		self.charno = 1
+		self.value = ' '
+		return "C_COND_CHAR"
+	"^#[^\n]*":		return		# strip pragmas off
+	".":			return "C_COND_CHAR"
