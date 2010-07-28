@@ -8,7 +8,9 @@ typedef MyType2 {
 	MyType a[2]
 }
 
-chan ch = [1] of {MyType};
+chan ch = [1] of {MyType}
+
+byte w[3] = {1, 2}
 
 active proctype A() {
 	MyType a;

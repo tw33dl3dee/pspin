@@ -29,7 +29,7 @@ code:
 
 
 spec ->
-	(module sep?)+:
+	module+:
 		codegen.finish()
 		return codegen
 	;
@@ -183,12 +183,12 @@ varref_list ->
 	;
 
 ivar ->
-	name P_LSQBRACE expr P_RSQBRACE:
-		return Variable(kids[0], None, kids[2], None)
+	name P_LSQBRACE expr P_RSQBRACE array_init?:
+		return ArrayVariable(kids[0], None, kids[2], kids[4] or [])
 	| name ch_init:
 		return Channel(kids[0], *kids[1])
 	| name ivar_init?:
-		return Variable(kids[0], None, None, kids[1] or None)
+		return Variable(kids[0], None, kids[1] or None)
 #	TODO: bit fields
 #	| name P_COLON const ivar_init?
 	;
@@ -196,6 +196,18 @@ ivar ->
 ivar_init ->
 	O_ASSIGN expr:
 		return kids[1]
+	;
+
+array_init ->
+	O_ASSIGN P_LBRACE arg_list P_RBRACE:
+		return kids[2]
+	;
+
+expr_list ->
+	expr:
+		return kids
+	| expr_list P_COMMA expr:
+		return kids[0] + [kids[2]]
 	;
 
 ch_init ->

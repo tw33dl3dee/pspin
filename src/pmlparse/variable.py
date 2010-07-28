@@ -193,27 +193,21 @@ class Variable(object):
     """Variable object
     """
 
-    def __init__(self, name, vartype, arrsize = None, initval = None):
+    def __init__(self, name, vartype, initval = None):
         """
-
         Arguments:
         - `name`: variable name
         - `vartype`: Type object
-        - `arrsize`: size of array (None if variable is not an array,
-                                    otherwise must be an Expression that can be evaluated an generation time)
         - `initval`: initial value (Expression or None)
         """
         global max_name_len
         max_name_len = max(max_name_len, len(name))
 
         self._name = name
-        self._arrsize = arrsize
         self._initval = initval
         self._type = vartype
         self._visible = None
 
-        if arrsize and not arrsize.const:
-            raise RuntimeError, "Array size must be constant"
         if vartype:
             self.check_type()
         self.parent = None  # parent ref()able object object
@@ -265,10 +259,8 @@ class Variable(object):
         """Generates C-code (sequence of str) for variable declaration
         """
         bitspec = self._type.c_bitsize() and " : %d" % self._type.c_bitsize() or ""
-        lenspec = self._arrsize and "[%s]" % self._arrsize.code() or ""
         static = self.hidden and "static " or " "
-        # TODO: fold bit arrays
-        return "%s%s %s %s" % (static, self._type.c_type(), self._name, lenspec or bitspec)
+        return "%s%s %s %s" % (static, self._type.c_type(), self._name, bitspec)
 
     def init(self):
         """Generates  C-code to initialize variable
@@ -286,17 +278,16 @@ class Variable(object):
         else:
             return "%s" % self._name
 
+    def _printf_skip(self, depth):
+        if depth == 0:
+            return " "*(max_name_len + var_name_gap - len(self._name))
+        else:
+            return ""
+
     def printf_format(self, depth=0):
         """Generates string to be used as printf-format specifier
         """
-        if depth == 0:
-            skip = " "*(max_name_len + var_name_gap - len(self._name))
-        else:
-            skip = ""
-        if self._arrsize:
-            return skip + "[%s]" % (", ".join([self._type.printf_format()]*self._arrsize.eval()))
-        else:
-            return skip + self._type.printf_format()
+        return self._printf_skip(depth) + self._type.printf_format()
 
     def printf_ref(self, selfref=None):
         """Generates C code with arguments to printf() for printing this variable
@@ -314,11 +305,51 @@ class Variable(object):
         """
         if selfref is None:
             selfref = self.ref()
-        if self._arrsize:
-            return ",".join([self.type.printf_ref("%s[%d]" % (selfref, i))
-                             for i in range(self._arrsize.eval())])
-        else:
-            return self.type.printf_ref(selfref)
+        return self.type.printf_ref(selfref)
+
+
+class ArrayVariable(Variable):
+    """Array variable
+    """
+    def __init__(self, name, vartype, arrsize, initval = None):
+        """
+        Arguments:
+        - `name`: variable name
+        - `vartype`: Type object
+        - `arrsize`: size of array (Expression that can be evaluated an generation time)
+        - `initval`: initial value (list of Expression objects)
+        """
+        if initval is None:
+            initval = []
+        super(ArrayVariable, self).__init__(name, vartype, initval)
+        self._arrsize = arrsize
+        if arrsize and not arrsize.const:
+            raise RuntimeError, "Array size must be constant"
+        # Dirty hack: Channel is ArrayVariable with constant but non-evaluable size,
+        # so we check if initval is non-empty (which is True for Channel) prior to evaluating
+        if len(initval) and len(initval) > arrsize.eval():
+            raise RuntimeError, ("Array initializer has too many elements (%d, expected %d)" %
+                                 (len(initval), arrsize.eval()))
+
+    def decl(self):
+        lenspec = "[%s]" % self._arrsize.code()
+        static = self.hidden and "static " or " "
+        # TODO: bit arrays
+        return "%s%s %s %s" % (static, self._type.c_type(), self._name, lenspec)
+
+    def init(self):
+        return ";\n".join(["%s[%d] = %s" % (self.ref(), i, e.code())
+                           for i, e in enumerate(self._initval)])
+
+    def printf_format(self, depth=0):
+        return self._printf_skip(depth) + "[%s]" % (", ".join([self._type.printf_format()]*
+                                                              self._arrsize.eval()))
+
+    def printf_ref(self, selfref=None):
+        if selfref is None:
+            selfref = self.ref()
+        return ",".join([self.type.printf_ref("%s[%d]" % (selfref, i))
+                         for i in range(self._arrsize.eval())])
 
 
 class SpecialVariable(Variable):
@@ -348,7 +379,7 @@ class SpecialVariable(Variable):
         return self._c_name
 
 
-class Channel(Variable):
+class Channel(ArrayVariable):
     """Channels variable holds a pointer (of type ChanType) to state area
     with channel data.
 
@@ -423,13 +454,9 @@ class Channel(Variable):
         """Generates string to be used as printf-format specifier
         """
         printf_fmt_tpl = "$skip<%d of %d> [$fields_fmt]"
-        if depth == 0:
-            skip = " "*(max_name_len + var_name_gap - len(self._name))
-        else:
-            skip = ""
         entry_fmt = "{" + "; ".join([t.printf_format() for t in self._typelist]) + "}"
         fields_fmt = ", ".join([entry_fmt]*self._max_len)
-        return Template(printf_fmt_tpl).substitute(skip=skip, fields_fmt=fields_fmt)
+        return Template(printf_fmt_tpl).substitute(skip=self._printf_skip(depth), fields_fmt=fields_fmt)
 
     def printf_ref(self, selfref=None):
         if selfref is None:
