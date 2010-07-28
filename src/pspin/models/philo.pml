@@ -1,9 +1,9 @@
 /*
  * Configuration
  * ***************** */
-#define PHILO_LR   3
+#define PHILO_LR   0
 #define PHILO_RL   0
-#define PHILO_RETR 0
+#define PHILO_RETR 6
 /* ***************** */
 
 #define N (PHILO_LR + PHILO_RL + PHILO_RETR)
@@ -43,7 +43,6 @@ Eat:
 active [PHILO_RETR] proctype PhiloRetr() {
 Think:
 	atomic { LFORK == 0 -> LFORK = 1; };
-	/* assert(nr_eat == 0); */
 One:
 	if
 	 :: atomic { RFORK == 0 -> RFORK = 1; nr_eat++; ATE }
