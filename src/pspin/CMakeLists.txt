@@ -91,6 +91,10 @@ set_target_properties(pspin-emu
 
 add_custom_target(emurun
   COMMAND pspin-emu
+  COMMENT "Running emulation..."
+)
+add_custom_target(emurund
+  COMMAND pspin-emu
   ARGUMENTS -d
   COMMENT "Running emulation..."
 )
