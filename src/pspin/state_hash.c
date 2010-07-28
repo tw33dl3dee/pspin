@@ -14,7 +14,8 @@
 #include "bfs.h"
 
 /**
- * If non-zero, new states are dumped to stderr
+ * If non-zero, new states are dumped to stderr.
+ * Has no effect if debug is turned on.
  */
 int dump_new_states;
 
@@ -201,8 +202,10 @@ int state_hash_add(struct State *state, enum HashAddAction add_action)
 		min_state_size = (min_state_size < STATESIZE(state)) ? min_state_size : STATESIZE(state);
 		max_state_size = (max_state_size > STATESIZE(state)) ? max_state_size : STATESIZE(state);
 
+#ifndef DEBUG
 		if (dump_new_states)
 			edump_state(state);
+#endif
 
 		hash_dprintf(" - ADDED");
 		++used_hash_entries;
@@ -305,8 +308,10 @@ int state_hash_add(struct State *state, enum HashAddAction add_action)
 		min_state_size = (min_state_size < STATESIZE(state)) ? min_state_size : STATESIZE(state);
 		max_state_size = (max_state_size > STATESIZE(state)) ? max_state_size : STATESIZE(state);
 
+#ifndef DEBUG
 		if (dump_new_states)
 			edump_state(state);
+#endif
 
 		hash_dprintf(" - ADDED");
 		used_hash_entries += BITSTATE_HASH_COUNT;
