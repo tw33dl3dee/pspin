@@ -85,4 +85,10 @@ set_target_properties(pspin-emu
   PROPERTIES COMPILE_DEFINITIONS "EMULATION"
 )
 
+add_custom_target(emurun
+  COMMAND pspin-emu
+  ARGUMENTS -d
+  COMMENT "Running emulation..."
+)
+
 enable_distclean(pspin)
