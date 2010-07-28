@@ -242,7 +242,8 @@ static void bfs(void)
 							}
 						}
 
-						eprintf(ERROR_COLOR("BLOCKED IN D_STEP") "\n");
+						eprintf(ERROR_COLOR("BLOCKED IN D_STEP:") "\n");
+						edump_state(next_state);
 						goto aborted;
 
 					  in_dstep_next:;
