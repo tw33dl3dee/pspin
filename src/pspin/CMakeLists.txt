@@ -33,6 +33,10 @@ add_custom_command(OUTPUT ${STATEGEN_FILE}
   COMMENT "Parsing ${PROMELA_MODEL}"
 )
 
+add_custom_target(stategen
+  DEPENDS ${STATEGEN_FILE}
+)
+
 set(MPI_TEST_NODE_COUNT 4)
 add_custom_target(mpilocal
   COMMAND mpirun -n ${MPI_TEST_NODE_COUNT} ./pspin-mpi
