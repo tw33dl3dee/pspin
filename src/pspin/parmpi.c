@@ -312,7 +312,7 @@ static int termination_check()
 		 */
 		if (msg_counter.color == White && msg_accum.color == White && msg_accum.count == 0) {
 			termination_detected(node_id);
-			eprintf(SUCCESS_COLOR("VERIFICATION PASSED") "\n");
+			eprintf(SUCCESS_COLOR("==VERIFICATION PASSED") "\n");
 			return -1;
 		}
 		/* Otherwise, node 0 may start a new probe. */
@@ -652,7 +652,7 @@ static void dfs(void)
 							}
 						}
 
-						eprintf(ERROR_COLOR("BLOCKED IN D_STEP:") "\n");
+						eprintf(ERROR_COLOR("==BLOCKED IN D_STEP:") "\n");
 						edump_state(next_state);
 						goto aborted;
 

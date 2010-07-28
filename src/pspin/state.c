@@ -171,7 +171,7 @@ do_transition(int pid, int dest_ip,
 	state_dprintf("Performing step: <<< %s >>>\n", msg);
 #define CHECK_ALLOC(ptr)								\
 	if (ptr == NULL) {									\
-	    eprintf(ERROR_COLOR("OUT OF MEMORY") "\n");		\
+	    eprintf(ERROR_COLOR("==OUT OF MEMORY") "\n");	\
 		return TransitionCausedAbort;					\
 	}
 #define NEW_STATE()										\
@@ -192,11 +192,14 @@ do_transition(int pid, int dest_ip,
 		*next_current = current =								\
 		    PROC_BY_OFFSET(state, current__offset);				\
 	}
-#define ASSERT(expr, repr)												\
-	if (!(expr)) {														\
-	    eprintf(ERROR_COLOR("ASSERTION VIOLATED:") " %s\n", repr);		\
-		edump_state(state);												\
-		aborted = TransitionCausedAbort;								\
+#define ASSERT(expr, repr)									\
+	if (!(expr)) {											\
+		eprintf(ERROR_COLOR("==ASSERTION VIOLATED:") " %s "	\
+		        INFO_COLOR("IN PROCESS") " %d "				\
+		        INFO_COLOR("IP") " %d -> %d\n",				\
+		        repr, pid, current->_ip, dest_ip);			\
+		edump_state(state);									\
+		aborted = TransitionCausedAbort;					\
 	}
 #define PRINTF(fmt, args...)					\
 	state_dprintf("*** " fmt, ##args);

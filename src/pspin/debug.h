@@ -78,5 +78,6 @@ extern int node_id;
 #	endif
 #endif
 
-#define ERROR_COLOR(msg) "\033[01;31m==" msg "\033[00m"
-#define SUCCESS_COLOR(msg) "\033[01;32m==" msg "\033[00m"
+#define ERROR_COLOR(msg) "\033[01;31m" msg "\033[00m"
+#define SUCCESS_COLOR(msg) "\033[01;32m" msg "\033[00m"
+#define INFO_COLOR(msg) "\033[00;35m" msg "\033[00m"

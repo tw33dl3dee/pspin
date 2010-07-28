@@ -242,7 +242,7 @@ static void bfs(void)
 							}
 						}
 
-						eprintf(ERROR_COLOR("BLOCKED IN D_STEP:") "\n");
+						eprintf(ERROR_COLOR("==BLOCKED IN D_STEP:") "\n");
 						edump_state(next_state);
 						goto aborted;
 
@@ -279,7 +279,7 @@ static void bfs(void)
 			trace_inter_stat();
 	}
 
-	eprintf(SUCCESS_COLOR("VERIFICATION PASSED") "\n");
+	eprintf(SUCCESS_COLOR("==VERIFICATION PASSED") "\n");
 
  aborted:
 	state_dprintf("---------------------------------\n");
