@@ -286,7 +286,7 @@ $init;
         """
         lines = [p.c_code_def() for p in self._procs]
         # Empty string to prevent adding ; to end of last macro
-        lines += ["#define this (*state)", ""]
+        lines += ["#define now (*state)", ""]
         return '\n'.join(lines)
 
     def c_code_undef(self):
@@ -294,7 +294,7 @@ $init;
         """
         lines = [p.c_code_undef() for p in self._procs]
         # Empty string to prevent adding ; to end of last macro
-        lines += ["#undef this", ""]
+        lines += ["#undef now", ""]
         return '\n'.join(lines)
 
     def finish(self):
