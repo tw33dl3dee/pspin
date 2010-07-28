@@ -159,6 +159,13 @@ do_transition(int pid, int dest_ip,
 {
 	int current_offset, aborted = TransitionPassed;
 
+	/* Hidden variables are static locals here
+	 */
+
+#define HIDDEN_VAR_DECL
+#include STATEGEN_FILE
+#undef  HIDDEN_VAR_DECL
+
 #define RECORD_STEP(msg)									\
 	state_dprintf(" PASSED\n");								\
 	state_dprintf("Performing step: <<< %s >>>\n", msg);

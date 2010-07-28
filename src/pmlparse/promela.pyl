@@ -77,7 +77,7 @@ INITIAL:
 	"assert":		return "K_ASSERT"
 	"atomic":		return "K_ATOMIC"
 	"break":		return "K_BREAK"
-	"chan":		return "K_CHAN"
+	"chan":			return "K_CHAN"
 	"d_step":		return "K_DSTEP"
 	"do":			return "K_DO"
 	"else":			return "K_ELSE"
@@ -109,9 +109,9 @@ INITIAL:
 		return "K_TRACE"
 	"{K_VIS}":
 		if self.value == "show":
-			self.value = 1
+			self.value = True
 		else:
-			self.value = 0
+			self.value = False
 		return "K_VIS"
 
 	"{T_BUILTIN}":	return "T_BUILTIN"

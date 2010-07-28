@@ -28,7 +28,7 @@ class Type(object):
     def c_type(self):
         """C-type corresponding to this type (str)
         """
-        return NotImplemented
+        raise NotImplementedError
 
     def c_align(self):
         """Not actual align (depends on platform) but score telling
@@ -36,7 +36,7 @@ class Type(object):
 
         Bigger values mean higher alignment requirement
         """
-        return NotImplemented
+        raise NotImplementedError
 
     def c_bitsize(self):
         """Bit-size of C type corresponding to this type (int)
@@ -48,7 +48,7 @@ class Type(object):
     def printf_format(self):
         """printf specifier to use for this type (str)
         """
-        return NotImplemented
+        raise NotImplementedError
 
     def printf_ref(self, varref):
         """printf() argument for printing variable of given type
@@ -56,7 +56,7 @@ class Type(object):
         Arguments:
         - `varref`: C code (str) with variable refernce
         """
-        return NotImplemented
+        raise NotImplementedError
 
 
 class BuiltinType(Type):
@@ -141,6 +141,8 @@ class UserType(Type):
             return 1
 
     def add_field(self, fieldvar):
+        if fieldvar.hidden:
+            raise RuntimeError, "Field cannot be hidden: `%s'" % fieldvar.name
         self._fields.append(fieldvar)
 
     def finish(self):
@@ -185,6 +187,7 @@ class Variable(object):
         self._arrsize = arrsize
         self._initval = initval
         self._type = vartype
+        self._visible = None
         if arrsize and not arrsize.const:
             raise RuntimeError, "Array size must be constant"
         if vartype:
@@ -205,6 +208,23 @@ class Variable(object):
     def type(self):
         return self._type
 
+    def set_visible(self, visible):
+        """Sets variable visibility
+
+        False: variable is hidden
+        True: variable is tracked (currently not supported)
+        None: usual variable
+        """
+        if visible:
+            raise RuntimeError, "`%s': variable tracking is not supported" % self.name
+        self._visible = visible
+
+    @property
+    def hidden(self):
+        """Hidden variable is not stored in state vector
+        """
+        return self._visible is False
+
     def set_type(self, vartype):
         """Changes variable type
         """
@@ -222,8 +242,9 @@ class Variable(object):
         """
         bitspec = self._type.c_bitsize() and " : %d" % self._type.c_bitsize() or ""
         lenspec = self._arrsize and "[%s]" % self._arrsize.code() or ""
+        static = self.hidden and "static " or " "
         # TODO: fold bit arrays
-        return "%s %s %s" % (self._type.c_type(), self._name, lenspec or bitspec)
+        return "%s%s %s %s" % (static, self._type.c_type(), self._name, lenspec or bitspec)
 
     def init(self):
         """Generates  C-code to initialize variable

@@ -79,6 +79,8 @@ class Process(object):
         """
         if var.name in self._vars:
             raise RuntimeError, "Redefinition: `%s'" % var.name
+        elif var.hidden:
+            raise RuntimeError, "Local hidden variables not supported: `%s'" % var.name
         else:
             self._vars[var.name] = var
             var.parent = self

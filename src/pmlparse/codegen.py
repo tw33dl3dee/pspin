@@ -13,6 +13,7 @@ class Codegen(object):
     """
     def __init__(self):
         self._vars = dict()
+        self._hidden_vars = dict()
         self._utypes = dict()
         self._procs = []
         self.cur_proc = None
@@ -28,6 +29,7 @@ class Codegen(object):
             self.write_block(f, 'STATE_DECL', self.state_decl())
             self.write_block(f, 'PROC_DECL', self.proc_decl())
             self.write_block(f, 'UTYPE_DECL', self.utype_decl())
+            self.write_block(f, 'HIDDEN_VAR_DECL', self.hidden_var_decl())
             self.write_block(f, 'C_CODE_DEF', self.c_code_def())
             self.write_block(f, 'C_CODE_UNDEF', self.c_code_undef())
             self.write_block(f, 'STATE_INIT', self.state_init())
@@ -70,7 +72,10 @@ class Codegen(object):
         self.cur_proc = None
 
     def start_utype(self, name):
-        """
+        """Starts utype definition
+
+        Arguments:
+        - `name`: utype name (str)
         """
         if name in self._utypes:
             raise RuntimeError, "Redefinition: `%s'" % name
@@ -79,16 +84,20 @@ class Codegen(object):
         return self.cur_utype
 
     def end_utype(self):
+        """Ends utype definition
+        """
         self.cur_utype.finish()
         self.cur_utype = None
 
     def lookup_utype(self, name):
+        """Returns UserType object by name
+        """
         if name in self._utypes:
             return self._utypes[name]
         else:
             raise RuntimeError, "Undefined user type: `%s'" % name
 
-    def add_var(self, var, vartype = None):
+    def add_var(self, var, vartype=None, visible=None):
         """Adds variable to current scope
 
         Variable is added either to global symbol table or current proctype, if one exists.
@@ -96,15 +105,22 @@ class Codegen(object):
         Arguments:
         - `var`: Variable object
         - `vartype`: Type object
+        - `visible`: visibility type (see Variable.set_visible())
         """
         if vartype is not None:
             var.set_type(vartype)
+        var.set_visible(visible)
         if self.cur_utype is not None:
             return self.cur_utype.add_field(var)
         elif self.cur_proc is not None:
             return self.cur_proc.add_var(var)
-        elif var.name in self._vars:
+        elif var.name in self._vars or var.name in self._hidden_vars:
             raise RuntimeError, "Redefinition: `%s'" % var.name
+        elif var.hidden:
+            self._hidden_vars[var.name] = var
+            # Hidden variables do not have a parent as they are actually
+            # static local variables in C
+            return var            
         else:
             self._vars[var.name] = var
             var.parent = self
@@ -123,6 +139,8 @@ class Codegen(object):
             return local
         elif name in self._vars:
             return self._vars[name]
+        elif name in self._hidden_vars:
+            return self._hidden_vars[name]
         else:
             raise RuntimeError, "Undefined variable: `%s'" % name
 
@@ -174,6 +192,12 @@ static int procactive[] = { $procactive }"""
         """Returns C-code which declares user types
         """
         return ";\n".join(ut.decl() for ut in self._utypes.values())
+
+    
+    def hidden_var_decl(self):
+        """Returns C-code with hidden variables declarations
+        """
+        return ";\n".join([v.decl() for v in self._hidden_vars.values()])
 
     def transitions_init(self):
         """Returns C-code (str) that initializes transitions for all proctypes

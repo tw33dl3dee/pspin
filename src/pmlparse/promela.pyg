@@ -109,7 +109,7 @@ decl_list ->
 
 decl ->
 	visible? typename ivar_list:
-		return [codegen.add_var(v, kids[1]) for v in kids[2]]
+		return [codegen.add_var(v, kids[1], kids[0]) for v in kids[2]]
 	;
 
 ivar_list ->
@@ -149,7 +149,7 @@ enabler ->
 
 visible ->
 	K_VIS:
-		raise NotImplementedError(kids[0])
+		return kids[0]
 	;
 
 sequence ->
