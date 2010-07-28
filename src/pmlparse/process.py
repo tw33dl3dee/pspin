@@ -281,9 +281,14 @@ class Process(object):
         end_stmt = NoopStmt("-end-", True)
         end_stmt.set_endstate(True)
         self.add_stmt(end_stmt)
+        # If process has > 256 states, use 2 bytes for IP, otherwise only 1
+        if self._state_count > 256:
+            ip_type = 'short'
+        else:
+            ip_type = 'byte'
         # Alignment of special vars is forced to maximum value
         # so that they appear at the beginning of field list
-        self.add_var(Variable("_ip", SimpleType('byte', SimpleType.MAX_ALIGN)))
+        self.add_var(Variable("_ip", SimpleType(ip_type, SimpleType.MAX_ALIGN)))
         self.add_var(Variable("_proctype", SimpleType('byte', SimpleType.MAX_ALIGN)))
         self.sanity_check()
         # First settle pass
