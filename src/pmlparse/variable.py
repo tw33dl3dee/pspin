@@ -70,8 +70,9 @@ class BuiltinType(Type):
     c_bitsizes = {'bit': 1, 'bool': 1}
     # Need not be actual alignments, see c_align()
     c_aligns = {'unsigned':4, 'int':4, 'short':2, 'unsigned char':1, 'char':1}
-    # Maximum possible alignment (used for special variable to enforce order)
+    # Maximum and minimum possible alignments (used for special variable to enforce order)
     MAX_ALIGN = 256
+    MIN_ALIGN = 0
 
     printf_codes = {}  # no special cases here
     printf_types = {}  # no special cases here
@@ -91,6 +92,9 @@ class BuiltinType(Type):
         return self.c_types[self._name]
 
     def c_align(self):
+        # Bit fields go last
+        if self.c_bitsize() is not None:
+            return self.MIN_ALIGN
         return self._align or self.c_aligns[self.c_type()]
 
     def c_bitsize(self):
@@ -153,7 +157,9 @@ class UserType(Type):
     $fields;
 }
 """
-        field_decls = ';\n\t'.join([f.decl() for f in self._fields])
+        field_decls = ';\n\t'.join([f.decl() for f in sorted(sorted(self._fields),
+                                                             key=lambda v: v.type.c_align(),
+                                                             reverse=True)])
         return Template(utype_decl_tpl).substitute(hdr=self.c_type(),
                                                    fields=field_decls)
 
