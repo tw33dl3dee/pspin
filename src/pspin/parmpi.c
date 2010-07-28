@@ -312,7 +312,7 @@ static int termination_check()
 		 */
 		if (msg_counter.color == White && msg_accum.color == White && msg_accum.count == 0) {
 			termination_detected(node_id);
-			eprintf("\033[01;32m==VERIFICATION PASSED\033[00m\n");
+			eprintf(SUCCESS_COLOR("VERIFICATION PASSED") "\n");
 			return -1;
 		}
 		/* Otherwise, node 0 may start a new probe. */
@@ -566,6 +566,8 @@ static struct State *get_state(void)
 	}
 }
 
+extern int in_dstep;
+
 /** 
  * @brief Параллельный поиск в ширину.
  */
@@ -573,6 +575,7 @@ static void dfs(void)
 {
 	struct State *init_state;
 	struct State *cur_state, *next_state;
+	struct Process *next_current;
 	transitions_t transitions;
 
 	BFS_INIT();
@@ -615,10 +618,10 @@ static void dfs(void)
 			} else
 				state_dprintf(":\n");
 
-			FOREACH_TRANSITION(transitions, src_ip, dest_ip) {
+			FOREACH_TRANSITION(transitions, current, src_ip, dest_ip) {
 				state_dprintf("\t%d -> %d ", src_ip, dest_ip);
 
-				switch (do_transition(pid, dest_ip, cur_state, current, &next_state)) {
+				switch (do_transition(pid, dest_ip, cur_state, current, &next_state, &next_current)) {
 				case TransitionCausedAbort:
 					termination_detected(node_id);
 					goto aborted;
@@ -628,14 +631,38 @@ static void dfs(void)
 					++transitions_possible;
 #endif
 
+					assert(next_state != NULL);
+
+					/* If current process entered d_step context,
+					 * make further transitions until it exits d_step
+					 */
+					while (in_dstep) {
+						FOREACH_TRANSITION(transitions, next_current, src_ip, dest_ip) {
+							state_dprintf("D\t%d -> %d ", src_ip, dest_ip);
+
+							switch (do_transition(pid, dest_ip, next_state, next_current, &next_state, &next_current)) {
+							case TransitionCausedAbort:
+								termination_detected(node_id);
+								goto aborted;
+							case TransitionPassed:
+								goto in_dstep_next;
+							case TransitionBlocked:
+								break;
+							}
+						}
+
+						eprintf(ERROR_COLOR("BLOCKED IN D_STEP") "\n");
+						goto aborted;
+
+					  in_dstep_next:;
+					}
+
 					state_dprintf("New state:\n");
 #ifdef STATE_DEBUG
 					dump_state(next_state);
 #endif
 
-					assert(next_state != NULL);
 					queue_new_state(next_state);
-
 					trace_state_new(next_state);
 					break;
 

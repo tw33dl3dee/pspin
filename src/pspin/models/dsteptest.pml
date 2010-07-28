@@ -1,19 +1,22 @@
 int x = 0
 
-active proctype Run1() {
-  do
-	:: d_step { x == 0 -> x = x + 1 }
-	:: d_step { x == 1 -> x = x - 1 }
-  od
+active proctype p1() {
+	if
+	 :: x = 1
+	 :: x = 2
+	fi;
+	d_step {
+		do 
+		 :: x < 100 -> x++;
+			if
+			 :: x == 10 -> x = 90
+			 :: else
+			fi;
+		 :: break
+		od;
+	};
 }
 
-active proctype Run2() {
-  do
-	:: d_step { x == 0 -> x = x + 2 }
-	:: d_step { x == 2 -> x = x - 2 }
-  od
-}
-
-active proctype Checker() {
-  (x > 2) || (x < 0) -> assert(0)
+active proctype p2() {
+	x > 2 -> assert(x == 100);
 }

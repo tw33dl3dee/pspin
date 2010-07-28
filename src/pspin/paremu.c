@@ -167,6 +167,8 @@ static void queue_new_state(struct State *state)
 	state_hash_add(state, /* don't copy */ BfsAdd);
 }
 
+extern int in_dstep;
+
 /** 
  * @brief Поиск в ширину
  */
@@ -174,6 +176,7 @@ static void bfs(void)
 {
 	struct State *init_state;
 	struct State *cur_state, *next_state;
+	struct Process *next_current;
 	transitions_t transitions;
 
 	BFS_INIT();
@@ -208,10 +211,10 @@ static void bfs(void)
 			} else
 				state_dprintf(":\n");
 
-			FOREACH_TRANSITION(transitions, src_ip, dest_ip) {
+			FOREACH_TRANSITION(transitions, current, src_ip, dest_ip) {
 				state_dprintf("\t%d -> %d ", src_ip, dest_ip);
 
-				switch (do_transition(pid, dest_ip, cur_state, current, &next_state)) {
+				switch (do_transition(pid, dest_ip, cur_state, current, &next_state, &next_current)) {
 				case TransitionCausedAbort:
 					goto aborted;
 
@@ -219,6 +222,31 @@ static void bfs(void)
 #ifdef ENDSTATE
 					++transitions_possible;
 #endif
+					assert(next_state != NULL);
+
+					/* If current process entered d_step context,
+					 * make further transitions until it exits d_step
+					 */
+					while (in_dstep) {
+						FOREACH_TRANSITION(transitions, next_current, src_ip, dest_ip) {
+							state_dprintf("D\t%d -> %d ", src_ip, dest_ip);
+
+							switch (do_transition(pid, dest_ip, next_state, next_current, &next_state, &next_current)) {
+							case TransitionCausedAbort:
+								goto aborted;
+							case TransitionPassed:
+								goto in_dstep_next;
+							case TransitionBlocked:
+								break;
+							}
+						}
+
+						eprintf(ERROR_COLOR("BLOCKED IN D_STEP") "\n");
+						goto aborted;
+
+					  in_dstep_next:;
+					}
+
 					state_dprintf("TRANSITION: " HASH_FMT " => " HASH_FMT "\n",
 					              STATE_HASH(cur_state, 0), STATE_HASH(next_state, 0));
 
@@ -227,9 +255,7 @@ static void bfs(void)
 					dump_state(next_state);
 #endif
 
-					assert(next_state != NULL);
 					queue_new_state(next_state);
-					
 					trace_state_new(next_state);
 					break;
 
@@ -250,6 +276,8 @@ static void bfs(void)
 		if (state_count%STAT_THRESHOLD == 0)
 			trace_inter_stat();
 	}
+
+	eprintf(SUCCESS_COLOR("VERIFICATION PASSED") "\n");
 
  aborted:
 	state_dprintf("---------------------------------\n");

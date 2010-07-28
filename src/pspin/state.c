@@ -135,7 +135,7 @@ static struct State *copy_state_add_process(const struct State *state, int proct
 /**
  * If non-zero, current process is inside d_step block
  */
-static int in_dstep = 0;
+int in_dstep = 0;
 
 /** 
  * @brief Perform transition, if possible.
@@ -145,6 +145,7 @@ static int in_dstep = 0;
  * @param state Current state
  * @param current Current process state
  * @param next_state Next state is stored here if transition passes
+ * @param next_current Next state's current is stored here if transition passes
  * 
  * @return
  *  - [TransitionBlocked]     -- transition blocked
@@ -154,7 +155,7 @@ static int in_dstep = 0;
 enum TransitionResult 
 do_transition(int pid, int dest_ip,
               struct State *state, struct Process *current, 
-              struct State **next_state)
+              struct State **next_state, struct Process **next_current)
 {
 	int current_offset, aborted = TransitionPassed;
 
@@ -163,26 +164,32 @@ do_transition(int pid, int dest_ip,
 	state_dprintf("Performing step: <<< %s >>>\n", msg);
 #define CHECK_ALLOC(ptr)								\
 	if (ptr == NULL) {									\
-	    eprintf("==OUT OF MEMORY\n");					\
+	    eprintf(ERROR_COLOR("OUT OF MEMORY") "\n");		\
 		return TransitionCausedAbort;					\
 	}
 #define NEW_STATE()										\
-	*next_state = copy_state(state);					\
-	current_offset = PROC_OFFSET(current, state);		\
-	state = *next_state;								\
-	CHECK_ALLOC(state);									\
-	current = PROC_BY_OFFSET(state, current_offset);
-#define NEW_STATE_NEW_PROC(proctype)						\
-	*next_state = copy_state_add_process(state, proctype);	\
-	current_offset = PROC_OFFSET(current, state);			\
-	state = *next_state;									\
-	CHECK_ALLOC(state);										\
-	current = PROC_BY_OFFSET(state, current__offset);
-#define ASSERT(expr, repr)								\
-	if (!(expr)) {										\
-		eprintf("\033[01;31m==ASSERTION VIOLATED:\033[00m %s\n", repr);	\
-		edump_state(state);								\
-		aborted = TransitionCausedAbort;				\
+	if (!in_dstep) {									\
+	    *next_state = copy_state(state);				\
+		current_offset = PROC_OFFSET(current, state);	\
+		state = *next_state;							\
+		CHECK_ALLOC(state);								\
+		*next_current = current =						\
+		    PROC_BY_OFFSET(state, current_offset);		\
+	}
+#define NEW_STATE_NEW_PROC(proctype)							\
+	if (!in_dstep) {											\
+		*next_state = copy_state_add_process(state, proctype);	\
+		current_offset = PROC_OFFSET(current, state);			\
+		state = *next_state;									\
+		CHECK_ALLOC(state);										\
+		*next_current = current =								\
+		    PROC_BY_OFFSET(state, current__offset);				\
+	}
+#define ASSERT(expr, repr)												\
+	if (!(expr)) {														\
+	    eprintf(ERROR_COLOR("ASSERTION VIOLATED:") " %s\n", repr);		\
+		edump_state(state);												\
+		aborted = TransitionCausedAbort;								\
 	}
 #define PRINTF(fmt, args...)					\
 	state_dprintf("*** " fmt, ##args);
@@ -234,7 +241,7 @@ check_endstate(struct State *state)
 	return 0;
 
   invalid:
-	eprintf("\033[01;31m==INVALID END STATE:\033[00m\n");
+	eprintf(ERROR_COLOR("==INVALID END STATE:") "\n");
 	edump_state(state);
 	return -1;
 }

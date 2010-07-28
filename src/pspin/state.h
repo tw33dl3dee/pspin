@@ -83,14 +83,17 @@ struct Process {
 /**
  * Enumerates processes (referred to as `current') inside `state' executing
  * `increment_expr' on each new process before changing `current'.
+ * `current' may be altered inside loop body.
  */
 #define FOREACH_PROCESS(state, increment_expr)							\
 	for (struct Process													\
-			 *base = FIRST_PROC(state),									\
-			 *current = base;											\
+	         *base = FIRST_PROC(state),									\
+	         *current_save = base,										\
+	         *current = base;											\
 		 (char *)current - (char *)state < STATESIZE(state);			\
 		 (increment_expr),												\
-			 current = PROC_BY_OFFSET(current, PROCSIZE(current)))
+	         current_save = current =									\
+	         PROC_BY_OFFSET(current_save, PROCSIZE(current)))
 
 /**
  * Enumerates up to `process_count` processes (referred to as `current') inside `state'.
@@ -104,12 +107,12 @@ struct Process {
 
 /**
  * Enumerates all transitions (by `src_ip' and `dest_ip') for process
- * specified by `current'.
+ * specified by `process'.
  */
-#define FOREACH_TRANSITION(transitions, src_ip, dest_ip)				\
-	for (int i = 0, src_ip = PROCIP(current), dest_ip = 0;				\
-		 /* PROCIP(current) *may* change during loop */					\
-		 (dest_ip = transitions[PROCTYPE(current)][src_ip][i]) != 0;	\
+#define FOREACH_TRANSITION(transitions, process, src_ip, dest_ip)		\
+	for (int i = 0, src_ip = PROCIP(process), dest_ip = 0;				\
+		 /* PROCIP(process) *may* change during loop */					\
+		 (dest_ip = transitions[PROCTYPE(process)][src_ip][i]) != 0;	\
 		 ++i)
 
 /**
@@ -142,7 +145,7 @@ void hexdump_state(struct State *state);
 enum TransitionResult 
 do_transition(int pid, int dest_ip,
 			  struct State *state, struct Process *current, 
-			  struct State **next_state);
+			  struct State **next_state, struct Process **next_current);
 
 int
 check_endstate(struct State *state);

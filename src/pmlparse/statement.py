@@ -199,8 +199,8 @@ class Stmt(object):
  
         Returns: tuple (
         (1) is valid endstate (True or None),
-        (2) ends atomic (bool),
-        (3) ends d_step (bool)
+        (2) ends atomic (bool or None),
+        (3) ends d_step (bool or None)
         (3) next statements (list)
         )
 
@@ -217,7 +217,7 @@ class Stmt(object):
         def deduce_atomic(acc, e):
             if acc is not None and acc != e:
                 raise RuntimeError, "Cannot reduce statement atomicity context"
-            return e
+            return e or acc
 
         for stmt in self._next:
             if stmt.omittable:
@@ -580,6 +580,9 @@ class SequenceStmt(Stmt):
         self._stmts[0].set_dstep(starts, None)
         self._stmts[-1].set_dstep(None, ends)
 
+    def executable(self):
+        return self._stmts[0].executable()
+
     def debug_repr(self):
         return "-(-"
 
@@ -609,6 +612,8 @@ class DstepStmt(SequenceStmt):
 
     This is a dumb statement, needed only to set starts_dstep/ends_dstep
     flags on it's children
+
+    Is *not* omittable (to always have a single start point)
     """
 
     def __init__(self, stmts):
@@ -618,10 +623,17 @@ class DstepStmt(SequenceStmt):
         - `stmts`: list of Stmt objects
         """
         super(DstepStmt, self).__init__(stmts)
-        self.set_dstep(True, True)
+        # Some magic here
+        # DstepStmt was meant to be like AtomicStmt but then was decided
+        # to be made non-omittable, so that we always have single entry point in it
+        # Therefore, _starts_dstep is set manually to be True,
+        # while children don't actually start d_step
+        self.set_dstep(None, True)
+        self._starts_dstep = True
+        self._omittable = False
 
     def debug_repr(self):
-        return "d_step"
+        return "d_step BEGIN"
 
 
 class PrintStmt(Stmt):
