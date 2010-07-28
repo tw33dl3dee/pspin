@@ -32,7 +32,7 @@ definitions:
 	T_CONST		"(true|false|skip)"
 	T_ID		"[[:alpha:]_][[:alnum:]_$]*"
 	T_NUMBER	"[0-9]+"
-	T_STRING	"\".*\""
+	T_STRING	"\"[^\"]*\""
 	T_TYPE		"(bit|bool|byte|pid|short|int|unsigned)"
 
 
