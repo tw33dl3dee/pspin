@@ -231,7 +231,8 @@ static void bfs(void)
 						FOREACH_TRANSITION(transitions, next_current, src_ip, dest_ip) {
 							state_dprintf("D\t%d -> %d ", src_ip, dest_ip);
 
-							switch (do_transition(pid, dest_ip, next_state, next_current, &next_state, &next_current)) {
+							switch (do_transition(pid, dest_ip, next_state, next_current, 
+							                      &next_state, &next_current)) {
 							case TransitionCausedAbort:
 								goto aborted;
 							case TransitionPassed:
