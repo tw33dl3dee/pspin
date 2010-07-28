@@ -6,6 +6,11 @@ from string import Template
 from expression import ConstExpr
 
 
+max_name_len = 0
+# Space count between name and value columns in state dumps
+var_name_gap = 2
+
+
 class Type(object):
     """Type object
     """
@@ -189,11 +194,15 @@ class Variable(object):
                                     otherwise must be an Expression that can be evaluated an generation time)
         - `initval`: initial value (Expression or None)
         """
+        global max_name_len
+        max_name_len = max(max_name_len, len(name))
+
         self._name = name
         self._arrsize = arrsize
         self._initval = initval
         self._type = vartype
         self._visible = None
+
         if arrsize and not arrsize.const:
             raise RuntimeError, "Array size must be constant"
         if vartype:
@@ -272,7 +281,7 @@ class Variable(object):
         """Generates string to be used as printf-format specifier
         """
         if depth == 0:
-            skip = " "*(10 - len(self._name))
+            skip = " "*(max_name_len + var_name_gap - len(self._name))
         else:
             skip = ""
         if self._arrsize:
@@ -401,18 +410,23 @@ class Channel(Variable):
         init_tpl = "CHAN_LEN($chan) = 0, CHAN_MAXLEN($chan) = $max_len"
         return Template(init_tpl).substitute(chan=self.ref(), max_len=self._max_len)
 
-    def printf_format(self):
+    def printf_format(self, depth=0):
         """Generates string to be used as printf-format specifier
         """
         printf_fmt_tpl = "$skip<%d of %d> [$fields_fmt]"
-        skip = " "*(10 - len(self._name))
+        if depth == 0:
+            skip = " "*(max_name_len + var_name_gap - len(self._name))
+        else:
+            skip = ""
         entry_fmt = "{" + "; ".join([t.printf_format() for t in self._typelist]) + "}"
         fields_fmt = ", ".join([entry_fmt]*self._max_len)
         return Template(printf_fmt_tpl).substitute(skip=skip, fields_fmt=fields_fmt)
 
-    def printf_ref(self):
+    def printf_ref(self, selfref=None):
+        if selfref is None:
+            selfref = self.ref()
         printf_ref_tpl = "(int)CHAN_LEN($chan), (int)CHAN_MAXLEN($chan), $fields"
-        return Template(printf_ref_tpl).substitute(chan=self.ref(),
+        return Template(printf_ref_tpl).substitute(chan=selfref,
                                                    fields=", ".join([self._typelist[f].printf_ref(self.field_ref(e, f))
                                                                      for e in range(self._max_len)
                                                                      for f in range(len(self._typelist))]))
