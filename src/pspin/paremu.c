@@ -167,8 +167,6 @@ static void queue_new_state(struct State *state)
 	state_hash_add(state, /* don't copy */ BfsAdd);
 }
 
-extern int in_dstep;
-
 /** 
  * @brief Поиск в ширину
  */
@@ -176,7 +174,6 @@ static void bfs(void)
 {
 	struct State *init_state;
 	struct State *cur_state, *next_state;
-	struct Process *next_current;
 	transitions_t transitions;
 
 	BFS_INIT();
@@ -214,7 +211,7 @@ static void bfs(void)
 			FOREACH_TRANSITION(transitions, current, src_ip, dest_ip) {
 				state_dprintf("\t%d -> %d ", src_ip, dest_ip);
 
-				switch (do_transition(pid, dest_ip, cur_state, current, &next_state, &next_current)) {
+				switch (do_transition(transitions, pid, dest_ip, cur_state, current, &next_state)) {
 				case TransitionCausedAbort:
 					goto aborted;
 
@@ -224,34 +221,8 @@ static void bfs(void)
 #endif
 					assert(next_state != NULL);
 
-					/* If current process entered d_step context,
-					 * make further transitions until it exits d_step
-					 */
-					while (in_dstep) {
-						FOREACH_TRANSITION(transitions, next_current, src_ip, dest_ip) {
-							state_dprintf("D\t%d -> %d ", src_ip, dest_ip);
-
-							switch (do_transition(pid, dest_ip, next_state, next_current, 
-							                      &next_state, &next_current)) {
-							case TransitionCausedAbort:
-								goto aborted;
-							case TransitionPassed:
-								goto in_dstep_next;
-							case TransitionBlocked:
-								break;
-							}
-						}
-
-						eprintf(ERROR_COLOR("==BLOCKED IN D_STEP:") "\n");
-						edump_state(next_state);
-						goto aborted;
-
-					  in_dstep_next:;
-					}
-
 					state_dprintf("TRANSITION: " HASH_FMT " => " HASH_FMT "\n",
 					              STATE_HASH(cur_state, 0), STATE_HASH(next_state, 0));
-
 					state_dprintf("New state:\n");
 #ifdef STATE_DEBUG
 					dump_state(next_state);

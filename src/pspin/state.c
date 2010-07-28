@@ -135,17 +135,20 @@ static struct State *copy_state_add_process(const struct State *state, int proct
 /**
  * If non-zero, current process is inside d_step block
  */
-int in_dstep = 0;
+static int in_dstep = 0;
 
 /** 
  * @brief Perform transition, if possible.
+ *
+ * If transition results in entering d_step context, calls itself
+ * recursively until exiting out of it. 
  * 
+ * @param transitions Matrix of transition relation (used for recursive calls)
  * @param pid Pid of current process
  * @param dest_ip IP to transition process to
  * @param state Current state
  * @param current Current process state
  * @param next_state Next state is stored here if transition passes
- * @param next_current Next state's current is stored here if transition passes
  * 
  * @return
  *  - [TransitionBlocked]     -- transition blocked
@@ -153,9 +156,10 @@ int in_dstep = 0;
  *  - [TransitionCausedAbort] -- transition passed and caused abort
  */
 enum TransitionResult 
-do_transition(int pid, int dest_ip,
+do_transition(transitions_t transitions, 
+              int pid, int dest_ip,
               struct State *state, struct Process *current, 
-              struct State **next_state, struct Process **next_current)
+              struct State **next_state)
 {
 	int current_offset, aborted = TransitionPassed;
 
@@ -174,14 +178,13 @@ do_transition(int pid, int dest_ip,
 	    eprintf(ERROR_COLOR("==OUT OF MEMORY") "\n");	\
 		return TransitionCausedAbort;					\
 	}
-#define NEW_STATE()										\
-	if (!in_dstep) {									\
-	    *next_state = copy_state(state);				\
-		current_offset = PROC_OFFSET(current, state);	\
-		state = *next_state;							\
-		CHECK_ALLOC(state);								\
-		*next_current = current =						\
-		    PROC_BY_OFFSET(state, current_offset);		\
+#define NEW_STATE()											\
+	if (!in_dstep) {										\
+	    *next_state = copy_state(state);					\
+		current_offset = PROC_OFFSET(current, state);		\
+		state = *next_state;								\
+		CHECK_ALLOC(state);									\
+		current = PROC_BY_OFFSET(state, current_offset);	\
 	}
 #define NEW_STATE_NEW_PROC(proctype)							\
 	if (!in_dstep) {											\
@@ -189,8 +192,7 @@ do_transition(int pid, int dest_ip,
 		current_offset = PROC_OFFSET(current, state);			\
 		state = *next_state;									\
 		CHECK_ALLOC(state);										\
-		*next_current = current =								\
-		    PROC_BY_OFFSET(state, current__offset);				\
+		current = PROC_BY_OFFSET(state, current__offset);		\
 	}
 #define ASSERT(expr, repr)									\
 	if (!(expr)) {											\
@@ -224,7 +226,32 @@ do_transition(int pid, int dest_ip,
 	PROCIP(current) = dest_ip;
 	if (STATEATOMIC(state) >= 0)
 		state_dprintf("ATOMIC now\n");
+
+	/* If current process is in d_step context,
+	 * make further transitions until it exits d_step
+	 */
+	if (aborted == TransitionPassed && in_dstep) {
+		FOREACH_TRANSITION(transitions, current, src_ip, dest_ip) {
+			state_dprintf("D\t%d -> %d ", src_ip, dest_ip);
+			/* We can safely pass NULL, because no further states can be created here
+			 */
+			aborted = do_transition(transitions, pid, dest_ip, state, current, NULL);
+			/* If not TransitionBlocked, d_step has reached it's end
+			 */
+			if (aborted != TransitionBlocked)
+				return aborted;
+		}
+
+		eprintf(ERROR_COLOR("==BLOCKED IN D_STEP: ")
+		        INFO_COLOR("IN PROCESS") " %d " 
+		        INFO_COLOR("IP") " %d -> %d\n",
+		        pid, current->_ip, dest_ip);
+		edump_state(state);
+		return TransitionCausedAbort;
+	}
+
 	return aborted;
+
   blocked:
 	state_dprintf(" BLOCKED\n");
 	return TransitionBlocked;

@@ -149,9 +149,10 @@ void edump_state(struct State *state);
 void hexdump_state(struct State *state);
 
 enum TransitionResult 
-do_transition(int pid, int dest_ip,
+do_transition(transitions_t transitions,
+              int pid, int dest_ip,
 			  struct State *state, struct Process *current, 
-			  struct State **next_state, struct Process **next_current);
+			  struct State **next_state);
 
 int
 check_endstate(struct State *state);
