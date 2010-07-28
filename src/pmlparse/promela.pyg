@@ -153,7 +153,7 @@ visible ->
 	;
 
 sequence ->
-step:
+	step:
 		return kids[0]
 	| step sep sequence:
 		return kids[0] + kids[2]
@@ -165,7 +165,9 @@ sep ->
 	;
 
 step ->
-	# empty
+# empty
+	:
+		return []
 	| stmt:
 		return [codegen.cur_proc.add_stmt(k) for k in listify(kids[0])]
 	| stmt K_UNLESS stmt:

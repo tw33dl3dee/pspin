@@ -562,6 +562,9 @@ class SequenceStmt(Stmt):
         - `stmts`: list of Stmt objects
         """
         Stmt.__init__(self)
+        for s in stmts:
+            if not isinstance(s, Stmt):
+                raise RuntimeError, "Declarations inside blocks not supported: `%s'" % s
         self._stmts = stmts
         self._next = [stmts[0]]
         self._omittable = True

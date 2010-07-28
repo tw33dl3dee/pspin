@@ -252,7 +252,7 @@ class Variable(object):
     def check_type(self):
         """Used for type validation
         """
-        if not type(self._type) in (SimpleType, UserType, SpecialType):
+        if not isinstance(self._type, (SimpleType, UserType, SpecialType)):
             raise RuntimeError, "Invalid type `%s' for `%s'" % (self._type, self._name)
 
     def decl(self):
@@ -404,7 +404,7 @@ class Channel(ArrayVariable):
     def check_type(self):
         """Used for type validation
         """
-        if not type(self._type) is ChanType:
+        if not isinstance(self._type, ChanType):
             raise RuntimeError, "Invalid type `%s' for `%s'" % (self._type, self._name)
 
     def check_args(self, arg_list):
