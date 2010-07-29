@@ -717,7 +717,7 @@ class RecvStmt(SendStmt):
 
     def execute(self):
         recv_code_tpl = "CHAN_RECV($chan); $recv_ops"
-        recv_op_tpl = "$var = $field_ref"
+        recv_op_tpl = "$var = $field_ref; $field_ref = 0"
         recv_ops = []
         chan = self._chan_ref.code()
         chan_len = ChanOpExpr('len', self._chan_ref).code()
