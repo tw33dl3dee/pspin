@@ -170,6 +170,34 @@ class Process(object):
                                                             i=len(stmt.next), descr="END"))
         return ";\n".join(lines)
 
+    def transitions_dot(self):
+        """Returns Graphviz description of process state graph
+        """
+        dot_tpl = """node [shape = doublecircle]; $atomic_states
+    node [shape = circle]; $states
+    $transitions"""
+        # (from ip, to ip)
+        trans = [(0, first.ip) for first in self._stmts[0].next]
+        # (is atomic, name)
+        nodes = {0: (False, "proctype %s" % self.name)}
+        for stmt in self._stmts[1:]:
+            trans += [(stmt.ip, next.ip) for next in stmt.next]
+            nodes[stmt.ip] = (stmt.starts_atomic, str(stmt))
+        atomic_states = []
+        states = []
+        st_prefix = "S%s" % self.name
+        for k, v in nodes.items():
+            st = """%s_%d [label = "%s"]""" % (st_prefix, k, v[1])
+            if v[0]:
+                atomic_states.append(st)
+            else:
+                states.append(st)                
+        transitions = ["%s_%d -> %s_%d" % (st_prefix, ip_from, st_prefix, ip_to)
+                       for (ip_from, ip_to) in trans]
+        return Template(dot_tpl).substitute(atomic_states=" ".join(atomic_states),
+                                            states=" ".join(states),
+                                            transitions=";\n\t".join(transitions))
+
     def transitions(self):
         """Returns C-code (str) that performs transition for current proctype and given ip
         """

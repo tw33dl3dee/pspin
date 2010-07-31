@@ -19,7 +19,8 @@ def print_errpos(fname, lineno, charno, spaces_per_tab):
 
 fname = sys.argv[1]
 out_fname = sys.argv[2]
-pp_opt = sys.argv[3:]
+dot_fname = sys.argv[3]
+pp_opt = sys.argv[4:]
 
 l,ltab = pyggy.getlexer("promela.pyl")
 p,ptab = pyggy.getparser("promela.pyg")
@@ -45,3 +46,4 @@ else:
         sys.exit(2)
     else:
         code.write_file(out_fname)
+        code.write_dot(dot_fname)

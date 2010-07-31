@@ -1,5 +1,5 @@
 pmlparse/*.c
-pspin/stategen.c
+pspin/stategen.*
 pspin/test.pml
 pspin/pspin*
 *.log

@@ -26,23 +26,23 @@ class Codegen(object):
         - `fname`: file name to write to
         """
         with file(fname, "w") as f:
-            self.write_block(f, 'STATE_DECL', self.state_decl())
-            self.write_block(f, 'PROC_DECL', self.proc_decl())
-            self.write_block(f, 'UTYPE_DECL', self.utype_decl())
-            self.write_block(f, 'HIDDEN_VAR_DECL', self.hidden_var_decl())
-            self.write_block(f, 'C_CODE_DEF', self.c_code_def())
-            self.write_block(f, 'C_CODE_UNDEF', self.c_code_undef())
-            self.write_block(f, 'STATE_INIT', self.state_init())
-            self.write_block(f, 'PROCSTATE_INIT', self.procstate_init())
-            self.write_block(f, 'VALID_ENDSTATES', self.valid_endstates())
-            self.write_block(f, 'TRANSITIONS', self.transitions())
-            self.write_block(f, 'TRANSITIONS_INIT', self.transitions_init())
-            self.write_block(f, 'STATE_DUMP', self.state_dump(False))
-            self.write_block(f, 'STATE_EDUMP', self.state_dump(True))
-            self.write_block(f, 'PROCSTATE_DUMP', self.procstate_dump(False))
-            self.write_block(f, 'PROCSTATE_EDUMP', self.procstate_dump(True))
+            self._write_block(f, 'STATE_DECL', self.state_decl())
+            self._write_block(f, 'PROC_DECL', self.proc_decl())
+            self._write_block(f, 'UTYPE_DECL', self.utype_decl())
+            self._write_block(f, 'HIDDEN_VAR_DECL', self.hidden_var_decl())
+            self._write_block(f, 'C_CODE_DEF', self.c_code_def())
+            self._write_block(f, 'C_CODE_UNDEF', self.c_code_undef())
+            self._write_block(f, 'STATE_INIT', self.state_init())
+            self._write_block(f, 'PROCSTATE_INIT', self.procstate_init())
+            self._write_block(f, 'VALID_ENDSTATES', self.valid_endstates())
+            self._write_block(f, 'TRANSITIONS', self.transitions())
+            self._write_block(f, 'TRANSITIONS_INIT', self.transitions_init())
+            self._write_block(f, 'STATE_DUMP', self.state_dump(False))
+            self._write_block(f, 'STATE_EDUMP', self.state_dump(True))
+            self._write_block(f, 'PROCSTATE_DUMP', self.procstate_dump(False))
+            self._write_block(f, 'PROCSTATE_EDUMP', self.procstate_dump(True))
 
-    def write_block(self, f, guard, code):
+    def _write_block(self, f, guard, code):
         """Writes block of code inside #ifdef/#endif guard
 
         Arguments:
@@ -53,6 +53,19 @@ class Codegen(object):
         f.write("\n#ifdef %s\n\n" % guard)
         f.write(code.replace("\t", " "*4))
         f.write(";\n\n#endif // %s\n" % guard)
+
+    def write_dot(self, fname):
+        """Write out graphviz dot file with process state graphs
+        """
+        dot_tpl = """digraph stategen {
+    rankdir=LR;
+    $transitions;
+}
+"""
+        transitions = ";\n\t".join([p.transitions_dot() for p in self._procs])
+        dot = Template(dot_tpl).substitute(transitions=transitions)
+        with file(fname, "w") as f:
+            f.write(dot)
 
     def start_proc(self, active, name):
         """Starts new proctype definition

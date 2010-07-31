@@ -1,6 +1,8 @@
 set(PROMELA_MODEL test.pml)
 
 set(STATEGEN_FILE ${CMAKE_CURRENT_BINARY_DIR}/stategen.c)
+set(STATE_DOT     ${CMAKE_CURRENT_BINARY_DIR}/stategen.dot)
+set(STATE_GRAPH   ${CMAKE_CURRENT_BINARY_DIR}/stategen.png)
 set(PROMELA_FILE  ${CMAKE_CURRENT_SOURCE_DIR}/${PROMELA_MODEL})
 set(PMLPARSE_DIR  ${CMAKE_CURRENT_SOURCE_DIR}/../pmlparse)
 
@@ -26,15 +28,21 @@ if (NOT EXISTS ${PROMELA_FILE})
   message(FATAL_ERROR "You must create symlink ${PROMELA_MODEL} to a file with PROMELA model")
 endif()
 
-add_custom_command(OUTPUT ${STATEGEN_FILE}
+add_custom_command(OUTPUT ${STATEGEN_FILE} ${STATE_DOT}
   DEPENDS ${PROMELA_FILE} ${PMLPARSE_DIR}/*.py*
-  COMMAND ./pmlparse.py ${PROMELA_FILE} ${STATEGEN_FILE} $(PP)
+  COMMAND ./pmlparse.py ${PROMELA_FILE} ${STATEGEN_FILE} ${STATE_DOT} $(PP)
   WORKING_DIRECTORY ${PMLPARSE_DIR}
   COMMENT "Parsing ${PROMELA_MODEL}"
 )
 
+add_custom_command(OUTPUT ${STATE_GRAPH}
+  DEPENDS ${STATE_DOT}
+  COMMAND ${DOXYGEN_DOT_EXECUTABLE} -Tpng -o ${STATE_GRAPH} ${STATE_DOT}
+  COMMENT "Generating state graph"
+)
+
 add_custom_target(stategen
-  DEPENDS ${STATEGEN_FILE}
+  DEPENDS ${STATEGEN_FILE} ${STATE_GRAPH}
 )
 
 set(MPI_TEST_NODE_COUNT 4)
