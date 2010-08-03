@@ -24,6 +24,12 @@ add_latex_document(paco-thesis.tex
   DEFAULT_PDF MANGLE_TARGET_NAMES 
 )
 
+add_latex_document(paco-article.tex 
+  INPUTS ${INC_FILES}
+  BIBFILES ../thesis/thesis.bib
+  DEFAULT_PDF MANGLE_TARGET_NAMES 
+)
+
 add_latex_document(review.tex DEFAULT_PDF MANGLE_TARGET_NAMES)
 
 add_custom_target(articles ALL)
