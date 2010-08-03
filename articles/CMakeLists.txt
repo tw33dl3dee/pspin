@@ -26,6 +26,8 @@ add_latex_document(paco-thesis.tex
 
 add_latex_document(paco-article.tex 
   INPUTS ${INC_FILES}
+  DEPENDS graphics
+  IMAGE_DIRS ../graphics
   BIBFILES ../thesis/thesis.bib
   DEFAULT_PDF MANGLE_TARGET_NAMES 
 )

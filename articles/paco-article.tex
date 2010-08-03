@@ -42,7 +42,7 @@
 \begin{document}
 
 \begin{center}{ \fontsize{18pt}{23pt}\selectfont\bf РАЗРАБОТКА ПАРАЛЛЕЛЬНОГО АЛГОРИТМА ГЕНЕРАЦИИ СОСТОЯНИЙ ПРИ ПРОВЕРКЕ
-    КОНЕЧНЫХ МОДЕЛЕЙ ДЛЯ СИСТЕМ С НЕРАЗДЕЛЯЕМОЙ ПАМЯТЬЮ}
+    МОДЕЛЕЙ ДЛЯ СИСТЕМ С НЕРАЗДЕЛЯЕМОЙ ПАМЯТЬЮ}
 \end{center}
 
 \vspace{5mm}
@@ -79,7 +79,7 @@ E-mail:~korotkov2@mail.ru
 I.\,A.\,Korotkov (Moscow State Technical Univercity, 5 Baumanskay 2-aya ul., Moscow 105005, Russia,
 e-mail:~korotkov2@mail.ru).
 
-Main limitation of model checking is statespace combinatorial explosion, which makes even medium-sized model
+Major limitation of model checking is statespace combinatorial explosion, which makes even medium-sized model
 inappropriate for that kind of verification. In this paper, parallel statespace generation with distributed state
 storage is proposed as a possible solution. State partitioning scheme that allows to reduce number of remote calls
 during generation process is developed.  Experimental results, produced by developed verification tool, are given and
@@ -105,7 +105,7 @@ prove that proposed partitioning scheme is better than random uniform distributi
 которых такие циклы возникают, и необходимо использование специальных мер (расщепленный горизонт) для их
 избежания.~\cite{RipOnSpin}
 
-\section{Формальное описание проверки моделей}
+\section{Формальное описание проверки конечных моделей}
 \label{sec:modelchecking}
 
 Пространство состояний моделируемой программы или программного комплекса можно формализовать, как модель Крипке
@@ -147,7 +147,7 @@ CTL).~\cite{Clarke, Velder} Формулы в CTL* составляются из
 пути выполняется $x$>>, а формула $AGEF x$ означает <<во всех путях, идущих из начального состояния, из каждого состояния есть хотя бы
 один путь, в котором рано или поздно встретится состояние, в котором выполняется $x$>>.
 
-\section{Средство проверки модели SPIN}
+\section{Средство проверки конечных модели SPIN}
 \label{sec:spin}
 
 Наиболее распространенным средством проверки конечных моделей является ПО SPIN, использующее для описания исходной
@@ -319,7 +319,7 @@ Cтоль высокое число удаленных вызовов негат
 удачном выборе хэш-функции, а при $W_\rho < N$ память некоторых узлов не будет использоваться вообще, так как число
 возможных значений хэш-функции будем меньше числа узлов.
 
-\section{Экспериментальная проверка}
+\section{Проведение экспериментов}
 \label{sec:experim}
 
 Создано программное средство для параллельной проверки состояний с распределенной генерацией, поддерживающий подмножество языка
@@ -347,8 +347,8 @@ x$ и $AF x$, где $x$ может содержать локальные пер
 В качестве платформы для параллельных вычислений использовался стандарт MPI, выбранный в силу его распространенности
 среди кластерного ПО и поддержки широкого набора языков.
 
-Исходными данными служат две модели: алгоритм выбора лидера и обедающие философы с числом компонент $P = 6$. Для проведения
-экспериментов использовался кластер из 20 узлов, имеющих 4 Гб ОЗУ и 4 ЦПУ Intel\,Xeon\,5120~1.86 ГГц каждый.
+Исходными данными служат две модели: алгоритм выбора лидера и <<обедающие философы>> с числом компонент $P = 6$. Для
+проведения экспериментов использовался кластер из 20 узлов, имеющих 4 Гб ОЗУ и 4 ЦПУ Intel\,Xeon\,5120~1.86 ГГц каждый.
 
 Результаты экспериментов по сравнению предлагаемого распределения с $\rho = 1$ и $\rho = 2$ с наивным представлены на
 табл.~\ref{tab:election-results} и~\ref{tab:philo-results}. Приведены следующие величины:
@@ -388,7 +388,7 @@ x$ и $AF x$, где $x$ может содержать локальные пер
     2      & 35                  & 29.6              & 7              & 21                  \\ \hline
     ---    & \textbf{88}         & 0.1               & \textbf{50}    & \textbf{75}         \\ \hline    
   \end{tabular}
-  \caption{Сравнение распределений (обедающие философы)}
+  \caption{Сравнение распределений (<<обедающие философы>>)}
   \label{tab:philo-results}
 \end{table}
 
