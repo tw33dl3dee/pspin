@@ -1,4 +1,4 @@
-\documentclass[12pt,a4paper,fleqn,leqno]{article}
+\documentclass[12pt,a4paper,fleqn]{article}
 
 \usepackage{ucs}
 \usepackage[utf8x]{inputenc}
@@ -10,11 +10,8 @@
 \usepackage{verbatim}
 \usepackage{amsthm}
 \usepackage{amssymb}
-\usepackage[colorlinks, urlcolor=blue, pdfborder={0 0 0 [0 0]}]{hyperref}
-\usepackage{sectsty}
-\usepackage{titlesec}
-\usepackage{mathtext}%русские буквы в формулах
 \usepackage{amsmath}
+%\usepackage[colorlinks, urlcolor=blue, pdfborder={0 0 0 [0 0]}]{hyperref}
 \usepackage{graphicx}
 
 \usepackage[left=20mm,right=20mm,top=20mm,bottom=20mm]{geometry}
@@ -40,11 +37,12 @@
 \sloppy
 \hyphenpenalty=9000
 
+\pagestyle{empty}
+
 \begin{document}
 
-\begin{center}{
-    \fontsize{18pt}{23pt}\selectfont\bf
-    ПАРАЛЛЕЛЬНАЯ ГЕНЕРАЦИЯ ПРОСТРАНСТВА СОСТОЯНИЙ ДИСКРЕТНЫХ ДЕТЕРМИНИРОВАННЫХ СИСТЕМ}
+\begin{center}{ \fontsize{18pt}{23pt}\selectfont\bf РАЗРАБОТКА ПАРАЛЛЕЛЬНОГО АЛГОРИТМА ГЕНЕРАЦИИ СОСТОЯНИЙ ПРИ ПРОВЕРКЕ
+    КОНЕЧНЫХ МОДЕЛЕЙ ДЛЯ СИСТЕМ С НЕРАЗДЕЛЯЕМОЙ ПАМЯТЬЮ}
 \end{center}
 
 \vspace{5mm}
@@ -54,11 +52,11 @@
 \footnotesize\it Московский государственный технический университет им.~Н.~Э.~Баумана\\\
 \rm
 Россия, 105005, Москва, 2-ая Бауманская, 5\\
-E-mail: \textcolor {blue}{\underline{korotkov2@mail.ru}}}
+E-mail:~korotkov2@mail.ru
 
 \hspace{1.25cm}
 
-\vspace{10mm}
+\vspace{8mm}
 
 \begin{minipage}{12.16cm}\noindent
 
@@ -67,22 +65,25 @@ E-mail: \textcolor {blue}{\underline{korotkov2@mail.ru}}}
 
 \noindent{\bf Key words:} model checking, state generation, parallel statespace, parallelism, Promela
 
-\vspace{8mm}
+\vspace{6mm}
 
 \noindent Основной проблемой верификации конечных моделей является комбинаторный <<взрыв>> числа состояний, которые с
 ростом размера модели становится затруднительно хранить в ОЗУ одной машины. Рассматривается подход к верификации
 конечных моделей на основе параллельной генерации состояний и их распределенного хранения. Предлагается схема
 распределенного хранения состояний, позволяющая уменьшить число удаленных вызовов между узлами в процессе
-генерации. Приводятся результаты экспериментов, полученные при помощи разработанного прототипа.
+генерации. Приводятся результаты экспериментов, полученные при помощи разработанного программного средства.
 
-\noindent {\bf Parallel statespace generation in model-checking} / I.\,A.\,Korotkov (Moscow State Technical Univercity, 5
-Baumanskay 2-aya ul., Moscow 105005, Russia, E-mail: \textcolor {blue}{\underline{korotkov2@mail.ru}}). 
+\vspace{4mm}
+
+\noindent {\bf Parallel statespace generation during model-checking for systems with distributed memory} /
+I.\,A.\,Korotkov (Moscow State Technical Univercity, 5 Baumanskay 2-aya ul., Moscow 105005, Russia,
+e-mail:~korotkov2@mail.ru).
 
 Main limitation of model checking is statespace combinatorial explosion, which makes even medium-sized model
 inappropriate for that kind of verification. In this paper, parallel statespace generation with distributed state
 storage is proposed as a possible solution. State partitioning scheme that allows to reduce number of remote calls
-during generation process is developed.  Experimental results, produced by developed prototype, are given and prove that
-proposed partitioning scheme is better than random uniform distribution.
+during generation process is developed.  Experimental results, produced by developed verification tool, are given and
+prove that proposed partitioning scheme is better than random uniform distribution.
 \end{minipage}
 
 \end{center}
@@ -192,8 +193,8 @@ active [3] proctype user()
   \label{fig:modelchk-idef0-a0}
 \end{figure}
 
-\section{Проблемы традиционного подхода}
-\label{sec:modelchk-problems}
+\section{Параллельная генерация состояний}
+\label{sec:pargen}
 
 При росте числа и сложности компонент моделируемого программного комплекса наблюдается комбинаторный рост числа
 возможных состояний, поэтому проверка модели требует больших затрат вычислительных ресурсов. Приведенная в предыдущем
@@ -205,12 +206,11 @@ active [3] proctype user()
 \emph{сокращение частных порядков} (уменьшает размер графа состояний,~\cite{POD}), \emph{битовое хэширование} (уменьшает
 объем требуемоей памяти за счет того, что сами состояния не хранятся и коллизии в хэш-таблице не
 отслеживаются,~\cite{BitHash1, Wolper}), \emph{сжатие состояний} (уменьшает объем требуемой памяти, однако незначительно
-и ценой существенного увеличения времени проверки,~\cite{StateCompr}), но все они либо дают небольшой, плохо
-масштабируемый прирост, либо приводят к потенциальным потерям состояний при обходе. Альтернативным подходом является
-\emph{параллельная генерация состояний} с распределенным хранением по различным узлам вычислительной сети.
+и ценой существенного увеличения времени проверки,~\cite{StateCompr}). 
 
-\section{Параллельная генерация состояний}
-\label{sec:pargen}
+Однако, приведенные меры либо дают небольшой, плохо масштабируемый прирост, либо приводят к потенциальным потерям
+состояний при обходе. Альтернативным подходом является \emph{параллельная генерация состояний} с распределенным
+хранением по различным узлам вычислительной сети.
 
 Возможны два подхода к параллельной генерации состояний.
 
@@ -322,18 +322,27 @@ Cтоль высокое число удаленных вызовов негат
 \section{Экспериментальная проверка}
 \label{sec:experim}
 
-Создан прототип ПО для параллельной проверки состояний с распределенной генерацией, поддерживающий подмножество языка
+Создано программное средство для параллельной проверки состояний с распределенной генерацией, поддерживающий подмножество языка
 Promela для описания модели. Для задания проверямых утверждений поддерживается подмножество LTL, допускающее формулы $AG
 x$ и $AF x$, где $x$ может содержать локальные переменные процессов (включая счетчик команд) и глобальные переменные. На
 практике данное подмножество LTL реализовано при помощи встроенной в Promela функции \texttt{assert} и поиска тупиковых
 состояний.
 
-В разработанном прототипе поддерживаются основные возможности языка Promela, такие как асинхронные каналы,
+В разработанном средстве поддерживаются основные возможности языка Promela, такие как асинхронные каналы,
 пользовательские типа данных, \texttt{atomic} и \texttt{d\_step}.~\cite{SpinRoot}
 
 Исходная модель на Promela считывается и транслируется во внутренний граф команд для каждого процесса, который затем
 минимизируется. С целью достижения скорости генерации состояний, сравнимой со скоростью SPIN, по полученным графам
-команд генерируется код на языке~C, выполняющий вычисление функции переходов модели $Next(s) = \{s': R(s, s')\}$.
+команд генерируется код на языке~C, выполняющий вычисление функции переходов модели $Next(s) = \{s': R(s, s')\}$ и
+функции проверки состояний $Assert(s): S \rightarrow \{0, 1\}$. Функциональная схема данного процесса приведена на
+рис.~\ref{fig:stategen-idef0-b0}.
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=\textwidth]{../graphics/stategen-idef0-b0}
+  \caption{Функциональная схема процесса генерации кода по описанию модели}
+  \label{fig:stategen-idef0-b0}
+\end{figure}
 
 В качестве платформы для параллельных вычислений использовался стандарт MPI, выбранный в силу его распространенности
 среди кластерного ПО и поддержки широкого набора языков.
