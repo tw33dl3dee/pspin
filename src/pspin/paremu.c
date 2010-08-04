@@ -245,10 +245,10 @@ static void bfs(void)
 			}
 		}
 
+#ifdef ENDSTATE
 		if (transitions_possible == 1)
 			determ_state_count++;
 
-#ifdef ENDSTATE
 		if (!transitions_possible) {
 			state_dprintf("End-state, performing validity check...\n");
 			if (check_endstate(cur_state) < 0)
