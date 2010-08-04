@@ -41,6 +41,11 @@ static uint64_t states_per_node[NODECOUNT];
  */
 static uint64_t state_count;
 /**
+ * Суммарное число состояний, 
+ * из которых лишь один возможный переход
+ */
+static uint64_t determ_state_count;
+/**
  * Суммарное число внутренних переходов.
  */
 static uint64_t trans_count;
@@ -109,8 +114,10 @@ static void trace_summary()
 			(double)xnode_count, xnode_count*100./trans_count);
 
 	iprintf("\tStates:\n"
-			"\t\tTotal:   %.0f (%.1f/sec)\n",
-			(double)state_count, state_count/run_time);
+			"\t\tTotal:         %.0f (%.1f/sec)\n"
+	        "\t\tDeterministic: %.0f (%.1f%%)\n",
+	        (double)state_count, state_count/run_time,
+	        (double)determ_state_count, 100.*determ_state_count/state_count);
 	
 	uint64_t states_max = 0, states_min = states_per_node[0];
 	for (int i = 0; i < NODECOUNT; ++i) {
@@ -118,7 +125,7 @@ static void trace_summary()
 			states_min = states_per_node[i];
 		if (states_max < states_per_node[i])
 			states_max = states_per_node[i];
-		iprintf("\t\tNode %2d: %.0f (%.1f%%)\n",
+		iprintf("\t\tNode %2d:       %.0f (%.1f%%)\n",
 				i, (double)states_per_node[i], states_per_node[i]*100./state_count);
 	}
 	iprintf("\t\tMin/max: %.2f\n", 
@@ -237,6 +244,9 @@ static void bfs(void)
 				}
 			}
 		}
+
+		if (transitions_possible == 1)
+			determ_state_count++;
 
 #ifdef ENDSTATE
 		if (!transitions_possible) {
