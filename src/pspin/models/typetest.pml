@@ -17,6 +17,8 @@ active proctype A() {
 	MyType b[2];
 
 	MyType2 c[2];
+
+	short v[2] = {1, 5};
 	
 	a.x = 1;
 	b[0].y = 2;

@@ -1,4 +1,4 @@
-chan ch = [2] of {int, byte};
+chan ch = [2] of {int, byte}
 
 active proctype A() {
 	int x;
