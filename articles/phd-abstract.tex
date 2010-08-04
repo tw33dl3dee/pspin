@@ -1,0 +1,58 @@
+\documentclass[a4paper,titlepage]{article}
+
+\usepackage{ucs}
+\usepackage[utf8x]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[english,russian]{babel}
+
+\usepackage{textcomp}
+\usepackage{indentfirst}
+\usepackage{verbatim}
+
+\usepackage{amsthm}
+\usepackage{amssymb}
+\usepackage{amsmath}
+
+\usepackage{hyperref}
+
+\usepackage{graphicx}
+
+\usepackage[left=20mm,right=20mm,top=20mm,bottom=20mm]{geometry}
+
+\usepackage{listings}
+\lstset{
+  basicstyle=\footnotesize,
+  frame=none,
+  breakatwhitespace=true,% разрыв строк только на whitespacce
+  breaklines=true,       % переносить длинные строки
+  captionpos=b,          % подписи снизу
+  numbers=none,          % без нумерации
+  showspaces=false,      % показывать пробелы подчеркиваниями -- идиотизм 70-х годов
+  showstringspaces=false,
+  showtabs=false,        % и табы тоже
+  stepnumber=1,
+  tabsize=4              % кому нужны табы по 8 символов?..
+}
+
+\sloppy
+\hyphenpenalty=9000
+
+\makeatletter
+\renewcommand\@biblabel[1]{\hfill#1.}
+\makeatother
+
+\title{Параллельная верификация конечных моделей на соответствие формулам логики
+  ветвящегося времени} \author{Коротков\,И.\,А.}
+
+\begin{document}
+
+
+\bibliographystyle{../thesis/gost780u}
+\bibliography{../thesis/thesis}
+
+\end{document}
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: t
+%%% End: 
