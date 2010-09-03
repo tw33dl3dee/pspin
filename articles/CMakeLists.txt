@@ -34,18 +34,19 @@ add_latex_document(paco-article.tex
 
 add_latex_document(phd-proposals.tex DEFAULT_PDF MANGLE_TARGET_NAMES)
 add_latex_document(phd-abstract.tex 
+  INPUTS ${INC_FILES}
   BIBFILES ../thesis/thesis.bib  
   DEFAULT_PDF MANGLE_TARGET_NAMES
 )
-add_latex_document(phd-abstract-review.tex 
-  BIBFILES ../thesis/thesis.bib  
-  DEFAULT_PDF MANGLE_TARGET_NAMES
-)
+add_latex_document(phd-abstract-review.tex DEFAULT_PDF MANGLE_TARGET_NAMES)
 
 add_latex_document(review.tex DEFAULT_PDF MANGLE_TARGET_NAMES)
 
 add_custom_target(articles ALL)
 add_dependencies(articles report1_pdf report2_pdf report2-slides_pdf report3_pdf report3-slides_pdf review_pdf)
+
+add_custom_target(phd ALL)
+add_dependencies(phd phd-proposals_pdf phd-abstract_pdf phd-abstract-review_pdf)
 
 add_custom_command(TARGET articles POST_BUILD
   COMMAND cp ${LATEX_OUTPUT_PATH}/*.pdf ${CMAKE_CURRENT_BINARY_DIR}/
