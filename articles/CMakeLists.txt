@@ -51,3 +51,6 @@ add_dependencies(phd phd-proposals_pdf phd-abstract_pdf phd-abstract-review_pdf)
 add_custom_command(TARGET articles POST_BUILD
   COMMAND cp ${LATEX_OUTPUT_PATH}/*.pdf ${CMAKE_CURRENT_BINARY_DIR}/
 )
+add_custom_command(TARGET phd POST_BUILD
+  COMMAND cp ${LATEX_OUTPUT_PATH}/*.pdf ${CMAKE_CURRENT_BINARY_DIR}/
+)
