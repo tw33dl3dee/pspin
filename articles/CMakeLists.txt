@@ -33,7 +33,14 @@ add_latex_document(paco-article.tex
 )
 
 add_latex_document(phd-proposals.tex DEFAULT_PDF MANGLE_TARGET_NAMES)
-add_latex_document(phd-abstract.tex DEFAULT_PDF MANGLE_TARGET_NAMES)
+add_latex_document(phd-abstract.tex 
+  BIBFILES ../thesis/thesis.bib  
+  DEFAULT_PDF MANGLE_TARGET_NAMES
+)
+add_latex_document(phd-abstract-review.tex 
+  BIBFILES ../thesis/thesis.bib  
+  DEFAULT_PDF MANGLE_TARGET_NAMES
+)
 
 add_latex_document(review.tex DEFAULT_PDF MANGLE_TARGET_NAMES)
 
