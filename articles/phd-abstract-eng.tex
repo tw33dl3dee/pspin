@@ -1,0 +1,35 @@
+Parallel CTL verification in model checking
+
+Introduction
+
+Model checking is a formal automated mechanism for finite parallel system verification.
+
+Traditional testing methods are oftern not enough for development of high-reliable complex
+parallel systems with multiple asynchronously functioning components because they only
+allow to find easy reproducible errors. In case where certain error classes must be fully
+excluded, e.g., avionics software, designing network protocols, microcircuits, etc.,
+modelchecking is used.
+
+As part of the modelchecking process, full statespace of a discrete model of software
+being examing is built and tested for a certain set of assertions called the
+specification. The main problem arising is the combinatorical explosion of the statespace.
+
+For instance, if a model of four network routers running RIP protocol connected with four
+network interfaces is checked for possibility of routing loops, it can be prooved that
+without using the so-called <<split horizon>> extension, there is a scenario where such
+loops arise. This is an example of a successful modelchecking application.
+
+One of the advantage of this method over others like formal proofs or coverage-driven
+unit-testing is that modelchecking process always (given sufficient resources) converges
+to a <<yes/no>> result in finite time.
+
+The problem of statespace explosion.
+
+Full statespace if built and visited during the modelchecking process, which requires
+storing all states already visited in program memory to prevent infinite recursion. The
+number of states grows exponentially with model size
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: t
+%%% End: 
