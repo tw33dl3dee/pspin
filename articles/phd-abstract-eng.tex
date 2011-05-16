@@ -27,7 +27,152 @@ The problem of statespace explosion.
 
 Full statespace if built and visited during the modelchecking process, which requires
 storing all states already visited in program memory to prevent infinite recursion. The
-number of states grows exponentially with model size
+number of states grows exponentially with model size which makes verification impossible
+even for medium-sized models due to insufficient storage available for visited states
+array. Let's take two models as example, dining philosophers problem and beforementioned
+RIP looping problem. The state and transition count for these models are shown in
+table~\ref{tab:models-statecount}. It can be observed that the numbers of states grows
+rapidly as the problem grows. For example, RIP model with 5 routers will require around
+100 Gb of RAM for storing visited states set.
+
+\begin{table}
+  \centering
+  \begin{tabular}{|r|l|l|}
+    \hline
+    Model                  & States         & Transitions       \\
+    \hline
+    Philosphers (5)            & $2.8 \cdot 10^4$  & $4.2 \cdot 10^4$ \\
+    Philosphers (7)            & $3.6 \cdot 10^5$  & $6.0 \cdot 10^5$ \\
+    RIP (4 routers)  & $1.6 \cdot 10^8$  & $4.8 \cdot 10^9$ \\
+    \hline
+  \end{tabular}
+  \caption{State and transition count for various models}
+\label{tab:models-statecount}
+
+There are several ways of solving this problem:
+Using external storage for visited states set. This method is not used widely because it
+slows down the verification process by several magnitudes.
+Symbolic verification, which involves representing the Kripke structure with boolean
+formulae instead of storing it directly. These formulae often take the same amount of RAM
+to store, so the profit is questionable.
+Mechanisms that reduce the number of states generated, e.g., partial order reduction
+(POD).
+Mechanisms that reduce the memory footprint of the state space: using Huffman codes to
+compress state representation, recursive state coding, bit state hashing without collision checking.
+
+All these methods, however, either pose serious restrictions on the verification process,
+lead to potentially incorrect result (as with bit state hashing, which <<looses>> states)
+or just don't scale well, i.e. give only marginal profit, like state compression.
+
+An alternative solution proposed is using parallel computations with distributed memory
+model for partitioning statesspace between multiple calculation nodes.
+
+Present modelchecking tools.
+
+One the most widespread tools is SPIN modelchecker, originally developed by J.~Holzmann at
+Bell Labs in 1980. It uses Promela (PROtocol Meta Language) as means of describing a
+model, which is represented as a set of concurrent finiate state machines (processes), communicating via means of
+channels and global variables. The models itself is the intersection of all processes'
+finite state machines (FSMs). SPIN can be used verifying both safety conditions (state
+assertions) as well as liveness conditions (given as linear time logic, LTL, formulae).
+
+SPIN explores the whole statespace of the model during the verification process,
+constructing a corresponding Buchi automation (BA) and looking for an accepting
+cycle. If such a cycle is found, verification completes with negative result. The
+automaton graph is traversed in DFS (depth-first search) order with so-called nested
+DFS to detect accepting cycles.
+
+Another well-known modelchecker is NUSMV, which verifies models described with SMV
+(Symbolic Model Verification) language by means of symbolic verification, representing
+them as OBDD (ordered binary decision diagrams). Unlike SPIN, it supports <<fairness CTL>>
+instead of LTL logic for specifying liveness conditions.
+
+UCLID is a software tool for verifying Counter Arithmetic with Lambda Expressions and
+Uninterpreted Functions (CLU) models. It is primarily used for validating logical schemes
+of microprocessors, used by Intel and other microprocessor manufacturers. It also uses
+symbolic verification, deducing a proof for boolean formulae in part of validation
+process..
+
+Another tool used in that field is Mur$\phi$ verifier, originally created for cache
+synchronization algorithm checking in multiprocessor systems. Mur$\phi$ is quite analogous
+to SPIN, traversing full statespace graph in depth-first order, checking it for safety
+conditions only.
+
+Overview of similar works.
+
+The first articles on parallel statespace generation of finite models appeared in late
+80-s. They had numerous drawbacks, mentioned by ~ref.
+
+~ref suggests a parallel verification of Mur$\phi$ verifier, with distributed
+breadth-first search algorithm and even state distribution between nodes. One of it's
+major drawbacks was a big volume of internode communication traffic which lead to big
+verification times. Authors suggested message buffering to hinder that problem.
+
+~ref improved on this idea, suggesting such statespace partitioning function that would
+satisfy both uniformity and locality requirements, i.e. distribute states between nodes as
+even as possible while reducing the number of cross-node state transition (transitions
+whose endstate is located on different node than its beginning state). This resulted in
+reducing cross-node network traffic, average waiting time of nodes and reduced the whole
+verification time by 5--10 times. It must be noted that message buffering could also be
+used here for even greater effort.
+
+~ref originated the idea of parallel storage and processing of OBDDs. Authors, however,
+could not come up with a feasible solution and have fallen back to method described
+by~ref.
+
+All the works mentioned did solve the problem of parallel generation and storing of
+statespace. That allowed to perform safety condition verification, i.e. proving that
+certain condition holds in all states. Liveness conditions, however, were not considered.
+
+The main difficulty with checking liveness conditions, presented in general case as CTL*
+formulae is that they require strongly connected components (SCCs) of the state graph to
+be detected, which requires loop detection. Loop detection is easy when the global
+visiting order is depth-first, but not when it is breadth-first, as with the parallel
+graph traversing.
+
+A couple of PhDs in the Brno University have worked on that problem and published
+papers~ref, in which they develop a parallel graph traversing algorithm that makes loop
+detection and, therefore, LTL formula checking possible. The state partitioning function
+is chosen so that all states belonging to a cycle of the Buchi automaton will belong to a
+single node, so loop detection is carried out locally for each node with nested DFS. 
+
+Another algorithm developed by them uses breadth-first search combined with cycle
+prediction and followed by a costly global cycle detection phase. A verification tool
+called DiVinE has been developed based on that algorithms, and others.
+
+~ref considers a very interesting option, reducing CTL* formulae to $\mu$-calculus formulae
+of order not greater than two, for which a parallel verification algorithm has been
+suggested. This approach, however, was not complete and required some further work, for
+example, authors do not consider an effective way for splitting the state graph into
+strongly connected components in some parallel-optimized way, which is one of the most
+time-consuming operations in the suggested algorithm.
+
+Accomplished results.
+
+In~ref, we develop a parallel statespace generation algorithm similar to that of~ref and
+propose a state partitioning function that reduces the number of cross-node messages by
+multiple times.
+
+This partitioning function makes use of the locality property of the model in terms of
+Promela processes. Cross-node transitions happen only when a specific process (e.g. the
+first one) changes it's state, which reduces the network traffic and the total waiting
+time of nodes by several times while keeping the distribution uniformity no worse than
+30\% than the truly uniform partitioning.
+
+There are at present no practical works on parallel checking of CTL formulae (as opposed
+to LTL). That seems somewhat strange, given that CTL is more widely and more
+cost-effective than LTL for practical reasons.
+
+Goals and tasks. The primary goal of further work is to extend the parallel statespace
+generation algorithm for CTL verification. To accomplish it, the following tasks must be
+fullfilled:
+
+the analysis of present CTL checking algorithms;
+development of a parallel CTL checking algorithm;
+extending it with fairness condition checking;
+creating a modelchecking tool based on developed algorithm.
+
+
 
 %%% Local Variables: 
 %%% mode: latex
