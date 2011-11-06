@@ -32,6 +32,14 @@ add_latex_document(paco-article.tex
   DEFAULT_PDF MANGLE_TARGET_NAMES 
 )
 
+add_latex_document(paco-slides.tex 
+  INPUTS ${INC_FILES}
+  DEPENDS graphics
+  IMAGE_DIRS ../graphics
+  BIBFILES ../thesis/thesis.bib
+  DEFAULT_PDF MANGLE_TARGET_NAMES 
+)
+
 add_latex_document(phd-proposals.tex DEFAULT_PDF MANGLE_TARGET_NAMES)
 add_latex_document(phd-abstract.tex 
   INPUTS ${INC_FILES}
@@ -42,8 +50,17 @@ add_latex_document(phd-abstract-review.tex DEFAULT_PDF MANGLE_TARGET_NAMES)
 
 add_latex_document(review.tex DEFAULT_PDF MANGLE_TARGET_NAMES)
 
+# add_latex_document(techomag-article.tex
+#   INPUTS ${INC_FILES}
+#   IMAGE_DIRS ../graphics
+#   DEFAULT_PDF MANGLE_TARGET_NAMES
+# )
+
 add_custom_target(articles ALL)
-add_dependencies(articles report1_pdf report2_pdf report2-slides_pdf report3_pdf report3-slides_pdf review_pdf)
+add_dependencies(articles
+  report1_pdf report2_pdf report2-slides_pdf report3_pdf report3-slides_pdf review_pdf
+  paco-thesis_pdf paco-article_pdf paco-slides_pdf
+)
 
 add_custom_target(phd ALL)
 add_dependencies(phd phd-proposals_pdf phd-abstract_pdf phd-abstract-review_pdf)
