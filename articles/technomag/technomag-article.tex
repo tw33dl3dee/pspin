@@ -1,23 +1,25 @@
-\documentclass[12pt,a4paper]{article}
+\documentclass[12pt,a4paper,article]{bpm2}
 
-% \usepackage{ucs}
+\usepackage{NiOMGTU}
+
+\usepackage{ucs}
 \usepackage{cmap}
 \usepackage[utf8x]{inputenc}
 \usepackage[T2A]{fontenc}
 \usepackage[english,russian]{babel}
 
+%% Incompatible with bpm2 class:
 
-\usepackage{verbatim}
-\usepackage{amsthm}
-\usepackage{amssymb}
-\usepackage{amsmath}
+% \usepackage{verbatim}
+% \usepackage{amsthm}
+% \usepackage{amssymb}
+% \usepackage{amsmath}
 \usepackage{graphicx}
 
-\usepackage{misccorr}
-\usepackage{indentfirst}
+% \usepackage{misccorr}
+% \usepackage{indentfirst}
 
-
-\usepackage[left=20mm,right=20mm,top=20mm,bottom=20mm]{geometry}
+% \usepackage[left=20mm,right=20mm,top=20mm,bottom=20mm]{geometry}
 
 \sloppy
 \hyphenpenalty=9000
@@ -30,73 +32,67 @@
 
 \begin{document}
 
-% \begin{center}
-% \huge
+\begin{center}
+\huge
 
-% Выбор функции распределения состояний при параллельной проверки модели
+Выбор функции распределения состояний при параллельной проверки модели \\
 % конечной и детерминированной можно оставить только во введении и аннотации
-
+Choosing a state partitioning function for parallel assertion-based model checking
 
 % Выбор функции распределения состояний конечной детерминированной модели
 % для параллельной проверки конечных дискретных моделей
 % Параллельная проверка утверждений для моделей конечных детерминированных систем
-% Parallel assertion-based model checking
-% \end{center}
+\end{center}
 
 % \vspace{5mm}
 
-% \begin{center}
-% И.А.~Коротков, В.А.~Крищенко\\
-% \it Московский государственный технический университет им.~Н.~Э.~Баумана\\\
-% \rm
-% Россия, 105005, Москва, 2-ая Бауманская, 5\\
-% E-mail: kva@bmstu.ru
-%
-% \hspace{1.25cm}
-%
-% \vspace{8mm}
-%
-% \begin{minipage}{12.16cm}\noindent
-%
+\begin{center}
+И.А.~Коротков, В.А.~Крищенко\\
+\it Московский государственный технический университет им.~Н.~Э.~Баумана\\\
+\rm
+Россия, 105005, Москва, 2-ая Бауманская, 5\\
+E-mail: kva@bmstu.ru
+
+\hspace{1.25cm}
+
+\vspace{8mm}
+
+\begin{minipage}{12.16cm}\noindent
+
 % \footnotesize{\bf Ключевые слова:} формальная верификация, проверка моделей, генерация состояний, параллельные
 % вычисления, Promela
-%
+
 % \noindent{\bf Key words:} model checking, state generation, parallel statespace, parallelism, Promela
-%
+
 % \vspace{6mm}
-%
-% \noindent Основной проблемой верификации конечных моделей является комбинаторный <<взрыв>> числа состояний, которые с
-% ростом размера модели становится затруднительно хранить в ОЗУ одной машины. Рассматривается подход к верификации
-% конечных моделей на основе параллельной генерации состояний и их распределенного хранения. Предлагается схема
-% распределенного хранения состояний, позволяющая уменьшить число удаленных вызовов между узлами в процессе
-% генерации. Приводятся результаты экспериментов, полученные при помощи разработанного программного средства.
-%
-% \vspace{4mm}
-%
-% \noindent {\bf Parallel statespace generation during model-checking for systems with distributed memory} /
-% I.\,A.\,Korotkov (Moscow State Technical Univercity, 5 Baumanskay 2-aya ul., Moscow 105005, Russia,
-% e-mail:~korotkov2@mail.ru).
-%
-% Major limitation of model checking is statespace combinatorial explosion, which makes even medium-sized model
-% inappropriate for that kind of verification. In this paper, parallel statespace generation with distributed state
-% storage is proposed as a possible solution. State partitioning scheme that allows to reduce number of remote calls
-% during generation process is developed.  Experimental results, produced by developed verification tool, are given and
-% prove that proposed partitioning scheme is better than random uniform distribution.
-% \end{minipage}
-%
-% \end{center}
+
+\noindent При параллельной проверке моделей 
+
+Рассматривается подход к верификации
+конечных моделей на основе параллельной генерации состояний и их распределенного хранения. Предлагается схема
+распределенного хранения состояний, позволяющая уменьшить число удаленных вызовов между узлами в процессе
+генерации. Приводятся результаты экспериментов, полученные при помощи разработанного программного средства.
+
+\vspace{4mm}
+
+Major limitation of model checking is statespace combinatorial explosion, which makes even medium-sized model
+inappropriate for that kind of verification. In this paper, parallel statespace generation with distributed state
+storage is proposed as a possible solution. State partitioning scheme that allows to reduce number of remote calls
+during generation process is developed.  Experimental results, produced by developed verification tool, are given and
+prove that proposed partitioning scheme is better than random uniform distribution.
+\end{minipage}
+
+\end{center}
 
 % TODO: надо урезать на ещё одну страницу или хотя бы пол-страницы.
 
 \section{Введение}
 
 % TODO: написать под новое название. Уже тут должна прозвучать основная проблематика. Часть уже перенёс.
-% TODO: ссылку POD нужно заменить чем-то опубликованным!
-
 
 % TODO: тут вводный абзац, но не очень вводный, сразу с проверки моделей
 
-В настоящий момент на практике применяется ряд оптимизаций, позволяющих сократить как число состояний, так и требуемый для их хранения объем ОЗУ: сокращение частных порядков~\cite{POD}, битовое хэширование без обнаружения коллизий~\cite{BitHash1}, сжатие состояний.
+В настоящий момент на практике применяется ряд оптимизаций, позволяющих сократить как число состояний, так и требуемый для их хранения объем ОЗУ: сокращение частных порядков~\cite{Clarke}, битовое хэширование без обнаружения коллизий~\cite{BitHash1}, сжатие состояний.
 Однако, данные меры либо дают небольшой, плохо масштабируемый прирост, либо приводят к потенциальным потерям
 состояний при обходе.
 Альтернативным подходом является параллельная генерация состояний с распределенным
@@ -358,7 +354,6 @@ active [3] proctype concurent_user()
 
 \bibliographystyle{../../thesis/gost780u}
 \bibliography{../../thesis/thesis}
-
 
 \end{document}
 

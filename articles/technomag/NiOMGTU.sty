@@ -1,0 +1,472 @@
+%%%   Наука и Образование
+%%%   Электронно-научно=техническое издание
+%%%   Стилевой файл
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\newdimen\footheight
+\topmargin=20mm
+\oddsidemargin=22mm
+\evensidemargin=\oddsidemargin
+\headheight=0pt
+\headsep=0pt
+\footheight=5mm
+\textheight=245mm
+\textwidth=165mm
+\paperheight=297mm
+\paperwidth=210mm
+\clubpenalty=10000
+\widowpenalty10000
+
+
+\usepackage{color}
+
+
+\def\sectionfont{\bfseries\boldmath}
+\def\foliofont{\small}
+\def\colonfont{\small}
+\def\titlefont{\large\bfseries\raggedright}
+\def\issuefont{\color[rgb]{0.3,0.3,0.3}\bfseries}
+\def\authorfont{\color[rgb]{0.3,0.3,0.3}\bfseries}
+\def\colonstyle#1{{\colonfont#1}}
+\def\captionfont{\small}
+\def\abstractfont{}
+\def\keywordsfont{}
+\def\sfracfont{\small}
+
+% \UseBaseFont{ANSI}{tftr}
+\def\baselinestretch{1.25}
+\AtBeginDocument{\changebase{1}{0.01}{0.01}}
+\flushbottom
+\CenteringSection
+
+
+%  Основной стиль страницы
+
+\def\ps@NiO{\let\@mkboth\markboth
+  \def\@oddhead{}\def\@evenhead{}%           No heads.
+  \@twosidetrue\@mparswitchfalse\reversemarginpar
+  \def\chapterpagestyle{NiO}%
+  \def\@evenfoot{%
+       \vbox to \footheight{%
+          %\@headframe
+          \hrule height1mm
+          \kern1pt
+          \hrule height0.25mm
+          \kern1.5mm
+          \hbox to \textwidth{\colonstyle{\rightmark}\hfil{\foliofont\thepage}}\vss}}%
+  \def\@oddfoot{%
+       \vbox to \footheight{%
+          %\@headframe
+          \textcolor[rgb]{0.38,0.14,0.14}
+                         {\hrule height1mm\kern1pt\hrule height0.25mm}
+          \kern1.5mm
+          \hbox to \textwidth{\colonstyle{\leftmark}\hfil{\foliofont\thepage}}\vss}}%
+          }%
+\pagestyle{NiO}
+
+
+%%%  Оформление спусковой полосы
+
+\def\maketitle{%
+   \newpage
+   \@maketitle
+   \let\@title\relax
+   \let\@author\relax
+   \let\@UDK\relax
+   }
+
+
+\def\@maketitle{%
+  \let \footnote \thanks
+  \bgroup
+    \linespread{1}\selectfont
+    \parindent=0pt
+    \centerline{%
+        \ifpdftex
+            \Graph{164.97mm}{22.18mm}{0pt}{NIO_Shapka.pdf}%
+        \else
+            \Graph{164.97mm}{22.18mm}{0pt}{NIO_Shapka.bmp}%
+        \fi
+        }%
+    \vskip5mm
+    \@ifundefined{@title}{\@NiO@error{Title of article is not specified}}
+                         {{\titlefont\@title@url{\@title}\par}}%
+    \vskip2mm
+    \@ifundefined{@IssCode}{\@NiO@error{Issue Code of article is not specified}\@ehc}{{\titlefont\@IssCode\par}}%
+    \vskip3mm
+    \@ifundefined{@issue}{\@NiO@error{Issue is not specified}}%
+       {\@ifundefined{@issuemonth}{\@NiO@error{Issue month is not specified}}%
+          {\@ifundefined{@issueyear}{\@NiO@error{Issue year is not specified}}%
+             {{\issuefont\# \@pissue, \@issuemonth\space\@issueyear\par}}}}%
+    \@ifundefined{@author}{\@NiO@error{Author of article is not specified}}{{\authorfont\@author\par}}%
+    \vskip2mm
+    \@ifundefined{@UDK}{\@latex@error{УДК is not specified}}{{УДК \@UDK\par}}%
+    \bgroup
+      \raggedleft
+      \@Organization\par
+      \ifx\@email\@empty
+      \else
+        \def\mlistleft{\@Email@link}\def\mlistright{\mpar}\def\mlistdel{\mpar\@Email@link}%
+        \let\_=\@us\edef\@@email{{\@email}}\let\_=\@old@us\expandafter\emlist\@@email\mpar
+      \fi
+    \egroup
+  \egroup
+  \ifx\@abstract\@empty\else\AtEndDocument{\@make@abstract}\fi
+  \@ifundefined{@englishversion}{}{%
+     \filename@parse{\@englishversion}%
+     \ifx\filename@ext\relax\edef\@englishversion{\@englishversion.tex}\fi
+      \IfFileExists\@englishversion{\AtEndDocument{\@makeengvers}}
+                   {\@latex@error{File "\@englishversion" not found}}}\relax
+  \markboth{\@Url@link{\@place}}
+           {\@IssCode, \No\@issue\space\@issuemonth\space\@issueyear~г. \@Url@link{\@jsuite}}%
+  \vskip5mm plus1mm minus0.5mm}
+
+\newcommand\@IssBaseCode{77-30569}
+\def\title#1{\def\@title{#1}\let\s@title\@title}
+\def\titleeng#1{\def\@titleeng{#1}}
+\def\issue#1{\def\@issue{#1}\get@issue#1\@empty\relax}
+\def\IssCode#1{\@ifundefined{@IssBaseCode}{\def\@IssCode{#1}}{\def\@IssCode{\@IssBaseCode/#1}}}
+\def\placeissue{!\@pissue!}
+\def\get@issue#1#2\relax{\ifx\@empty#2\def\@pissue{0#1}\else\def\@pissue{#1#2}\fi}
+\def\issuemonth#1{%
+   \ifnum0=#1\relax
+     \@err@issuemonth\def\@issuemonth{??}\def\@issuemontheng{??}\else
+     \ifcase#1\or
+        \def\@issuemonth{январь}\def\@issuemontheng{January}\or
+        \def\@issuemonth{февраль}\def\@issuemontheng{February}\or
+        \def\@issuemonth{март}\def\@issuemontheng{March}\or
+        \def\@issuemonth{апрель}\def\@issuemontheng{April}\or
+        \def\@issuemonth{май}\def\@issuemontheng{May}\or
+        \def\@issuemonth{июнь}\def\@issuemontheng{June}\or
+        \def\@issuemonth{июль}\def\@issuemontheng{July}\or
+        \def\@issuemonth{август}\def\@issuemontheng{August}\or
+        \def\@issuemonth{сентябрь}\def\@issuemontheng{September}\or
+        \def\@issuemonth{октябрь}\def\@issuemontheng{October}\or
+        \def\@issuemonth{ноябрь}\def\@issuemontheng{November}\or
+        \def\@issuemonth{декабрь}\def\@issuemontheng{December}\else
+        \@err@issuemonth
+     \fi\fi}
+\def\@err@issuemonth{\@NiO@error{Issue month parameter is wrong}}
+\def\@NiO@error#1{\GenericError{}{\@spaces NiO Error: #1}{}{\@ehc}}
+\def\issueyear#1{\def\@issueyear{#1}}
+\def\author#1{\def\@author{#1}\let\s@author\@author}
+\def\authoreng#1{\def\@authoreng{#1}}
+\def\UDK#1{\def\@UDK{#1}}
+\def\abstract#1{\def\@abstract{#1}}\abstract{}
+\def\Organization#1{\def\@Organization{#1}}
+\def\Organizationeng#1{\def\@Organizationeng{#1}}
+\let\@old@us=\_\def\@us{\noexpand\_}
+\def\email#1{\def\@email{#1}}
+\def\place#1{\def\@place{#1}}
+\def\htmlname#1{\def\@htmlname{#1.html}}
+\def\htmlfolder#1{\def\@htmlfolder{/#1}}\htmlfolder{doc}
+\def\jsuite#1{\def\@jsuite{#1}}
+\def\abstracteng#1{\def\@abstracteng{#1}}
+\def\keywords#1{\def\@keywords{#1}}
+\def\keywordseng#1{\def\@keywordseng{#1}}
+\let\mpar\par
+\def\@make@abstract{%
+    \clearpage\pagestyle{empty}%
+    {{\authorfont\s@author\par}\vskip2mm}%
+    {{\titlefont\s@title\par}\vskip4mm}%
+    {\abstractfont\@abstract\par\vskip2mm}%
+    \@ifundefined{@keywords}{}{\keywordsfont Ключевые слова: \@keywords\par}%
+    \@ifundefined{@abstracteng}{}{%
+       \clearpage\pagestyle{empty}%
+       \@ifundefined{@authoreng}{}{{\authorfont\@authoreng\par}\vskip2mm}%
+       \@ifundefined{@titleeng}{}{{\titlefont\@titleeng\par}\vskip4mm}%
+       {\abstractfont\@abstracteng\par\vskip4mm}%
+       \@ifundefined{@keywordseng}{}{\keywordsfont Keywords: \@keywordseng\par}%
+       }%
+    }
+\def\englishversion#1{\def\@englishversion{#1}}
+\def\@makeengvers{%
+   \clearpage
+   \bgroup
+     \bgroup
+       \linespread{1}\selectfont
+       \parindent=0pt
+       \centerline{%
+           \ifpdftex
+               \Graph{164.97mm}{22.18mm}{0pt}{NIO_Shapka_E.pdf}%
+           \else
+               \Graph{164.97mm}{22.18mm}{0pt}{NIO_Shapka_E.bmp}%
+           \fi
+           }%
+       \vskip5mm
+       \@ifundefined{@titleeng}{\@latex@error{Title of article is not specified}}
+                            {{\titlefont\@title@url{\@titleeng}\par}}%
+       \vskip2mm
+       \@ifundefined{@IssCode}{\@latex@error{Issue Code of article is not specified}}{{\titlefont\@IssCode\par}}%
+       \vskip3mm
+       \@ifundefined{@issue}{\@latex@error{Issue is not specified}}%
+          {\@ifundefined{@issuemonth}{\@latex@error{Issue month is not specified}}%
+             {\@ifundefined{@issueyear}{\@latex@error{Issue year is not specified}}%
+                {{\issuefont\# \@pissue, \@issuemontheng\space\@issueyear\par}}}}%
+       \@ifundefined{@authoreng}
+                    {\@latex@error{Author of article is not specified}}{{\authorfont\@authoreng\par}}%
+       \vskip2mm
+       \bgroup
+         \raggedleft
+         \@Organizationeng\par
+         \ifx\@email\@empty
+         \else
+           \def\mlistleft{\@Email@link}\def\mlistright{\mpar}\def\mlistdel{\mpar\@Email@link}%
+           \let\_=\@us\edef\@@email{{\@email}}\let\_=\@old@us\expandafter\emlist\@@email\mpar
+         \fi
+       \egroup
+       \vskip5mm plus1mm minus0.5mm
+     \egroup
+     \def\refname{References}
+     \renewthrmenv{definition}{Definition}\def\theH@definition{E\arabic{@definition}}%
+     \renewthrmenv{example}{Example}\def\theH@example{E\arabic{@example}}%
+     \renewthrmenv{lemma}{Lemma}\def\theH@lemma{E\arabic{@lemma}}%
+     \renewthrmenv{remark}{\razr{Remark}}\def\theH@remark{E\arabic{@remark}}%
+     \renewthrmenv{corollary}{Corollary}\def\theH@corollary{E\arabic{@corollary}}%
+     \renewthrmenv{theorem}{Theorem}\def\theH@theorem{E\arabic{@theorem}}%
+     \changelanguage{english}
+     \long\def\hyper@@anchor##1##2{\@hyper@@anchor E##1\relax##2\relax}%
+     \pagestyle{NiO}\pageno{1}  %\pagenumbering{E}%
+     \markboth{\@Url@link{\@place}}
+              {\@IssCode, \No\@issue\space\@issuemontheng\space\@issueyear~г. \@Url@link{\@jsuite}}%
+     \input{\@englishversion}
+     \clearpage
+   \egroup
+   \clearpage
+   }
+\def\makeHrefpref#1#2{\@namedef{theH@#1}{#2\arabic{@#1}}}
+
+\AtBeginDocument{%
+  \@ifundefined{@place}{\edef\@place{\@jsuite\@htmlfolder/\@htmlname}}{}%
+               }
+
+
+\Organization{МГТУ им.\ Н.Э.~Баумана}
+\Organizationeng{Bauman Moscow State Technical University}
+\jsuite{http://technomag.edu.ru}
+
+\newcommand\@Url@link[1]{\color{blue}\underline{#1}}
+\let\@Email@link\@Url@link
+\def\emlist#1{{\def\@emlist##1;{\ifx\relax##1\let\@next=\mlistright
+         \else\def\@next{\@curdelim{##1}\let\@curdelim=\mlistdel\@emlist}\fi\@next}%
+         \let\@curdelim=\mlistleft\@emlist#1;\relax;}}
+
+\def\@nsection#1#2#3[#4][#5]#6{\relax
+     \@tempskipa #2\relax
+     \ifdim \@tempskipa>\z@
+        \begingroup
+          \raggedcenter@ #3 #6\par
+        \endgroup
+     \else
+        \def\@svsechd{#3\hskip\parindent#6\section@dot}%
+     \fi
+     %\markright{#4}\relax
+     \addcontentsline{toc}{section}{\protect\numberline{}#5}%
+     \@xsect{#2}}
+
+
+\def\punkt{\@ifstar{\def\@punktdot{}\@punkt}{\def\@punktdot{.}\@punkt}}
+\def\punktp{\@ifstar{\def\@punktdot{}\@punktp}{\def\@punktdot{.}\@punktp}}
+\def\@punkt#1{\par\addvspace\medskipamount
+    \everypar{%
+      \if@nobreak
+         \@nobreakfalse
+         \clubpenalty \@M
+         \if@afterindent\else{\setbox\z@\lastbox}\fi
+         \everypar{\clubpenalty \@clubpenalty}%
+      \else
+         \everypar{}%
+      \fi
+    {\bfseries\boldmath#1\@punktdot}\ifpunktspace\space\fi\ignorespaces}}
+\def\@punktp#1{\textbf{#1\@punktdot}}
+\newif\ifpunktspace
+\punktspacetrue
+
+
+%  Оформление списка литературы
+\def\refname{Список литературы}
+\def\@biblabel#1{#1.}  %  Метки в списке литературы
+\renewenvironment{thebibliography}[1]
+     {\section*{\refname}
+      \bgroup
+        \@beginparpenalty5000
+        \list{\@biblabel{\@arabic\c@enumiv}}%
+             {\settowidth\labelwidth{\@biblabel{#1}}%
+              \leftmargin\labelwidth
+              \advance\leftmargin\labelsep
+              \usecounter{enumiv}%
+              \let\p@enumiv\@empty
+              \itemsep4pt\topsep=0pt\parsep=0pt
+              \renewcommand\theenumiv{\@arabic\c@enumiv}}%
+        \sloppy
+        \clubpenalty4000
+        \@clubpenalty \clubpenalty
+        \widowpenalty4000%
+        \sfcode`\.\@m
+        \let\auth\textit\bibliofont}
+     {\def\@noitemerr
+       {\@latex@warning{Empty `thebibliography' environment}}%
+      \endlist\egroup}
+\let\bibliofont\relax
+
+
+
+
+%%   Гиперссылки и проч.
+
+\ifpdftex
+  \DefaultPath{PDF}\DefaultPicExt{PDF}\UsePDFPic
+  \usepackage[pdftex,final,unicode,bookmarks=false]{hyperref}
+  \hypersetup{colorlinks,linkcolor=black,citecolor=black,pagecolor=black,urlcolor=blue}
+  \def\@Url@link#1{{\color{blue}\underline{\url{#1}}}}
+  \def\@Email@link#1{{\color{blue}\underline{\href{mailto:#1}{#1}}}}
+  \let\WriteBookmarks\relax
+  \def\@title@url#1{{\catcode`\ 12\def\@urlcolor{black}\href{\@place}{#1}}}
+  %\long\def\hyper@@anchor#1#2{\@hyper@@anchor#1\relax#2\relax}
+\else
+  \DefaultPath{BMP}\DefaultPicExt{BMP}
+  \let\@title@url\relax
+\fi
+
+
+%%   Рисунки  и таблицы
+
+\def\figurename{Рис.}
+\def\fnum@figure{\bfseries\figurename~\thefigure}
+\def\fnum@table{\razr{\tablename{~}}\thetable}
+\def\makecaptionsep{\vskip\@captionsep}
+\def\changecaptionsep{\changecom\@captionsep}
+\def\@ffibox#1#2#3#4#5{\figbox{#1}{#2}{#3}{#4}}
+\def\ffibox#1#2#3{\UsePicture{\@ffibox}[#1]{#2}[#3]}
+\def\pcibox#1#2{\ifempty{#2}\def\@tempb{}\else\def\@tempb{\itshape #2}\fi
+                \UsePicture{\picbox}[\@tempb]{#1}}
+\def\capexpl#1{\mpar\vspace{2pt}{\subcaptionfont#1}\hskip0.5\hsize}
+\def\@defltplacefl{[!ht]}
+\let\@PlaceFloat\@defltplacefl
+\def\PlaceFloat#1{\def\@PlaceFloat{[!#1]}}
+\def\floatg#1{\expandafter\@@begfig\@PlaceFloat#1\nobreak\vskip\@belowcapsep\end{figure}%
+              \global\let\@PlaceFloat\@defltplacefl\belowcapsep{0}}
+\def\@@begfig{\begin{figure}}
+\def\floatc#1{\floatg{\centerline{#1}}}
+\def\floats#1#2#3{\floatc{\ffibox{#1}{#2}{#3}}}
+
+\def\tabbox#1#2#3{%
+      \ifempty{#1}\else\@tabcollect\refstepcounter{table}\label{#1}\fi
+      \setbox\@tempboxa\hbox{\tabfont#3}%
+      \parbox[t]{\wd\@tempboxa}{%
+          \ifempty{#1}\else
+             \hbox to \wd\@tempboxa{\hfil\tabheadfont\fnum@table}%
+             \vspace{\tabcapsep}%
+          \fi
+          \ifempty{#2}\else
+               {\centering\tabnamefont#2\par}%
+               \vspace{\tabbodysep}%
+          \fi
+          \unhbox\@tempboxa}}
+
+\def\@addtabtext{}
+\def\addtabtext#1{\def\@addtabtext{\Tabfont#1\gdef\@addtabtext{}}\ignorespaces}
+\long\def\tabplaceg#1{\expandafter\@@begtab\@PlaceFloat#1\end{table}%
+                      \global\let\@PlaceFloat\@defltplacefl}
+\def\@@begtab{\begin{table}}
+\def\tabboxc#1#2#3{\centerline{\tabbox{#1}{#2}{#3}}}
+\def\tabplace#1#2#3{\tabplaceg{\tabboxc{#1}{#2}{#3}}}
+
+\def\belowcapsep#1{\def\@belowcapsep{#1mm}\ignorespaces}
+\belowcapsep{0}
+\def\cttr#1{\leftskip#1em plus0.5\hsize\rightskip=\leftskip\parindent=0pt\parfillskip=0pt}
+\def\cttrz#1{\leftskip#1em plus1fil\rightskip=\leftskip\parindent=0pt\parfillskip=0pt}
+\def\tabusup#1#2{\setbox\strutbox\hbox{\usup{#1}{#2}}}
+
+
+
+%%  Команды системного назначения
+
+\def\vjp#1 {\ifvmode\penalty#1\else\vadjust{\penalty#1}\fi}
+\def\vj#1{\ifhmode\vadjust{\vskip#1pt}\else\vskip#1pt\fi}
+\def\luft{\nobreak\hskip0pt}
+\def\markpos#1{\ifinner\else\rem{#1}\fi\typepos{#1}}
+\def\typepos#1{\typeout{*** Метка #1, стр. \thepage\space***}\ignorespaces}
+\def\sfrac#1#2{\hbox{\sfracfont$\displaystyle\frac{#1}{#2}$}}
+\newcommand\sdiz{\ifhmode{\vadjust{\nobreak}}\else\nobreak\fi\usersdi{\topsep=0pt\itemsep=0pt}\sdi}
+\def\gbreak#1 {\unskip{\hquality{#1}\par}}  %  ставить в конце абзаца
+\def\hquad{\hskip0.5em}
+\def\Term#1{{\itshape #1}}
+\def\term#1{{#1}}
+\def\al{<}
+\def\ar{>}
+\def\razr{\looser{0.2}}
+
+
+
+%%%         Сокращение для окружения multline
+
+\def\bmz#1\em{\bgroup\multlinegap=0pt\bm #1 \em\egroup}
+\def\bm{\@ifstar{\@bms}{\@bmn}}
+\def\@bms#1\em{{\interdisplaylinepenalty-5000\begin{multline*}#1\end{multline*}}}
+%\def\@bms#1\em{\@nameuse{multline*}#1\@nameuse{endmultline*}}
+\def\@bmn#1\em{\begin{multline}#1\end{multline}}
+
+%%%         Сокращение для eqnarray без пробела между колонками
+
+\def\eqnz#1\eeq{\bgroup\everymath={\ds}
+                \edef\@restarrcolsep{\arraycolsep=\the\arraycolsep}\arraycolsep=0pt
+                \eqn#1\eeq\egroup}
+\def\eqn{\@ifstar{\@eqn*}{\@eqn{}}}
+\def\@eqn#1#2\eeq{\begin{eqnarray#1}#2\end{eqnarray#1}}
+\let\@restarrcolsep\relax
+
+
+%%%    Окружения типа теорема
+
+\def\newthrmenv#1#2{%
+  \@namedef{@#1id}{#2}
+  \newenvironment{@#1}%
+       {\par\@makethrmsep{#1}\leavevmode
+        \expandafter\ifx\csname @if#1numb\endcsname\@empty\else\refstepcounter{@#1}\fi
+        {\csname @#1headerfont\endcsname\@nameuse{@#1id}%
+         \expandafter\ifx\csname @if#1numb\endcsname\@empty\else\space\@nameuse{the@#1}\fi
+         \make@name{#1}.}%
+        \csname @#1bodyfont\endcsname\space\ignorespaces}
+        {\par\@makethrmsep{#1}\global\@namedef{@#1name}{}}%
+  \newcounter{@#1}%  [chapter]%
+  \@namedef{the@#1}{\arabic{@#1}}%  %\thechapter.
+  \@namedef{#1}{\@ifstar{\@makethrmnum{#1}\@empty\begin{@#1}}{\@makethrmnum{#1}\relax\begin{@#1}}}%
+  \@namedef{end#1}{\end{@#1}}%
+  %\@namedef{@#1true}{\global\expandafter\let\csname if@#1\endcsname\iftrue}%
+  %\@namedef{@#1false}{\global\expandafter\let\csname if@#1\endcsname\iffalse}%
+  \@namedef{#1headerfont}##1{\@namedef{@#1headerfont}{##1}}\@nameuse{#1headerfont}{}%
+  \@namedef{#1bodyfont}##1{\@namedef{@#1bodyfont}{##1}}\@nameuse{#1bodyfont}{}%
+  \@namedef{#1name}{\set@name{#1}}\@namedef{@#1name}{}%
+  \@namedef{#1sep}##1{\@namedef{@#1sep}{##1}}\global\@nameuse{#1sep}{0pt}%
+        }
+\def\renewthrmenv#1#2{\@namedef{@#1id}{#2}\resetcounter{@#1}}
+
+\def\@makethrmsep#1{\expandafter\addvspace\csname @#1sep\endcsname}
+\def\@makethrmnum#1#2{\expandafter\let\csname @if#1numb\endcsname#2}
+\def\make@name#1{\expandafter\ifx\csname @#1name\endcsname\@empty\else\space\@nameuse{@#1name}\fi}
+\def\set@name#1{\@ifstar{\set@s@name{#1}}{\set@@name{#1}}}
+\def\set@s@name#1#2{\@namedef{@#1name}{{#2}}}%
+\def\set@@name#1#2{\@namedef{@#1name}{{(#2)}}}%
+%\def\thrmdelimiters{}
+%\def:{{\rm\char`\:}}
+
+\global\let\@theorem\relax\let\end@theorem\relax
+\newthrmenv{definition}{Определение}
+\definitionheaderfont{\bfseries}
+\newthrmenv{example}{Пример}
+\exampleheaderfont{\bfseries}
+\newthrmenv{lemma}{Лемма}
+\lemmaheaderfont{\bfseries}
+\newthrmenv{remark}{\razr{Замечание}}
+\newthrmenv{corollary}{Следствие}
+\corollaryheaderfont{\bfseries}
+\newthrmenv{theorem}{Теорема}
+\theoremheaderfont{\bfseries}
+
+
+
+\providecommand\op[1]{\mathop{\hbox{\rm#1}}\nolimits}
+
+\endinput
