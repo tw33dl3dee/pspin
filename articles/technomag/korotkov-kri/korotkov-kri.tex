@@ -8,29 +8,37 @@
 \usepackage[T2A]{fontenc}
 \usepackage[english,russian]{babel}
 
-%% Incompatible with bpm2 class:
+\title{Допустимые пространственные траектории беспилотного\\
+       летательного аппарата в вертикальной плоскости}
+\author{А.Н.~Канатников, А.П.~Крищенко, С.Б.~Ткачев}
+\UDK{517.925:519.71}
+\email{mathmod@bmstu.ru}    %  список через запятую, символ _ набирается как \_
 
-% \usepackage{verbatim}
-% \usepackage{amsthm}
-% \usepackage{amssymb}
-% \usepackage{amsmath}
+\IssCode{??????}       %  код выпуска
+\issue{?}              %  номер выпуска
+\issuemonth{1}         %  месяц выпуска
+\issueyear{2011}       %  год выпуска
+\htmlname{??????}
+
 \usepackage{graphicx}
 
 % \usepackage{misccorr}
 % \usepackage{indentfirst}
 
 % \usepackage[left=20mm,right=20mm,top=20mm,bottom=20mm]{geometry}
-
-\sloppy
-\hyphenpenalty=9000
-
-\makeatletter
-\renewcommand\@biblabel[1]{\hfill#1.}
-\makeatother
-
-\pagestyle{empty}
+%
+% \sloppy
+% \hyphenpenalty=9000
+%
+% \makeatletter
+% \renewcommand\@biblabel[1]{\hfill#1.}
+% \makeatother
+%
+% \pagestyle{empty}
 
 \begin{document}
+
+\maketitle
 
 \begin{center}
 \huge
@@ -86,7 +94,7 @@ prove that proposed partitioning scheme is better than random uniform distributi
 
 % TODO: надо урезать на ещё одну страницу или хотя бы пол-страницы.
 
-\section{Введение}
+\section-{Введение}
 
 % TODO: написать под новое название. Уже тут должна прозвучать основная проблематика. Часть уже перенёс.
 
@@ -331,10 +339,10 @@ active [3] proctype concurent_user()
 \item Выбор распределения между узлами важен, поскольку время простоя за счет удаленных вызовов составляет существенного
   часть от времени выполнения.
 
-\item При <<наивном>> подходе к распределению состояний число удаленных вызовов близко к числу всех переходов, как и следует из~\eqref{eq:rpc-partfull}.
+\item При <<наивном>> подходе к распределению состояний число удаленных вызовов близко к числу всех переходов, как и следует из~\ref{eq:rpc-partfull}.
 
 \item Предлагаемый способ распределения состояний по первым $\rho$ процессам позволяет уменьшить число удаленных вызовов
-  и время выполнения в сравнении с <<наивным>> подходом в соответствии с~\eqref{eq:rpc-partproc}.
+  и время выполнения в сравнении с <<наивным>> подходом в соответствии с~\ref{eq:rpc-partproc}.
 
 \item Необходим подбор параметра $\rho$ в соответствии со свойствами проверямой модели ($P, w_i$) для обеспечения
   требуемого уровня равномерности распределения состояний; в частности, значения $\rho = 1$ в приведенных экспериментах
@@ -342,7 +350,7 @@ active [3] proctype concurent_user()
   используется вообще.
 \end{enumerate}
 
-\section{Выводы}
+\section-{Выводы}
 \label{sec:conclusion}
 
 % TODO: написать под новое название. возможно, взять часть выводов из списка сверху.
