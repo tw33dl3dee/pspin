@@ -1,39 +1,67 @@
-Parallel CTL verification in model checking
+\documentclass[a4paper,notitlepage,14pt]{article}
 
-Introduction
+\usepackage{ucs}
+\usepackage[utf8x]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[english]{babel}
 
-Model checking is a formal automated mechanism for finite parallel system verification.
+\usepackage{textcomp}
+\usepackage{indentfirst}
+\usepackage{verbatim}
 
-Traditional testing methods are oftern not enough for development of high-reliable complex
+\usepackage{amsthm}
+\usepackage{amssymb}
+\usepackage{amsmath}
+
+\usepackage{graphicx}
+
+\sloppy
+\hyphenpenalty=9000
+
+\title{Parallel CTL verification in model checking}
+\author{I.\,Korotkov}
+\date{2011}
+
+\begin{document}
+
+\maketitle
+
+\section{Introduction}
+\label{sec:introduction}
+
+\emph{Model checking} is a formal automated mechanism for finite parallel system verification.
+
+Traditional testing methods are often not enough for development of high-reliable complex
 parallel systems with multiple asynchronously functioning components because they only
 allow to find easy reproducible errors. In case where certain error classes must be fully
 excluded, e.g., avionics software, designing network protocols, microcircuits, etc.,
 modelchecking is used.
 
-As part of the modelchecking process, full statespace of a discrete model of software
+As part of the modelchecking process, full statespace of a discrete model of the software
 being examing is built and tested for a certain set of assertions called the
 specification. The main problem arising is the combinatorical explosion of the statespace.
 
-For instance, if a model of four network routers running RIP protocol connected with four
+For instance, when a model of four network routers running RIP protocol connected with four
 network interfaces is checked for possibility of routing loops, it can be prooved that
 without using the so-called <<split horizon>> extension, there is a scenario where such
 loops arise. This is an example of a successful modelchecking application.
 
-One of the advantage of this method over others like formal proofs or coverage-driven
+One of the advantages of this method over the others like formal proofs or coverage-driven
 unit-testing is that modelchecking process always (given sufficient resources) converges
 to a <<yes/no>> result in finite time.
 
-The problem of statespace explosion.
+\section{The problem of statespace explosion}
+\label{sec:probl-stat-expl}
 
 Full statespace if built and visited during the modelchecking process, which requires
 storing all states already visited in program memory to prevent infinite recursion. The
 number of states grows exponentially with model size which makes verification impossible
 even for medium-sized models due to insufficient storage available for visited states
-array. Let's take two models as example, dining philosophers problem and beforementioned
+array. Let's take two models as example, dining philosophers problem and the beforementioned
 RIP looping problem. The state and transition count for these models are shown in
 table~\ref{tab:models-statecount}. It can be observed that the numbers of states grows
 rapidly as the problem grows. For example, RIP model with 5 routers will require around
-100 Gb of RAM for storing visited states set.
+100 Gb of RAM for storing the visited states set.
 
 \begin{table}
   \centering
@@ -47,68 +75,75 @@ rapidly as the problem grows. For example, RIP model with 5 routers will require
     \hline
   \end{tabular}
   \caption{State and transition count for various models}
-\label{tab:models-statecount}
+  \label{tab:models-statecount}
+\end{table}
 
 There are several ways of solving this problem:
-Using external storage for visited states set. This method is not used widely because it
-slows down the verification process by several magnitudes.
-Symbolic verification, which involves representing the Kripke structure with boolean
-formulae instead of storing it directly. These formulae often take the same amount of RAM
-to store, so the profit is questionable.
-Mechanisms that reduce the number of states generated, e.g., partial order reduction
-(POD).
-Mechanisms that reduce the memory footprint of the state space: using Huffman codes to
-compress state representation, recursive state coding, bit state hashing without collision checking.
+\begin{itemize}
+\item Using external storage for the visited states set. This method is not used widely
+  because it slows down the verification process by several magnitudes.
+\item Symbolic verification, which involves representing the Kripke structure with boolean
+  formulae instead of storing it directly. These formulae often take the same amount of
+  RAM to store, so the profit is questionable.
+\item Mechanisms that reduce the number of states generated, e.g., partial order reduction
+  (POD).
+\item Mechanisms that reduce the memory footprint of the state space: using Huffman codes
+  to compress state representation, recursive state coding, bit state hashing without
+  collision checking.
+\end{itemize}
 
-All these methods, however, either pose serious restrictions on the verification process,
-lead to potentially incorrect result (as with bit state hashing, which <<looses>> states)
+All of these methods, however, either pose serious restrictions on the verification process,
+lead to a potentially incorrect result (as with bit state hashing, which <<looses>> states)
 or just don't scale well, i.e. give only marginal profit, like state compression.
 
-An alternative solution proposed is using parallel computations with distributed memory
-model for partitioning statesspace between multiple calculation nodes.
+An alternative solution proposed here is using parallel computations with distributed memory
+model for partitioning statespace between multiple workstation nodes.
 
-Present modelchecking tools.
+\section{Present modelchecking tools}
+\label{sec:pres-modelch-tools}
 
-One the most widespread tools is SPIN modelchecker, originally developed by J.~Holzmann at
-Bell Labs in 1980. It uses Promela (PROtocol Meta Language) as means of describing a
-model, which is represented as a set of concurrent finiate state machines (processes), communicating via means of
-channels and global variables. The models itself is the intersection of all processes'
-finite state machines (FSMs). SPIN can be used verifying both safety conditions (state
-assertions) as well as liveness conditions (given as linear time logic, LTL, formulae).
+One the most widespread tools is \textbf{SPIN} modelchecker, originally developed by
+J.~Holzmann at Bell Labs in 1980. It uses \textbf{Promela} (PROtocol Meta Language) as
+means of describing a model, which is represented as a set of concurrent finiate state
+machines (processes), communicating via channels and global variables. The model itself
+is the intersection of all processes' finite state machines (FSMs). SPIN can be used
+to verify both \emph{safety conditions} (state assertions) as well as \emph{liveness
+  conditions} (given as linear time logic, LTL formulae).
 
 SPIN explores the whole statespace of the model during the verification process,
-constructing a corresponding Buchi automation (BA) and looking for an accepting
+constructing a corresponding B\"{u}chi automation (BA) and looking for an accepting
 cycle. If such a cycle is found, verification completes with negative result. The
 automaton graph is traversed in DFS (depth-first search) order with so-called nested
 DFS to detect accepting cycles.
 
-Another well-known modelchecker is NUSMV, which verifies models described with SMV
+Another well-known modelchecker is \textbf{NUSMV}, which verifies models described with SMV
 (Symbolic Model Verification) language by means of symbolic verification, representing
 them as OBDD (ordered binary decision diagrams). Unlike SPIN, it supports <<fairness CTL>>
 instead of LTL logic for specifying liveness conditions.
 
-UCLID is a software tool for verifying Counter Arithmetic with Lambda Expressions and
-Uninterpreted Functions (CLU) models. It is primarily used for validating logical schemes
-of microprocessors, used by Intel and other microprocessor manufacturers. It also uses
-symbolic verification, deducing a proof for boolean formulae in part of validation
-process..
+\textbf{UCLID} is a software tool for verifying \emph{Counter Arithmetic with Lambda
+  Expressions and Uninterpreted Functions} (CLU) models. It is primarily used for
+validating logical schemes of microprocessors, used by Intel and other microprocessor
+manufacturers. It uses symbolic verification as well, deducing a proof for boolean
+formulae in part of validation process.
 
-Another tool used in that field is Mur$\phi$ verifier, originally created for cache
+Another tool used in that field is \textbf{Mur$\phi$} verifier, originally created for cache
 synchronization algorithm checking in multiprocessor systems. Mur$\phi$ is quite analogous
 to SPIN, traversing full statespace graph in depth-first order, checking it for safety
 conditions only.
 
-Overview of similar works.
+\section{Overview of similar works}
+\label{sec:overv-simil-works}
 
 The first articles on parallel statespace generation of finite models appeared in late
-80-s. They had numerous drawbacks, mentioned by ~ref.
+80-s. They had numerous drawbacks, mentioned by~\cite{Stern97parallelizingthe}.
 
-~ref suggests a parallel verification of Mur$\phi$ verifier, with distributed
+\cite{Stern97parallelizingthe}~suggests a parallel verification of Mur$\phi$ verifier, with distributed
 breadth-first search algorithm and even state distribution between nodes. One of it's
 major drawbacks was a big volume of internode communication traffic which lead to big
 verification times. Authors suggested message buffering to hinder that problem.
 
-~ref improved on this idea, suggesting such statespace partitioning function that would
+\cite{LS99}~improved on this idea, suggesting such statespace partitioning function that would
 satisfy both uniformity and locality requirements, i.e. distribute states between nodes as
 even as possible while reducing the number of cross-node state transition (transitions
 whose endstate is located on different node than its beginning state). This resulted in
@@ -116,13 +151,14 @@ reducing cross-node network traffic, average waiting time of nodes and reduced t
 verification time by 5--10 times. It must be noted that message buffering could also be
 used here for even greater effort.
 
-~ref originated the idea of parallel storage and processing of OBDDs. Authors, however,
-could not come up with a feasible solution and have fallen back to method described
-by~ref.
+\cite{McMillan92}~originated the idea of parallel storage and processing of OBDDs. Authors, however,
+could not come up with a feasible solution and have fallen back to the method described
+by~\cite{LS99}.
 
-All the works mentioned did solve the problem of parallel generation and storing of
+All of the works mentioned earlier did solve the problem of parallel generation and storing of
 statespace. That allowed to perform safety condition verification, i.e. proving that
-certain condition holds in all states. Liveness conditions, however, were not considered.
+certain condition holds in all states. Liveness conditions, however, were not taken into
+consideration at all.
 
 The main difficulty with checking liveness conditions, presented in general case as CTL*
 formulae is that they require strongly connected components (SCCs) of the state graph to
@@ -131,25 +167,26 @@ visiting order is depth-first, but not when it is breadth-first, as with the par
 graph traversing.
 
 A couple of PhDs in the Brno University have worked on that problem and published
-papers~ref, in which they develop a parallel graph traversing algorithm that makes loop
+papers~\cite{DLTL1,DLTL2} in which they develop a parallel graph traversing algorithm that makes loop
 detection and, therefore, LTL formula checking possible. The state partitioning function
-is chosen so that all states belonging to a cycle of the Buchi automaton will belong to a
+is chosen so that all states belonging to a cycle of the B\"{u}chi automaton will belong to a
 single node, so loop detection is carried out locally for each node with nested DFS. 
 
 Another algorithm developed by them uses breadth-first search combined with cycle
 prediction and followed by a costly global cycle detection phase. A verification tool
 called DiVinE has been developed based on that algorithms, and others.
 
-~ref considers a very interesting option, reducing CTL* formulae to $\mu$-calculus formulae
+\cite{Leucker_parallelmodel}~considers a very interesting option, reducing CTL* formulae to $\mu$-calculus formulae
 of order not greater than two, for which a parallel verification algorithm has been
 suggested. This approach, however, was not complete and required some further work, for
-example, authors do not consider an effective way for splitting the state graph into
+example, authors did not come up with an effecient way of splitting the state graph into
 strongly connected components in some parallel-optimized way, which is one of the most
 time-consuming operations in the suggested algorithm.
 
-Accomplished results.
+\section{Accomplished results}
+\label{sec:accomplished-results}
 
-In~ref, we develop a parallel statespace generation algorithm similar to that of~ref and
+In~\cite{Korotkov10MiemEng}, we develop a parallel statespace generation algorithm similar to that of~\cite{LS99} and
 propose a state partitioning function that reduces the number of cross-node messages by
 multiple times.
 
@@ -160,19 +197,251 @@ time of nodes by several times while keeping the distribution uniformity no wors
 30\% than the truly uniform partitioning.
 
 There are at present no practical works on parallel checking of CTL formulae (as opposed
-to LTL). That seems somewhat strange, given that CTL is more widely and more
+to LTL). That seems somewhat strange, given that CTL is more widely used and more
 cost-effective than LTL for practical reasons.
 
-Goals and tasks. The primary goal of further work is to extend the parallel statespace
+\section{Goals and tasks}
+\label{sec:goals-tasks}
+
+The primary goal of further work is to extend the parallel statespace
 generation algorithm for CTL verification. To accomplish it, the following tasks must be
 fullfilled:
 
-the analysis of present CTL checking algorithms;
-development of a parallel CTL checking algorithm;
-extending it with fairness condition checking;
-creating a modelchecking tool based on developed algorithm.
+\begin{itemize}
+\item 
+  the analysis of present CTL checking algorithms;
+\item development of a parallel CTL checking algorithm;
+\item extending it with fairness condition checking;
+\item creating a modelchecking tool based on developed algorithm.
+\end{itemize}
 
+\section{Formal definition of a finite model.}
+\label{sec:form-defin-finite}
 
+\subsection{Kripke structure.}
+\label{sec:kripke-structure}
+
+Statespace of the software or algorithm being verified may be formalized as a \emph{Kripke
+structure}. Kripke structure $M$ over the set of atoms $AP$ is a tuple $(S, S_0, R, L)$,
+where:
+
+\begin{itemize}
+\item $S$ is a finite set of states;
+\item $S_0 \in S$ is the set of initial states;
+\item $R \in S \times S$ is a relative satisfying the totality property (i.e. for each $s
+  \in S$ there must exist $s' \in S$ such that $R(s, s')$ holds;
+\item $L\colon S \rightarrow 2^{AP}$ is a function that labels each state with a subset of
+  atoms (atomic prepositions) that hold in that state.
+\end{itemize}
+
+Infinite state sequence $\pi = s_0 s_1 \ldots$ such that for each $i \geq 0$ $R(s_i,
+s_{i+1})$ holds is called a \emph{path} in model $M$ from state $s_0$.
+
+The software or algorithm under question may be described in each state as a set of
+values assigned to variables $V = \{v_0, v_1, \ldots\}$ from the \emph{interpretation domain}
+(the set of all possible values) $D$. Those variables describe single components of the
+software as well as communications between them. The set of atomic propositions $AP$
+contains items in form $v_i = d_i$, where $d_i \in D$. Thus, each state $s$ in $M$ can be
+viewed as a mapping $V \rightarrow D$.
+
+Relation $R$ is defined as follows. Let $s_1$ and $s_2$ be two states. Let there be a
+component in $s_1$ that can perform an atomic transition (change of variables' values)
+resulting in state $s_2$. Then these states are bound with a \emph{transition relation}:
+$(s_1, s_2) \in R$. In case there is no state $s_2$ such that $R(s_1, s_2)$ holds, $R(s_1,
+s_1)$ is postulated, which means that a <<deadlock>> state is bound to itself.
+
+\subsection{Ordered Binary Decision Diagrams}
+\label{sec:order-binary-decis}
+
+An alternative representation of the model being checked is called \emph{ordered binary decision
+diagrams} (OBDD), which is a form of boolean function representation.
+
+BDD is an acyclic oriented graph with vertices of two kinds, terminal and
+nonterminal. Each \emph{nonterminal vertex} $v$ is labeled with a variable $var(v)$ and has two
+successor vertices: $low(v)$, which corresponds to the case $var(v) = 0$, and $high(v)$,
+corresponding to the case $var(v) = 1$. Each \emph{terminal vertex} is labeled with a boolean
+value $value(v)$. There is one root nonterminal vertex.
+
+When boolean function represented by the BDD is evaluated, the BDD tree is traversed from
+root vertex to a terminal vertex, each time either $low(v)$ or $high(v)$ being chosen
+depending on the value of $v$. The result of function evaluation the is the value of the
+terminal vertex.
+
+OBDD (ordered BDD) is a BDD in which there is a fixed ordering over all varaibles and
+in every path from root vertex to a terminal vertex, all vertices obey that ordering.
+
+Usually OBDD gives a more compact representation of a boolean function than the truth
+table or the CDNF (complete disjunctive normal form) would give.
+
+The Kripke structure $M = (S, R, L)$ can be represented with OBDD as follows. Let $\phi$
+be a function that maps boolean vectors $\phi: S \rightarrow \{0, 1\}^m$  (where $|S| \leq
+2^m$). The $R(s, s')$ relation is then represented with the OBDD of the indicator function
+$\widehat{R}(\phi(s), \phi(s'))$ and the relation $L = AP \times S$ is represented with
+OBDDs of indicators functions $L_p = \{s~|~p \in L(s) \}$ for each $p \in AP$.
+
+\section{Formal definition of the model specification}
+\label{sec:form-defin-model}
+
+Specification being verified for a model may include two types of conditions: <<safety>>
+conditions and <<liveness>> conditions.
+
+\emph{Safety conditions} can be viewed as assertions that <<nothing bad could ever happen>>. For
+example, <<the deadlock state will never happen>>. Any safety condition can be
+rewritten as an assertion that a specific predicate $f(s) = f(v_i\|_s)$ shall hold in
+all states of $M$.
+
+\emph{Liveness conditions}, on the other hand, can be viewed as assertions that <<something good
+will happen eventually>>. For example, <<each request will eventually be followed by a
+reply>>. This class of conditions is more difficult to represent formally. Many liveness
+conditions can be reduced to an assertion in form <<each path $\pi$ in a modified model
+$M'$ contains an infinite number of states in which a specific predicate $f(s)$ holds>>.
+
+There are several ways of representing liveness conditions formally: \emph{temporal logics},
+$\mu$-calculus, PSL language, etc. One of the most widespread and expressive ways are
+temporal logics.
+
+\subsection{Temporal logics}
+\label{sec:temporal-logics}
+
+\emph{Temporal logics} describe a sequence of events happening along a path in the model. Despite
+their name, they do not employ the concept of time directly; instead, a temporal logic
+formula asserts that a state will eventually be reached or will never be reached. These
+assertions are expressed with the means of temporal quantifiers and coupled together by
+boolean operators. The main difference between various temporal logics lies in the sets of
+temporal quantifiers available. The most widespread temporal logic is called \textbf{CTL*}.
+
+Each CTL* formula is comprised of atomic propositions, temporal quantifiers and two \emph{path
+quantifiers}:
+\begin{itemize}
+\item $\mathbf{A}$ (All) means <<for all paths beginning with the current state holds \ldots>>;
+\item $\mathbf{E}$ (Exists) means <<there is such path beginning with the current state, that \ldots>>.
+\end{itemize}
+
+There are five \emph{temporal quantifiers} in CTL*:
+\begin{itemize}
+\item $\mathbf{F} f$ (Finally) means that eventually $f$ will hold along the path (in some state);
+\item $\mathbf{G} f$ (Globally) means that $f$ holds in all states along the path;
+\item $\mathbf{X} f$ (neXt) means that $f$ holds in the next state;
+\item $f \mathbf{U} g$ (Until) means that eventually $f$ will hold and in all states before it, $g$
+  holds;
+\item $f \mathbf{R} g$ (Release) means that $g$ will hold in all states before a state in which $f$
+  holds, if such state exists.
+\end{itemize}
+
+For example, $\mathbf{AFG}~f$ means <<in all paths beginning with the initial state, from some state
+and onwards, $f$ holds>>, while $\mathbf{AGEF}~f$ means <<in all paths beginning with the initial state,
+there is at least path from each state in which $f$ will eventually hold>>.
+
+There are two distinct subsets of \textbf{CTL*}: \emph{linear time logic} (\textbf{LTL}) and \emph{computational tree
+  logic} (\textbf{CTL}). They differ in the set of allowed combinations of temporal and path
+quantifiers.
+
+LTL consists of expressions in form $\mathbf{A}~f$ where $f$ contains no path quantifiers. Examples are
+$\mathbf{AF}~x~\mathbf{U}~y$, $\mathbf{AG}~x \Rightarrow \mathbf{F}~y$.
+
+CTL, on the other hand, consists of expressions where temporal and path quantifiers
+strictly alternate (i.e. each temporal quantifier is preceded by a path
+quantifier). Examples are $\mathbf{AG}~\mathbf{EF}~x$, $\mathbf{AG}~x \Rightarrow \mathbf{EF}~y$.
+
+LTL can be viewed as a logic for writing assertions about an event sequence that happens
+along \emph{any possible timeline} (state path), therefore it is called linear time logic. In the
+meantime, CTL asserts the existence (or non-existence) of \emph{various timelines} with required
+event sequence beginning from the current state, hence it is called computational tree
+logic.
+
+CTL is more widely used than LTL in practical applications. It has, however, a significant
+flaw: inability to express the so-called <<strong fairness>> conditions. <<Weak fairness>>
+conditions, like $\mathbf{AGF}~p$ (<<in each path a state in which $p$ holds occurs in infinite number
+of times>>) can be expressed in term of CTL, while strong fairness conditions, like $\mathbf{AG} (p \Rightarrow
+\mathbf{F} q)$ (<<in each path a state where $p$ holds will be eventually followed by a
+state where $q$ holds>>, i.e. <<each request is always followed by a reply>>) cannot be
+expressed in term of CTL.
+
+This flaw is solved by a CTL modification called \emph{fairness CTL} (FCTL). FCTL formulas
+are regular CTL formulas augmented with a fairness condition: each path $\pi =
+s_0s_1\ldots$ in the Kripke structure must include an indefinite number of states
+belonging to a specific set $s_i \in F$, called <<fairness set>>. Such path are called
+\emph{fair paths}.
+
+Both LTL and CTL (and hencefore, CTL*) have \textbf{PSPACE} complexity. In practice, however, CTL
+is less expensive to verify: comparisons show that in average LTL requires double space and
+time required by CTL checking. Moreover, CTL formulas have linear complexity in terms of
+formula length, while LTL has exponential complexity. This makes CTL a more
+attractive solution for modelchecking.
+
+\subsection{$\mu$-calculus}
+\label{sec:mu-calculus}
+
+$\mu$-calculus is yet another formal algebra for expressing liveness conditions. It uses
+same path quantifiers as CTL*, just a single temporal quantifier X (neXt), and least and
+most fixpoint operators ($\mu$ and $\nu$).
+
+It was shown that any CTL* formula $f$ can be expressed in terms of $\mu$-calculus formula
+$g$ over the lattice of all subsets of the state set. The original formula $f$ holds if
+and only if the initial state $s_0$ belongs to $g$.
+
+Each LTL formula can be henceforth reduced to a $\mu$-calculus formula with the fixpoint
+operator nesting depth not greater than two, while every CTL formula requires depth of
+one, which is another advantage of CTL.
+
+\section{The modelchecking algorithm}
+\label{sec:modelch-algor}
+
+\subsection{Global and local verification}
+\label{sec:glob-local-verif}
+
+Depending on the part of Kripke structure being
+constructed, local and global verification are distinguished. During a \emph{global verification}
+pass, the whole Kripke structure is constructed and then checked against the
+specification, while in a \emph{local verification} pass new states are generated on-the-fly
+simultaneously with checking. In the latter case, a negative goal is usually reached by
+the time only a small part of the structure has been constructed, which helps consume time and
+space.
+
+To check any safety conditions represented by some predicate $f(s)$, it is sufficient to
+check the predicate's value in each state of $M$ while the states are being generated, and
+if a state $s'$ is encountered such that $f(s') = \mathtt{false}$ then the varification
+pass stops with a negative result and $s'$ state as a \emph{counter-example}.
+
+There are several known algorithms for checking liveness conditions expressed as a
+temporal logic formula. It can be shown that checking an LTL (or an equivalent
+FCTL) formula can be reduced to an emptiness check of a \emph{B\"{u}chi automaton}, constructed in a
+specific way based on $M$. Another algorithm for checking pure CTL reduces the check to
+the winning strategy search on a game graph constructed from the Kripke structure in a
+specific way. However, it requires a prior search of strongly connected components in the
+constructed game graph which makes it difficult for parallelization (which is the main
+concerns of this article).
+
+\subsection{Symbolic verification}
+\label{sec:symb-verif}
+
+\emph{Symbolic verification} is a verification approach which does not involve Kripke structure
+construction whatsoever. Instead it operates on the OBDD representation of the transition
+relation $R(s, s')$ of the Kripke structure $M$. The verification process itself consists
+of multiple OBDD transformations. Since such OBDD may require the same amount of RAM to
+store as the Kripke structure itself, this approach isn't greatly benefecient over the
+traditional global/local verification process.
+
+\section{Expected results}
+\label{sec:expected-results}
+
+The main expected result is a new method for effective fairness CTL verification with
+parallel processing and distributed memory, <<effective>> in terms of total node waiting
+node and inter-node communication traffic.
+
+\subsection{Degree of scientific novelty}
+\label{sec:degr-scient-novelty}
+
+Unlike the linear time logic, there are at moment no successful works on parallelization
+of computational tree logic verification. Despite the fact that both CTL and LTL can be
+reduced to $\mu$-calculus formulas for which some parallel verification algorithms are
+being developed, it is expected that a more efficient (in terms of running time) algorithm
+for pure (F)CTL exists.
+
+\bibliographystyle{plain}
+\bibliography{../thesis/thesis}
+
+\end{document}
 
 %%% Local Variables: 
 %%% mode: latex
